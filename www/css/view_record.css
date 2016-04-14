@@ -1,0 +1,98 @@
+.list-item-container {
+  line-height: 1;
+  padding: 15px 0px 15px 15px;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+  margin: 4px;
+}
+
+#view_record .item{
+	font-size: 14px;
+	background: #fff;
+	padding: 0;
+	line-height: 0;
+}
+
+#view_record .item p{
+	margin: 0;
+	padding: 0;
+	line-height: 1.5;
+}
+
+.item_list_date{
+	text-align: center;
+	background: #25a6d9;
+	color: #fff;
+	padding: 20px 0;
+}
+
+.item_list_date p{
+	font-size: 10px;
+	margin: 0;
+	padding: 0;
+	line-height: 1;
+}
+
+.checkbox__checkmark.checkbox--list-item__checkmark {
+    top: 40%;
+    margin: 0 0 0 5px;
+    background: #fff;
+}
+
+label.checkbox.checkbox--list-item {
+    position: absolute;
+}
+
+.page_under_area{
+	position: fixed;
+	bottom: 55px;
+	width: 100%;
+	text-align: center;
+}
+
+.page_under_area .button{
+	width: 25%;
+}
+
+.bg_red{
+	background: rgba(255, 36, 36, 0.8);
+}
+
+#view_record_detail .navigation-bar .center{
+	font-size: 12px;
+}
+
+.card {
+  background-color: white;
+  background-image: url(../images/softcream_top.jpg);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  color: white;
+  height: 250px;
+}
+
+.card-toolbar ons-back-button span {
+  color: white;
+}
+
+.card-name {
+  font-weight: 600;
+  font-size: 20px;
+  padding: 66px 0 8px 0;
+  text-align: center;
+}
+
+.card-desc {
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.9;
+  text-align: center;
+  line-height: 1.4;
+}
+

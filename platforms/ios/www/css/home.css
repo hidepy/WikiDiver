@@ -1,0 +1,89 @@
+.page__background{
+  background-color: #e0f3ff;
+}
+
+.tab-bar{
+  background-color: #fff;
+}
+
+#home .list{
+  border: none;
+  text-align: center;
+  background: transparent;
+  margin-top: 85px;
+  text-shadow: none;
+}
+
+#home .list__item:first-child{
+  margin-right: 20px;
+}
+
+#home .profile-card .list__item{
+  display: inline-block;
+  width: 110px;
+  border-radius: 55px;
+  height: 110px;
+  min-height: 110px;
+  background: rgba(255, 255, 255, .55);
+}
+
+#home .profile-card {
+  width: 100%;
+  text-align: center;
+  color: white;
+  padding: 30px 0;
+  line-height: 1.4;
+  background-color: #33393c;
+  background: url(../images/softcream_top.jpg) center / cover;
+  text-shadow: rgba(0, 0, 0, 0.4) 0px 1px 0px;
+  height: 180px;
+}
+     
+    .profile-image {
+      height: 100px;
+      width: 100px;
+      border-radius: 50%;
+      -webkit-border-radius: 50%;
+      background-color: black;
+      border 1px solid white;
+      box-shadow:rgba(0, 0, 0, 0.2) 0px 2px 0px 0px;
+      -webkit-box-shadow:rgba(0, 0, 0, 0.2) 0px 2px 0px 0px;
+    }
+     
+    .profile-name {
+      margin: 20px 0 0 0;
+      font-weight: 600;
+      font-size: 17px;
+    }
+     
+    .profile-id {
+      margin: 0 0 5px 0;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+     
+    .profile-desc {
+      font-size: 15px;
+      opacity: 0.6;
+      width: 90%;
+      text-align: center;
+      margin: 0 auto;
+    }
+     
+.info-col {
+  height: 60px;
+  line-height: 1;
+  padding: 12px 0 12px 4px;
+}
+ 
+#home .info-num {
+  font-size: 20px;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+ 
+#home .info-unit {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1;
+}
