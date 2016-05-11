@@ -25,23 +25,12 @@
     });
 
 
-    module.controller("HomeController", function(){
-        //this.data = currentBikeInfo;
+    module.controller("HomeController", function($scope){
 
-        //this.visibility = {};
-        //this.visibility.dbg_disp_area = "inline";
+        $scope.search_key = "";
 
-        this.collections_count = storage_manager.getItemLength();
-        this.total_amount = calcSfTotalAmount(storage_manager.getAllItem());
-
-        function calcSfTotalAmount(h){
-            var total = 0;
-
-            for(var k in h){
-                total += (h[k] && h[k].price && !isNaN(h[k].price)) ? h[k].price : 0;
-            }
-
-            return total;
+        $scope.dive = function(){
+            // wikipediaの一覧取得
         };
 
     });

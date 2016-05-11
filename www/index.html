@@ -17,7 +17,6 @@
 
     <script src="js/storageManager.js"></script>
 
-
     <script src="lib/onsen/js/angular/angular.js"></script>
     <script src="lib/onsen/js/angular/checklist-model.js"></script>
     <script src="lib/onsen/js/onsenui.js"></script>
@@ -46,8 +45,8 @@
 
 <ons-tabbar>
   <ons-tab page="index.html" label="Home" icon="ion-ios-home" active="true"></ons-tab>
-  <ons-tab page="view_top.html" label="Collection" icon="ion-ios-book"></ons-tab>
-  <ons-tab page="entry_top.html" label="Record" icon="ion-edit"></ons-tab>
+  <ons-tab page="search_result_header.html" label="Collection" icon="ion-ios-book"></ons-tab>
+  <ons-tab page="search_result_detail.html" label="Record" icon="ion-edit"></ons-tab>
   <ons-tab page="settings.html" label="Settings" icon="ion-ios-cog"></ons-tab>
 </ons-tabbar>
 
@@ -56,11 +55,11 @@
     <ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 </ons-template>
 
-<ons-template id="view_top.html">
+<ons-template id="search_result_header.html">
     <ons-navigator var="myNavigator" page="view_record.html"></ons-navigator>
 </ons-template>
 
-<ons-template id="entry_top.html">
+<ons-template id="search_result_detail.html">
     <ons-navigator var="myNavigator" page="entry_record.html"></ons-navigator>
 </ons-template>
 
@@ -69,7 +68,7 @@
 
 [[top screen]]
     summary:
-        wikidiverのtitle. favorite, 履歴のtop ---が見れる
+        wikidiverのtitle画面. favorite, 履歴のtop5が見れる
 
     content:
         title
@@ -141,55 +140,20 @@ bower
 
 <!-- Home画面　index > home -->
 <ons-template id="home.html">
-    <ons-page ng-controller="HomeController as home" id="home">
+    <ons-page ng-controller="HomeController" id="home">
     
         <ons-toolbar>
-            <!--
-            <div class="left"><ons-back-button>Back</ons-back-button></div>
-            -->
             <div class="center">WikiDiver</div>
-            <!--<div class="right">
-            <ons-toolbar-button><ons-icon icon="ion-gear-a" style="vertical-align: -4px; font-size: 28px;"></ons-icon></ons-toolbar-button>
-            </div>
-            -->
         </ons-toolbar>
 
-        <div class="profile-card">
-            <!--<img src="images/softcream_top.jpg" class="profile-image">
-            <div class="profile-name">{{home.data.name}}</div>
-            <div class="profile-desc">{{home.data.comment}}</div>
-            <div class="profile-purcase_date">{{home.data.purchace_date}}</div>
-            --> 
-            <ons-list>
-                <ons-list-item>
-                      <div class="info-num">{{home.collections_count}}</div>
-                      <div class="info-unit">collections</div>
-                </ons-list-item>
-                <ons-list-item>
-                      <div class="info-num">{{home.total_amount}}</div>
-                      <div class="info-unit">totals</div>
-                    
-                </ons-list-item>
-            </ons-list>
-        </div>
-      </ons-toolbar>
+        <div>favorite</div>
 
-      <!--
-        ******************** home画面 ********************
+        <div>history</div>
 
-        表示項目
+        <label for="entry_sf_title" class="input_title">keyword</label>                    
+        <input type="text" class="text-input" ng-model="search_key" id="home_search_key" placeholder="wikipedia">
 
-            総データ数
-
-            総sf費用
-
-            評価top3
-
-       -->
-
-    <ons-button onclick="myNavigator.pushPage('entry_record.html')">entry</ons-button>
-
-    <ons-button onclick="myNavigator.pushPage('view_record.html')">show</ons-button>
+        <ons-button ng-click="dive()">Dive!!</ons-button>
 
     </ons-page>
 </ons-template>
