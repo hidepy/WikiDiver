@@ -1,41 +1,42 @@
-/*
-	class: WikiAdapter
-
-	summary: wikipediaへの問い合わせを行う
-
-	functions:
-		getHeaderList(keyword)
-			keywordに紐づくwikipediaの情報(ヘッダ)を取得する
-
-
-
-		getSingleArticle(id)
-
-
-*/
-var WikiAdapter = function(){
-
-};
-
-!function(proto){
-	proto.getHeaderList = function(keyword){
-
-	};
-
-	proto.getSingleArticle = function(id){
-
-	};
-
-}(WikiAdapter.prototype);
-
-
-//参考
-/*
-			キーワードを含むページのリストを得る
-			http://ja.wikipedia.org/w/api.php?action=opensearch&search=%E3%83%AA%E3%83%B3%E3%82%B
-
-
-			キーワードのページ全部取る
-			「リンゴ」のページの内容
-			http://ja.wikipedia.org/w/api.php?action=query&export&titles=%E3%83%AA%E3%83%B3%E3%82%B4
-*/
+/// <reference path="../../tsd/jquery/jquery.d.ts"/>
+var WikiAdapter = (function () {
+    function WikiAdapter() {
+    }
+    WikiAdapter.prototype.getHeaderList = function (search_key) {
+        console.log("in getHeaderList");
+        this.sendRequest("0", function (res) {
+            console.log("in getHeaderList callback!!");
+            console.log(res);
+        }, search_key);
+    };
+    WikiAdapter.prototype.getDetailById = function (id) {
+    };
+    WikiAdapter.prototype.sendRequest = function (type, callback, keyword) {
+        // type 一覧検索か、1件検索か
+        var params = {
+            format: "json",
+            action: "query"
+        };
+        switch (type) {
+            case "0":
+                params["prop"] = "info";
+                params["titles"] = "keyword";
+                break;
+        }
+        jQuery.ajax({
+            type: "GET",
+            url: "http://ja.wikipedia.org/w/api.php",
+            dataType: "html",
+            data: params,
+            success: function (data) {
+                console.log("ajax success!!");
+                callback(data);
+                return;
+            },
+            error: function (data) {
+                alert("ajax error occured!! (" + data + ")");
+            }
+        });
+    };
+    return WikiAdapter;
+}());

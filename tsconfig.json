@@ -1,0 +1,67 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": false,
+    "noLib": false,
+    "preserveConstEnums": true,
+    "suppressImplicitAnyIndexErrors": true
+  },
+  "formatCodeOptions": {
+    "indentSize": 4,
+    "tabSize": 4,
+    "newLineCharacter": "\r\n",
+    "convertTabsToSpaces": true,
+    "insertSpaceAfterCommaDelimiter": true,
+    "insertSpaceAfterSemicolonInForStatements": true,
+    "insertSpaceBeforeAndAfterBinaryOperators": true,
+    "insertSpaceAfterKeywordsInControlFlowStatements": true,
+    "insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
+    "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+    "placeOpenBraceOnNewLineForFunctions": true,
+    "placeOpenBraceOnNewLineForControlBlocks": true
+  },
+  "compileOnSave": true,
+  "filesGlob": [
+    "./**/*.ts",
+    "!./node_modules/**/*.ts",
+    "!./bower_components/**/*.ts",
+    "!./typings/**/*.ts"
+  ],
+  "files": [
+    "./tsd/angular/angular-1.4.d.ts",
+    "./tsd/cordova/cordova.d.ts",
+    "./tsd/cordova/plugins/BatteryStatus.d.ts",
+    "./tsd/cordova/plugins/Camera.d.ts",
+    "./tsd/cordova/plugins/Contacts.d.ts",
+    "./tsd/cordova/plugins/Device.d.ts",
+    "./tsd/cordova/plugins/DeviceMotion.d.ts",
+    "./tsd/cordova/plugins/DeviceOrientation.d.ts",
+    "./tsd/cordova/plugins/Dialogs.d.ts",
+    "./tsd/cordova/plugins/FileSystem.d.ts",
+    "./tsd/cordova/plugins/FileTransfer.d.ts",
+    "./tsd/cordova/plugins/Globalization.d.ts",
+    "./tsd/cordova/plugins/InAppBrowser.d.ts",
+    "./tsd/cordova/plugins/Keyboard.d.ts",
+    "./tsd/cordova/plugins/Media.d.ts",
+    "./tsd/cordova/plugins/MediaCapture.d.ts",
+    "./tsd/cordova/plugins/NetworkInformation.d.ts",
+    "./tsd/cordova/plugins/Push.d.ts",
+    "./tsd/cordova/plugins/Splashscreen.d.ts",
+    "./tsd/cordova/plugins/StatusBar-tests.ts",
+    "./tsd/cordova/plugins/StatusBar.d.ts",
+    "./tsd/cordova/plugins/Vibration.d.ts",
+    "./tsd/cordova/plugins/WebSQL.d.ts",
+    "./tsd/jquery/jquery.d.ts",
+    "./tsd/onsen/onsenui.d.ts",
+    "./www/js/app.ts",
+    "./www/js/commonFunctions.ts",
+    "./www/js/storageManager.ts",
+    "./www/js/wikiAdapter.ts"
+  ],
+  "atom": {
+    "rewriteTsconfig": true
+  }
+}
