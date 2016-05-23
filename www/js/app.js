@@ -77,7 +77,9 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         $scope.dive = function () {
             // wikipediaの一覧取得
             var el_keyword = document.getElementById("home_searchKey");
-            wikiAdapter.getHeaderList(el_keyword.innerHTML);
+            wikiAdapter.getHeaderList(el_keyword.value, function (res) {
+                console.log("callback level1");
+            });
         };
     });
     module.controller("HeaderListController", function ($scope) {

@@ -90,7 +90,13 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
             // wikipediaの一覧取得
             var el_keyword = document.getElementById("home_searchKey");
 
-            wikiAdapter.getHeaderList(el_keyword.innerHTML);
+            wikiAdapter.getHeaderList(
+              (<HTMLInputElement>el_keyword).value,
+              (res: any) => {
+                console.log("callback level1");
+                
+              }
+            );
         };
     });
 
