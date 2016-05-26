@@ -9,9 +9,11 @@
 
     <link rel="stylesheet" href="lib/onsen/css/onsenui.css">
     <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css">
+    <!--
     <link rel="stylesheet" href="css/home.css" />
     <link rel="stylesheet" href="css/entry_record.css" />
     <link rel="stylesheet" href="css/view_record.css">
+  -->
 
     <script src="jquery/jquery-1.11.3.min.js"></script>
 
@@ -29,17 +31,22 @@
 
 <body>
 
+<!--
 <ons-tabbar>
   <ons-tab page="index.html" label="Home" icon="ion-ios-home" active="true"></ons-tab>
   <ons-tab page="search_result_header.html" label="Collection" icon="ion-ios-book"></ons-tab>
   <ons-tab page="search_result_detail.html" label="Record" icon="ion-edit"></ons-tab>
   <ons-tab page="settings.html" label="Settings" icon="ion-ios-cog"></ons-tab>
 </ons-tabbar>
+-->
+<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 
 <!-- 各親ページのnavigatorを定義 -->
+<!--
 <ons-template id="index.html">
     <ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 </ons-template>
+
 
 <ons-template id="search_result_header.html">
     <ons-navigator var="myNavigator" page="view_record.html"></ons-navigator>
@@ -48,6 +55,7 @@
 <ons-template id="search_result_detail.html">
     <ons-navigator var="myNavigator" page="entry_record.html"></ons-navigator>
 </ons-template>
+-->
 
 <!--
 画面設計
@@ -145,6 +153,23 @@ bower
 
 <ons-template id="search_result_header.html">
   <ons-page ng-controller="HeaderListController">
+
+    in search result header
+
+    <ons-list>
+
+      in ons-list
+
+      <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
+        <ons-col>
+          {{item.pageid}}
+        </ons-col>
+        <ons-col>
+          {{item.title}}
+        </ons-col>
+      </ons-list-item>
+    </ons-list>
+
   </ons-page>
 </ons-template>
 

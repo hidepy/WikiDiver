@@ -87,24 +87,78 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
     module.controller("HomeController", function($scope){
         $scope.search_key = "";
         $scope.dive = function(){
-            // wikipediaの一覧取得
-            var el_keyword = document.getElementById("home_searchKey");
 
-            wikiAdapter.getHeaderList(
-              (<HTMLInputElement>el_keyword).value,
-              (res: any) => {
-                console.log("callback level1");
-                
-              }
-            );
+          var el_keyword: HTMLElement = document.getElementById("home_searchKey");
+          var search_key: string = (<HTMLInputElement>el_keyword).value;
+
+          //次画面遷移
+          myNavigator.pushPage(
+            "search_result_header.html",
+            {onTransitionEnd: {
+              search_key: search_key,
+              is_from_home: true
+            }}
+          );
+
         };
     });
 
     module.controller("HeaderListController", function($scope){
-        $scope.search_key = "";
+
+        $scope.items = [];
+
         $scope.dive = function(){
             // wikipediaの一覧取得
+
+            //service化するべき？...
+            var el_keyword: HTMLElement = document.getElementById("home_searchKey");
+            var search_key: string = (<HTMLInputElement>el_keyword).value;
+
+            getHeaderList(search_key);
         };
+
+        //レコード選択時
+        $scope.processItemSelect = function(idx, event){
+          console.log("item selected...");
+          console.log("idx=" + idx);
+          console.log("event=");
+          console.log(event);
+
+
+        }
+
+        var getHeaderList = (keyword: string) =>
+        {
+            wikiAdapter.getHeaderList(
+                keyword,
+                (res: any) => {
+                  console.log("callback level1");
+
+                  console.log(res);
+
+                  for(var p in res){
+                    if(res[p].pageid){ //page idが存在すれば規定通りのレコードと判断
+                      $scope.items.push(res[p]);
+                    }
+                  }
+
+                  $scope.$apply();
+                }
+            );
+        }
+
+        var _args = myNavigator.getCurrentPage().options;
+
+        console.log("in HeaderListController start");
+        console.log(_args);
+
+        // ホーム画面からの呼出の場合
+        if(_args.onTransitionEnd && _args.onTransitionEnd.is_from_home && _args.onTransitionEnd.search_key){
+          getHeaderList(_args.onTransitionEnd.search_key);
+        }
+
+        // ※※ これでどんなobjectが取得できるか確認 ※※
+        // okなら、optionsのis_from_homeを見て、getHeaderListするか決定
     });
 
 

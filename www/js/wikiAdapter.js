@@ -16,6 +16,11 @@ var WikiAdapter = (function () {
         }, search_key);
     };
     WikiAdapter.prototype.getDetailById = function (id) {
+        console.log("in getDetailById. param=id: " + id);
+        this.sendRequest("1", function (res) {
+            console.log("in getDetailById callback!!");
+            console.log(res);
+        });
     };
     WikiAdapter.prototype.sendRequest = function (type, callback, main_query) {
         // type 一覧検索か、1件検索か

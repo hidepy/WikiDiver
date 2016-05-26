@@ -25,7 +25,15 @@
 
    }
    public getDetailById(id: string): void{
+     console.log("in getDetailById. param=id: " + id);
 
+     this.sendRequest("1", res => {
+       console.log("in getDetailById callback!!");
+
+       console.log(res);
+
+       
+     });
    }
    private sendRequest(type: string, callback: (res: any)=>void, main_query?: string): any{
 
