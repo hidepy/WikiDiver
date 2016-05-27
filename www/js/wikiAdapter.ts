@@ -24,16 +24,32 @@
      }, search_key);
 
    }
-   public getDetailById(id: string): void{
+   public getDetailById(id: string, callback: (res: any)=>void): void{
      console.log("in getDetailById. param=id: " + id);
 
      this.sendRequest("1", res => {
        console.log("in getDetailById callback!!");
 
-       console.log(res);
+       //resの構造は...
+       /*
+        root->
+          query
+            pages
+              id_...
+                ns
+                pageid
+                revisions
+                title
+       */
 
-       
-     });
+       if(res && res.query && res.pages && res.pages[id]){
+         callback(res.pages[id]);
+       }
+       else{
+         console.log("cannnot find target article...");
+       }
+
+     }, id);
    }
    private sendRequest(type: string, callback: (res: any)=>void, main_query?: string): any{
 
@@ -48,7 +64,7 @@
      var params = {
        format: "json",
        action: "query",
-       callback: "test"
+       callback: "callback"
      };
 
      switch(type){
@@ -57,8 +73,10 @@
         params["titles"] = main_query;
         break;
       case "1":
-        params["prop"] = "info";
+        params["prop"] = "revisions";
         params["pageids"] = main_query;
+        params["rvprop"] = "content";
+        params["rvparse"] = "";
         break;
      }
 
@@ -66,7 +84,7 @@
        type: "GET",
        url: "http://ja.wikipedia.org/w/api.php",
        dataType: "jsonp",
-       jsonpCallback: "test",
+       jsonpCallback: "callback",
        data: params,
        beforeSend: function(){
          console.log("ajax beforeSend");

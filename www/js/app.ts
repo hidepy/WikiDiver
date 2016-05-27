@@ -124,6 +124,17 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
           console.log("event=");
           console.log(event);
 
+          //idを求めてgetDetailByIdする
+          var selectedItem = $scope.items[idx];
+
+          if(selectedItem && selectedItem.pageid){
+            wikiAdapter.getDetailById(selectedItem.pageid,
+            (res: any) => {
+              console.log("callback level1(get detail id)");
+              console.log(res);
+            });
+          }
+
 
         }
 

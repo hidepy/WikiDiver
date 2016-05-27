@@ -99,6 +99,14 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
             console.log("idx=" + idx);
             console.log("event=");
             console.log(event);
+            //idを求めてgetDetailByIdする
+            var selectedItem = $scope.items[idx];
+            if (selectedItem && selectedItem.pageid) {
+                wikiAdapter.getDetailById(selectedItem.pageid, function (res) {
+                    console.log("callback level1(get detail id)");
+                    console.log(res);
+                });
+            }
         };
         var getHeaderList = function (keyword) {
             wikiAdapter.getHeaderList(keyword, function (res) {

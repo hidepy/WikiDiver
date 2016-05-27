@@ -15,12 +15,28 @@ var WikiAdapter = (function () {
             callback(pages_info);
         }, search_key);
     };
-    WikiAdapter.prototype.getDetailById = function (id) {
+    WikiAdapter.prototype.getDetailById = function (id, callback) {
         console.log("in getDetailById. param=id: " + id);
         this.sendRequest("1", function (res) {
             console.log("in getDetailById callback!!");
-            console.log(res);
-        });
+            //resの構造は...
+            /*
+             root->
+               query
+                 pages
+                   id_...
+                     ns
+                     pageid
+                     revisions
+                     title
+            */
+            if (res && res.query && res.pages && res.pages[id]) {
+                callback(res.pages[id]);
+            }
+            else {
+                console.log("cannnot find target article...");
+            }
+        }, id);
     };
     WikiAdapter.prototype.sendRequest = function (type, callback, main_query) {
         // type 一覧検索か、1件検索か
@@ -30,7 +46,7 @@ var WikiAdapter = (function () {
         var params = {
             format: "json",
             action: "query",
-            callback: "test"
+            callback: "callback"
         };
         switch (type) {
             case "0":
@@ -38,15 +54,17 @@ var WikiAdapter = (function () {
                 params["titles"] = main_query;
                 break;
             case "1":
-                params["prop"] = "info";
+                params["prop"] = "revisions";
                 params["pageids"] = main_query;
+                params["rvprop"] = "content";
+                params["rvparse"] = "";
                 break;
         }
         jQuery.ajax({
             type: "GET",
             url: "http://ja.wikipedia.org/w/api.php",
             dataType: "jsonp",
-            jsonpCallback: "test",
+            jsonpCallback: "callback",
             data: params,
             beforeSend: function () {
                 console.log("ajax beforeSend");
