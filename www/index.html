@@ -9,11 +9,6 @@
 
     <link rel="stylesheet" href="lib/onsen/css/onsenui.css">
     <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css">
-    <!--
-    <link rel="stylesheet" href="css/home.css" />
-    <link rel="stylesheet" href="css/entry_record.css" />
-    <link rel="stylesheet" href="css/view_record.css">
-  -->
 
     <script src="jquery/jquery-1.11.3.min.js"></script>
 
@@ -27,6 +22,25 @@
 
     <script src="cordova.js"></script>
     <script src="js/app.js"></script>
+
+<!--
+
+media wiki
+https://en.wikipedia.org/w/api.php?action=help&modules=query
+
+
+
+Emmetの使い方
+
+!
+でtabすると、htmlを
+
+div#myId>ul>li*3
+でtabすると、この構造のhtmlを出してくれる
+
+
+-->
+
 </head>
 
 <body>
@@ -154,12 +168,7 @@ bower
 <ons-template id="search_result_header.html">
   <ons-page ng-controller="HeaderListController">
 
-    in search result header
-
     <ons-list>
-
-      in ons-list
-
       <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
         <ons-col>
           {{item.pageid}}
@@ -175,6 +184,13 @@ bower
 
 <ons-template id="search_result_detail.html">
   <ons-page ng-controller="DetailController">
+    <div id="detail_title" class="title">
+      {{title}}
+    </div>
+    <div id="detail_content" class="article">
+      {{article}}
+    </div>
+  </ons-page>
   </ons-page>
 </ons-template>
 
