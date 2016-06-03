@@ -27,17 +27,6 @@ var WikiAdapter = (function () {
         console.log("in getDetailById. param=id: " + id);
         this.sendRequest("1", function (res) {
             console.log("in getDetailById callback!!");
-            //resの構造は...
-            /*
-             root->
-               query
-                 pages
-                   id_...
-                     ns
-                     pageid
-                     revisions
-                     title
-            */
             if (res && res.query && res.query.pages && res.query.pages[id]) {
                 callback(res.query.pages[id]);
             }
@@ -51,26 +40,45 @@ var WikiAdapter = (function () {
         this.sendRequest("2", function (res) {
             console.log("in searchHeadersFromKeyword callback!!");
             console.log(res);
-        });
+            if (res && res.query && res.query.search) {
+                callback(res.query); //queryの階層にヒット件数があるので...
+            }
+        }, keyword);
     };
     WikiAdapter.prototype.searchArticleLinksById = function (id, callback) {
         console.log("in searchArticleLinksById. param=id: " + id);
         this.sendRequest("3", function (res) {
             console.log("in searchArticleLinksById callback!!");
             console.log(res);
-        });
+        }, id);
     };
-    WikiAdapter.prototype.sendRequest = function (type, callback, main_query_orig) {
+    WikiAdapter.prototype.getDetailByTitle = function (keyword, callback) {
+        console.log("in getDetailByTitle. param=keyword: " + keyword);
+        this.sendRequest("4", function (res) {
+            console.log("in getDetailByTitle callback!!");
+            console.log(res);
+            if (res && res.query && res.query.pages) {
+                var key = "";
+                for (key in res.query.pages) {
+                    break;
+                }
+                callback(res.query.pages[key]);
+            }
+            else {
+                console.log("cannnot find target article...");
+            }
+        }, keyword);
+    };
+    WikiAdapter.prototype.sendRequest = function (type, callback, main_query_orig, language_type) {
         // type 検索タイプ
-        // 0=> タイトル検索
-        // 1=> ID検索
-        // 2=> キーワード検索
-        // 3=> 参照検索
-        //main_query
-        //  keywordのヘッダ検索なら検索キーが、
-        //  idの1記事検索ならidが入る
+        // 0=> 【ヘッダ】タイトル検索
+        // 1=> [明細]ID検索
+        // 2=> [ヘッダ]キーワード検索
+        // 3=> [ヘッダ]参照検索
+        // 4=> [明細]タイトル検索
         //var main_query = main_query_orig ? encodeURIComponent(main_query_orig) : "";
         var main_query = main_query_orig;
+        var l_type = language_type ? language_type : "ja";
         var params = {
             format: "json",
             action: "query",
@@ -84,36 +92,36 @@ var WikiAdapter = (function () {
             case "1":
                 //応答が微妙なんで一旦prop削除
                 /*
-                params["prop"] = "revisions";
-                params["pageids"] = main_query;
-                params["rvprop"] = "content";
-                params["rvparse"] = "";
+                        params["prop"] = "revisions";
+                        params["pageids"] = main_query;
+                        params["rvprop"] = "content";
+                        params["rvparse"] = "";
+                
+                        //params["prop"] = "extracts|redirects";
+                        //params["prop"] = "extracts|links";
                 */
-                //params["action"] = "parse";
-                params["prop"] = "extracts";
-                params["exintro"] = "";
-                params["explaintext"] = "";
-                //params["titles"] = "Stack Overflow";
+                params["prop"] = "extracts|redirects";
                 params["pageids"] = main_query;
                 break;
             case "2":
                 params["list"] = "search";
                 params["srsearch"] = main_query;
-                /*
-                srlimit	結果数の上限	（整数）
-                srnamespace	記事の名前空間	0（通常の記事）, 1（ノート）, ...
-                sroffset	結果のオフセット	（整数）
-                srprop	結果に含める情報	size（記事サイズ）, wordcount（記事の単語数）, timestamp（記事の最終更新日時）, score（検索エンジンのスコア）, snippet（記事中の検索語を含む部分）, ...
-                */
                 break;
             case "3":
                 params["prop"] = "links";
                 params["pageids"] = main_query;
                 break;
+            case "4":
+                //params["prop"] = "extracts|redirects";
+                //params["prop"] = "revisions|redirects|links";
+                params["prop"] = "extracts|redirects|links";
+                params["rvprop"] = "content";
+                params["titles"] = main_query;
+                params["pllimit"] = 50;
         }
         jQuery.ajax({
             type: "GET",
-            url: "http://ja.wikipedia.org/w/api.php",
+            url: "http://" + l_type + ".wikipedia.org/w/api.php",
             dataType: "jsonp",
             jsonpCallback: "callback",
             data: params,
@@ -123,7 +131,6 @@ var WikiAdapter = (function () {
             },
             success: function (data) {
                 console.log("ajax success!!");
-                console.log(data);
                 callback(data);
                 return;
             },

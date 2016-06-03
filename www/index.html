@@ -168,6 +168,11 @@ bower
 <ons-template id="search_result_header.html">
   <ons-page ng-controller="HeaderListController">
 
+    <ons-toolbar>
+      <div class="left"><ons-back-button>Back</ons-back-button></div>
+      <div class="center">Headers</div>
+    </ons-toolbar>
+
     <ons-list>
       <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
         <ons-col>
@@ -184,12 +189,29 @@ bower
 
 <ons-template id="search_result_detail.html">
   <ons-page ng-controller="DetailController">
-    <div id="detail_title" class="title">
-      {{title}}
-    </div>
-    <div id="detail_content" class="article">
-      {{article}}
-    </div>
+
+    <ons-toolbar>
+      <div class="left"><ons-back-button>Back</ons-back-button></div>
+      <div class="center">Detail</div>
+    </ons-toolbar>
+
+    <p>
+      <h1 id="detail_title" class="title">
+        {{title}}
+      </h1>
+    </p>
+
+    <p ng-show="is_redirects_exist">
+      <ons-list>
+        <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in redirects" ng-click="processRedirectItemSelect($index, $event)">
+          <span>{{item.pageid}}</span><span>{{item.title}}</span>
+        </ons-list-item>
+      </ons-list>
+    </p>
+
+    <p id="detail_content" ng-bind-html="article" class="article">
+    </p>
+
   </ons-page>
   </ons-page>
 </ons-template>

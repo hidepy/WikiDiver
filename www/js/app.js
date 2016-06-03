@@ -86,27 +86,18 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
     });
     module.controller("HeaderListController", function ($scope) {
         $scope.items = [];
-        $scope.dive = function () {
-            // wikipediaの一覧取得
-            //service化するべき？...
-            var el_keyword = document.getElementById("home_searchKey");
-            var search_key = el_keyword.value;
-            getHeaderList(search_key);
-        };
+        $scope.completeMatch = false; //true-> getHeaderList, false-> searchHeadersFromKeyword
         //レコード選択時
         $scope.processItemSelect = function (idx, event) {
-            console.log("item selected...");
-            console.log("idx=" + idx);
-            console.log("event=");
-            console.log(event);
             //idを求めてgetDetailByIdする
             var selectedItem = $scope.items[idx];
             //遷移だけして、次画面に検索をゆだねる
-            if (selectedItem && selectedItem.pageid) {
+            if (selectedItem) {
                 //次画面遷移
                 myNavigator.pushPage("search_result_detail.html", {
                     onTransitionEnd: {
-                        pageid: selectedItem.pageid,
+                        pageid: selectedItem.pageid || false,
+                        title: selectedItem.title,
                         need_onload_search: true
                     }
                 });
@@ -124,54 +115,93 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
                 $scope.$apply();
             });
         };
+        var searchHeadersFromKeyword = function (keyword) {
+            wikiAdapter.searchHeadersFromKeyword(keyword, function (res) {
+                console.log("callback level1(search headers)");
+                console.log(res);
+                var hit_count = (res.searchinfo && res.searchinfo.totalhits) ? res.searchinfo.totalhits : 0;
+                $scope.items = [];
+                if (res && res.search) {
+                    for (var r in res.search) {
+                        $scope.items.push(res.search[r]);
+                    }
+                }
+                $scope.$apply();
+            });
+        };
         var _args = myNavigator.getCurrentPage().options;
         console.log("in HeaderListController start");
         console.log(_args);
         // ホーム画面からの呼出の場合
         if (_args.onTransitionEnd && _args.onTransitionEnd.is_from_home && _args.onTransitionEnd.search_key) {
-            getHeaderList(_args.onTransitionEnd.search_key);
+            if ($scope.completeMatch) {
+                getHeaderList(_args.onTransitionEnd.search_key);
+            }
+            else {
+                searchHeadersFromKeyword(_args.onTransitionEnd.search_key);
+            }
         }
-        // ※※ これでどんなobjectが取得できるか確認 ※※
-        // okなら、optionsのis_from_homeを見て、getHeaderListするか決定
     });
-    /* 基本の挙動を完成させよう！！ */
-    /*
-          1. タイトル画面はまあ、よいか　1つだけ入力フィールドがあり、それが全てのはじまり
-          2. 一覧ページ
-                狙い撃ちと乱れ撃ち. それぞれをさらに、radiateできる
-    
-                [狙い撃ちでヒットしたもの(tapでdive)][radiate(tapで関連検索)]
-                ---------------------
-                [乱れ打ちでヒットしたもの][radiate]
-                [乱れ打ちでヒットしたもの][radiate]
-                ...
-    
-    */
-    module.controller("DetailController", function ($scope) {
+    module.controller("DetailController", function ($scope, $sce) {
         $scope.title = "";
         $scope.article = "";
-        var getDetail = function (id) {
-            wikiAdapter.getDetailById(id, function (res) {
-                console.log("callback level1");
-                console.log(res);
-                $scope.title = res.title;
-                $scope.article = res.revisions["0"]["*"];
-                /*
-                                for(var p in res){
-                                  if(res[p].pageid){ //page idが存在すれば規定通りのレコードと判断
-                                    $scope.items.push(res[p]);
-                                  }
-                                }
-                */
-                $scope.$apply();
-            });
+        $scope.is_redirects_exist = false;
+        $scope.redirects = [];
+        $scope.processRedirectItemSelect = function (idx, event) {
+            console.log("in processRedirectItemSelect");
+            var pageid = $scope.redirects[idx] ? $scope.redirects[idx].pageid : false;
+            if (pageid) {
+                // 自身のページに遷移
+                myNavigator.pushPage("search_result_detail.html", {
+                    onTransitionEnd: {
+                        pageid: pageid,
+                        need_onload_search: true
+                    }
+                });
+            }
+            else {
+                alert("faild to get pageid...");
+            }
         };
+        var handleGetDetail = function (res) {
+            console.log("callback level1");
+            console.log(res);
+            $scope.title = res.title;
+            var article = res.extract;
+            article = article.replace(/[\r\n]/g, "<br />");
+            $scope.article = $sce.trustAsHtml(article);
+            //リダイレクトが存在すれば、リダイレクトの要素を表示させる
+            $scope.is_redirects_exist = !!(res.redirects);
+            if (res.redirects) {
+                for (var r in res.redirects) {
+                    $scope.redirects.push(res.redirects[r]);
+                }
+                console.log("redirects exist");
+                console.log($scope.redirects);
+            }
+            $scope.$apply();
+        };
+        //idから詳細情報を取得する
+        var getDetail = function (key) {
+            wikiAdapter.getDetailById(key, handleGetDetail);
+        };
+        //titleから詳細情報を取得する(searchだとpageidが取得できないので...)
+        var getDetailByTitle = function (key) {
+            wikiAdapter.getDetailByTitle(key, handleGetDetail);
+        };
+        //---------- on detailpage load ----------
         var _args = myNavigator.getCurrentPage().options;
         console.log("in DetailController start");
         console.log(_args);
         // ロード時検索要求有りなら
-        if (_args.onTransitionEnd && _args.onTransitionEnd.need_onload_search && _args.onTransitionEnd.pageid) {
-            getDetail(_args.onTransitionEnd.pageid);
+        if (_args.onTransitionEnd && _args.onTransitionEnd.need_onload_search) {
+            if (_args.onTransitionEnd.pageid) {
+                getDetail(_args.onTransitionEnd.pageid);
+            }
+            else {
+                //pageidがない場合、titleにて明細検索を行う
+                getDetailByTitle(_args.onTransitionEnd.title);
+            }
         }
     });
     module.factory("currentBikeInfo", function () {
