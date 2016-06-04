@@ -1,22 +1,21 @@
 <!doctype html>
+
 <html lang="en" ng-app="app">
 <head>
     <meta charset="utf-8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <title>そふこれっ！</title>
+    <title>WikiDiver</title>
 
     <link rel="stylesheet" href="lib/onsen/css/onsenui.css">
     <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css">
-    <link rel="stylesheet" href="css/home.css" />
-    <link rel="stylesheet" href="css/entry_record.css" />
-    <link rel="stylesheet" href="css/view_record.css">
+
+    <script src="jquery/jquery-1.11.3.min.js"></script>
 
     <script src="js/commonFunctions.js"></script>
-
     <script src="js/storageManager.js"></script>
-
+    <script src="js/wikiAdapter.js"></script>
 
     <script src="lib/onsen/js/angular/angular.js"></script>
     <script src="lib/onsen/js/angular/checklist-model.js"></script>
@@ -24,453 +23,202 @@
 
     <script src="cordova.js"></script>
     <script src="js/app.js"></script>
-    <script>
-        ons.ready(function() {
-            // onsen ready 
-            //storage_manager = new StorageManager("SOFTCREAM_COLLECTION_LIST");
 
-            console.log("platform: " + window.device.platform);
+<!--
 
-        });
-    </script>
+media wiki
+https://en.wikipedia.org/w/api.php?action=help&modules=query
 
-    <style>
-    .label_area{
-        width: 30%;
-        overflow: hidden;
-    }
-    </style>
+
+
+Emmetの使い方
+
+!
+でtabすると、htmlを
+
+div#myId>ul>li*3
+でtabすると、この構造のhtmlを出してくれる
+
+
+-->
+
 </head>
 
-<body ng-controller="AppController">
+<body>
 
+<!--
 <ons-tabbar>
   <ons-tab page="index.html" label="Home" icon="ion-ios-home" active="true"></ons-tab>
-  <ons-tab page="view_top.html" label="Collection" icon="ion-ios-book"></ons-tab>
-  <ons-tab page="entry_top.html" label="Record" icon="ion-edit"></ons-tab>
+  <ons-tab page="search_result_header.html" label="Collection" icon="ion-ios-book"></ons-tab>
+  <ons-tab page="search_result_detail.html" label="Record" icon="ion-edit"></ons-tab>
   <ons-tab page="settings.html" label="Settings" icon="ion-ios-cog"></ons-tab>
 </ons-tabbar>
+-->
+<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 
 <!-- 各親ページのnavigatorを定義 -->
+<!--
 <ons-template id="index.html">
     <ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 </ons-template>
 
-<ons-template id="view_top.html">
+
+<ons-template id="search_result_header.html">
     <ons-navigator var="myNavigator" page="view_record.html"></ons-navigator>
 </ons-template>
 
-<ons-template id="entry_top.html">
+<ons-template id="search_result_detail.html">
     <ons-navigator var="myNavigator" page="entry_record.html"></ons-navigator>
 </ons-template>
+-->
+
+<!--
+画面設計
+
+[[top screen]]
+    summary:
+        wikidiverのtitle画面. favorite, 履歴のtop5が見れる
+
+    content:
+        title
+        account (server連携用)
+        favorite items
+        history items (履歴)
+
+    action:
+
+        dive
+            とある文言をキーとしてwikiの検索を始める
+
+[[wiki header screen]]
+    summary:
+        あいまい検索候補一覧が表示
+
+    content:
+        header list
+            wiki headerのリスト. ヘッダとサマリ文の一覧が表示される
+
+    action:
+        get detail
+            wiki detailを取得しにいく
+            画面移動的には
+                wiki header screen ⇒ wiki detail screen
+
+        radiate(放射状に広がる), 横並びに検索
+            このキーに紐づくキーワード一覧を取得する
+            画面移動的には、
+                wiki header screen ⇒ wiki header screen
+
+
+[[wiki detail screen]]
+    summary:
+        詳細情報画面
+
+    content:
+        title
+        article
+
+    action:
+        favorite
+            お気に入りに追加
+                永続的に保存する
+
+        hold
+            一時ホールドしておく
+                後に全件削除とかが可能
+
+        dive
+            このキーをもとに他のキー一覧を取得する
+            画面移動的には
+                wiki detail ⇒　wiki header
+
+
+データ構造的には、
+    me
+        title, articleなどの実コンテンツをもつ
+    parent
+        複数親になる可能性あり...
+    childs
+        関連キーの子供たち
+-------------------------------------------------------
+bower
+    フロントエンドパッケージマネージャ
+
+
+-->
 
 <!-- Home画面　index > home -->
 <ons-template id="home.html">
-    <ons-page ng-controller="HomeController as home" id="home">
-    
+    <ons-page ng-controller="HomeController" id="home">
+
         <ons-toolbar>
-            <!--
-            <div class="left"><ons-back-button>Back</ons-back-button></div>
-            -->
-            <div class="center">SoftCreamCollection</div>
-            <!--<div class="right">
-            <ons-toolbar-button><ons-icon icon="ion-gear-a" style="vertical-align: -4px; font-size: 28px;"></ons-icon></ons-toolbar-button>
-            </div>
-            -->
+            <div class="center">WikiDiver</div>
         </ons-toolbar>
 
-        <div class="profile-card">
-            <!--<img src="images/softcream_top.jpg" class="profile-image">
-            <div class="profile-name">{{home.data.name}}</div>
-            <div class="profile-desc">{{home.data.comment}}</div>
-            <div class="profile-purcase_date">{{home.data.purchace_date}}</div>
-            --> 
-            <ons-list>
-                <ons-list-item>
-                      <div class="info-num">{{home.collections_count}}</div>
-                      <div class="info-unit">コレクション数</div>
-                </ons-list-item>
-                <ons-list-item>
-                      <div class="info-num">{{home.total_amount}}</div>
-                      <div class="info-unit">総費用</div>
-                    
-                </ons-list-item>
-            </ons-list>
-        </div>
-      </ons-toolbar>
+        <div>favorite</div>
 
-      <!--
-        ******************** home画面 ********************
+        <div>history</div>
 
-        表示項目
+        <input id="home_searchKey" type="text"></input>
 
-            総データ数
-
-            総sf費用
-
-            評価top3
-
-       -->
-
-    <ons-button onclick="myNavigator.pushPage('entry_record.html')">登録！</ons-button>
-
-    <ons-button onclick="myNavigator.pushPage('view_record.html')">照会！</ons-button>
+        <ons-button ng-click="dive()">Dive!!</ons-button>
 
     </ons-page>
 </ons-template>
 
-
-<!-- 
-********** ソフトクリーム登録画面 **********
-
-機能:
-    sf情報の登録/変更 を担当する
-
-    controllerへの引数によって、登録, 照会, 変更を制御する
-
--->
-<ons-template id="entry_record.html">
-    <ons-page ng-controller="EntryController" id="entry_record">
-
-      <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">Add Record</div>
-      </ons-toolbar>
-        
-        <ons-list>
-
-            <ons-list-item>
-                <label for="entry_sf_title" class="input_title">タイトル</label>                    
-                <input type="text" class="text-input" ng-model="sf_title" id="entry_sf_title" placeholder="○○高原　濃厚ソフトクリーム">
-            </ons-list-item>
-
-            <ons-list-item>
-                <label for="entry_sf_date" class="input_title">日付</label>
-                <input type="date" class="text-input" ng-model="sf_date" id="entry_sf_date">
-            </ons-list-item>
-
-            <!--
-            画像入力エリア
-            -->
-
-            <ons-list-item>
-                <ons-row>
-                    <ons-col>
-                        <label for="entry_sf_picture">写真</label>
-                    </ons-col>
-                    <ons-col>
-                        <ons-button id="entry_sf_picture" ng-click="showPictureSelect()">選択</ons-button>
-                        <span id="tsid"></span>
-                        <img id="entry_sf_picture_img">
-                    </ons-col>
-                </ons-row>
-
-            </ons-list-item>
-
-<canvas id="myCanvas"></canvas>
-            <!--
-            <canvas id="myCanvas" width="578" height="400"></canvas>
-        -->
-
-            <!--
-            <ons-list-item>
-                <label for="input_d_kind" class="input_title">味の種類</label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_kind_group" ng-model="sf_kind_group" value="バニラ" checked="checked">
-                    <div class="radio-button__checkmark"></div>
-                    バニラ
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_kind_group" ng-model="sf_kind_group" value="チョコレート">
-                    <div class="radio-button__checkmark"></div>
-                    チョコレート
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_kind_group" ng-model="sf_kind_group" value="抹茶">
-                    <div class="radio-button__checkmark"></div>
-                    抹茶
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_kind_group" ng-model="sf_kind_group"　value="フルーツ系">
-                    <div class="radio-button__checkmark"></div>
-                    フルーツ系
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_kind_group" ng-model="sf_kind_group"　value="ミックス">
-                    <div class="radio-button__checkmark"></div>
-                    ミックス
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_kind_group" ng-model="sf_kind_group"　value="その他">
-                    <div class="radio-button__checkmark"></div>
-                    その他
-                </label>
-            </ons-list-item>
-
-
-            <ons-list-item>
-                <!--<label for="input_d_bunrui" class="input_title">味の系統</label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_flavor_group" ng-model="sf_flavor_group" value="甘さたっぷり" checked="checked">
-                    <div class="radio-button__checkmark"></div>
-                    甘さたっぷり
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_flavor_group" ng-model="sf_flavor_group" value="濃厚系">
-                    <div class="radio-button__checkmark"></div>
-                    濃厚系
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_flavor_group" ng-model="sf_flavor_group" value="ミルク感強し">
-                    <div class="radio-button__checkmark"></div>
-                    ミルク感強し
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="entry_sf_flavor_group" ng-model="sf_flavor_group"　value="さっぱり">
-                    <div class="radio-button__checkmark"></div>
-                    さっぱり
-                </label>
--->
-                <ons-row>
-                    <ons-col>
-                        <label for="input_d_bunrui">味の系統</label>
-                    </ons-col>
-                    <ons-col>
-                        <ons-button id="entry_sf_flavor_group" ng-click="showSelectListFlavorGroup()">選択</ons-button>
-                        <span>{{sf_selected_flavor_group}}</span>
-                    </ons-col>
-                </ons-row>
-
-            </ons-list-item>
-
-<!--
-            <ons-list-item>
-                <label for="entry_sf_rating" class="input_title">ソフトクリームの評価</label>
-                <input type="number" min="0" max="5" step="0.5" class="text-input" ng-model="sf_rating" id="entry_sf_rating" />
-            </ons-list-item>
-
-            <ons-list-item>
-                <label for="entry_sf_rating_corn" class="input_title">コーンの評価</label>
-                <input type="number" min="0" max="5" step="0.5" class="text-input" ng-model="sf_rating_corn" id="entry_sf_rating_corn" />
-            </ons-list-item>
--->
-            <ons-list-item>
-                <label for="entry_sf_price" class="input_title">価格</label>
-                <input type="number" class="text-input" ng-model="sf_price" id="entry_sf_price" />
-            </ons-list-item>
-
-            <ons-list-item>
-                <label for="entry_sf_comment" class="input_title">コメント</label>
-                <textarea type="text" class="textarea" ng-model="sf_comment" id="entry_sf_comment"　placeholder="コメント" /></textarea>
-            </ons-list-item>
-
-        </ons-list>
-
-        <button class="button button--large" style="display: {{visibility.btn_entry}};" ng-click="entryRecord()">登録</button>
-        <button class="button button--large" style="display: {{visibility.btn_mod}}" ng-click="modifyRecord()">修正</button>
-
-    </ons-page>
-</ons-template>
-
-
-
-<!-- 整備レコード照会ページ -->
-<ons-template id="view_record.html">
-    <ons-page ng-controller="ViewListController" id="view_record">
+<ons-template id="search_result_header.html">
+  <ons-page ng-controller="HeaderListController">
 
     <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">View</div>
-        <div class="right">
-            <ons-toolbar-button ng-click="deleteSwitch()"><ons-icon icon="ion-ios-trash-outline" style="vertical-align: -4px; font-size: 28px;"></ons-icon></ons-toolbar-button>
-        </div>
+      <div class="left"><ons-back-button>Back</ons-back-button></div>
+      <div class="center">Headers</div>
     </ons-toolbar>
 
-    <ons-list-item id="view_record_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
+    <ons-list>
+      <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
+        <ons-col>
+          {{item.pageid}}
+        </ons-col>
+        <ons-col>
+          {{item.title}}
+        </ons-col>
+      </ons-list-item>
+    </ons-list>
 
-        <ons-row item_id="{{item.id}}">
-            <ons-col class="item_list_date" width="40px">
-                <div>
-                    <p class="date_y">{{item.date | date: 'yyyy'}}</p>
-                    <p class="date_md">{{item.date | date: 'M/d'}}</p>
-                    <p class="date_e">{{item.date | date: '（EEE）'}}</p>
-                </div>
-            </ons-col>
-            <ons-col width="95px">
-              <img ng-src="{{item.picture}}" class="thumbnail"></ons-col><ons-col><p class="item_list_title">{{item.title}}</p>
-              <p class="item_list_rating">{{item.rating}}</p>
-              <p class="item_list_price">{{item.price}}円</p>
-            </ons-col>
-
-            <!--
-            <ons-col width="40px" class="mark_box">
-                <label class='checkbox checkbox--list-item fade' ng-show="delete_switching" ng-click="$event.stopPropagation();">
-                    <input type='checkbox' checklist-model="del.items" checklist-value="item.id"><div class='checkbox__checkmark checkbox--list-item__checkmark'></div>
-                </label>
-            </ons-col>
-        -->
-
-        </ons-row>
-
-        <!--<ons-row>
-            <ons-col class="view_h_id">
-                <p class="item-desc">{{item.id}}</p>
-            </ons-col>
-            <ons-col class="view_h_title">
-                <p class="item-desc">{{item.title}}</p>
-            </ons-col>
-            <ons-col class="view_h_date">
-                <p class="item-desc">{{item.date}}</p>
-            </ons-col>
-            <ons-col class="view_h_picture">
-                <p class="item-desc">{{item.picture}}</p>
-            </ons-col>
-            <ons-col class="view_h_flavor_group">
-                <p class="item-desc">{{item.flavor_group}}</p>
-            </ons-col>
-            <ons-col class="view_h_map">
-                <p class="item-desc">{{item.map}}</p>
-            </ons-col>
-            <ons-col class="view_h_rating">
-                <p class="item-desc">{{item.rating}}</p>
-            </ons-col>
-            <ons-col class="view_h_rating_corn">
-                <p class="item-desc">{{item.rating_corn}}</p>
-            </ons-col>
-            <ons-col class="view_h_price">
-                <p class="item-desc">{{item.price}}</p>
-            </ons-col>
-            <ons-col class="view_h_comment">
-                <p class="item-desc">{{item.comment}}</p>
-            </ons-col>
-        </ons-row>
-    -->
-    </ons-list-item>
-
-    <div ng-show="delete_switching" class="page_under_area">
-        <ons-button ng-click="checkAll()">全選択</ons-button>
-        <ons-button ng-click="uncheckAll()">解除</ons-button>
-        <ons-button ng-click="deleteRecord()" ng-class="{bg_red: del.items.length > 0 }">削除<small>({{del.items.length}})</small></ons-button>
-    </div>
-
-    </ons-page>
+  </ons-page>
 </ons-template>
 
+<ons-template id="search_result_detail.html">
+  <ons-page ng-controller="DetailController">
 
+    <ons-toolbar>
+      <div class="left"><ons-back-button>Back</ons-back-button></div>
+      <div class="center">Detail</div>
+    </ons-toolbar>
 
+    <p>
+      <h1 id="detail_title" class="title">
+        {{title}}
+      </h1>
+    </p>
 
-<!-- 
-********** ソフトクリーム詳細照会画面 **********
-
-機能:
-    sf情報の照会 を担当する
-
-    編集ボタンが押下されたら、entry画面を変更画面としてコールする
-
-
--->
-<ons-template id="view_record_detail.html">
-    <ons-page ng-controller="ViewDetailController" id="view_record_detail">
-
-      <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">{{sf.title}}</div>
-      </ons-toolbar>
-
-
-        <div class="card">
-
-            <div class="card-name">{{sf.title}}</div>
-            <div class="card-desc">
-                <div class="rating"><div class="rating-num">
-                    <ons-icon icon="fa-star" fixed-width="false"></ons-icon>
-                    <ons-icon icon="fa-star" fixed-width="false"></ons-icon>
-                    <ons-icon icon="fa-star" fixed-width="false"></ons-icon>
-                    <ons-icon icon="fa-star" fixed-width="false"></ons-icon>
-                    <ons-icon icon="fa-star-half" fixed-width="false"></ons-icon>
-                    {{sf.rating}}
-                </div></div>
-            </div>
-
-        </div>
-        
-        <ons-list modifier="inset">
-            <ons-list-header>詳細情報</ons-list-header>
-            <ons-list-item>
-                <ons-row>
-                    <ons-col class="label_area">
-                        <label for="view_sf_title">価格</label>
-                    </ons-col>
-                    
-                    <ons-col>
-                        {{sf.price}}円
-                    </ons-col>
-
-                </ons-row>
-            </ons-list-item>
-
-            <ons-list-item>
-                <ons-row>
-                    <ons-col>
-                        <label for="view_sf_date">日付</label>
-                    </ons-col>
-                    
-                    <div id="view_sf_date">
-                        {{sf.date | date: 'yyyy/MM/dd(EEE)'}}
-                    </div>
-
-                </ons-row>
-            </ons-list-item>
-            <ons-list-item>味の系統　{{sf.selected_flavor_group}}</ons-list-item>
-            <ons-list-item>マップ　{{sf.map}}</ons-list-item>
-            <ons-list-item>コーン評価　{{sf.rating_corn}}</ons-list-item>
-            <ons-list-item>コメント　{{sf.comment}}</ons-list-item>
-
-            <!--
-            <ons-list-item>{{sf.picture}}</ons-list-item>
-        -->
-            <ons-list-item><img ng-src="{{sf.picture}}"></ons-list-item>
-            <!--
-            <ons-list-item><img ng-src="" id="sf_picture"></ons-list-item>
-        -->
-
-        </ons-list>
-
-        <button class="button button--large" ng-click="moveToModifyScreen()">編集</button>
-
-    </ons-page>
-</ons-template>
-
-
-
-
-
-
-
-<!-- 共通リスト項目選択ページ -->
-<ons-template id="list_select_page.html">
-    <ons-page ng-controller="SelectListController">
-
-      <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">Select</div>
-        <div class="right">
-          <ons-toolbar-button><ons-icon icon="ion-gear-a" style="vertical-align: -4px; font-size: 28px;"></ons-icon></ons-toolbar-button>
-        </div>
-      </ons-toolbar>
-
-        <ons-list-item modifier="chevron" class="item" ng-repeat="item in items" ng-click="processItemSelect($index)">
-            <ons-row>
-                <ons-col class="{{}}">
-                    <p class="item-desc">{{item.key}}</p>
-                </ons-col>
-                <ons-col class="{{}}">
-                    <p class="item-desc">{{item.value}}</p>
-                </ons-col>
-            </ons-row>
+    <p ng-show="is_redirects_exist">
+      <ons-list>
+        <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in redirects" ng-click="processRedirectItemSelect($index, $event)">
+          <span>{{item.pageid}}</span><span>{{item.title}}</span>
         </ons-list-item>
+      </ons-list>
+    </p>
 
-    </ons-page>
+    <p id="detail_content" ng-bind-html="article" class="article">
+    </p>
+
+  </ons-page>
+  </ons-page>
+</ons-template>
+
+<ons-template id="settings.html">
+
 </ons-template>
 
 </body>

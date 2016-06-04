@@ -106,7 +106,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         var getHeaderList = function (keyword) {
             wikiAdapter.getHeaderList(keyword, function (res) {
                 console.log("callback level1");
-                console.log(res);
+                //console.log(res);
                 for (var p in res) {
                     if (res[p].pageid) {
                         $scope.items.push(res[p]);
@@ -118,7 +118,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         var searchHeadersFromKeyword = function (keyword) {
             wikiAdapter.searchHeadersFromKeyword(keyword, function (res) {
                 console.log("callback level1(search headers)");
-                console.log(res);
+                //console.log(res);
                 var hit_count = (res.searchinfo && res.searchinfo.totalhits) ? res.searchinfo.totalhits : 0;
                 $scope.items = [];
                 if (res && res.search) {
@@ -131,7 +131,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         };
         var _args = myNavigator.getCurrentPage().options;
         console.log("in HeaderListController start");
-        console.log(_args);
+        //console.log(_args);
         // ホーム画面からの呼出の場合
         if (_args.onTransitionEnd && _args.onTransitionEnd.is_from_home && _args.onTransitionEnd.search_key) {
             if ($scope.completeMatch) {
@@ -165,7 +165,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         };
         var handleGetDetail = function (res) {
             console.log("callback level1");
-            console.log(res);
+            //console.log(res);
             $scope.title = res.title;
             var article = res.extract;
             article = article.replace(/[\r\n]/g, "<br />");
@@ -177,7 +177,6 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
                     $scope.redirects.push(res.redirects[r]);
                 }
                 console.log("redirects exist");
-                console.log($scope.redirects);
             }
             $scope.$apply();
         };
@@ -192,7 +191,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         //---------- on detailpage load ----------
         var _args = myNavigator.getCurrentPage().options;
         console.log("in DetailController start");
-        console.log(_args);
+        //console.log(_args);
         // ロード時検索要求有りなら
         if (_args.onTransitionEnd && _args.onTransitionEnd.need_onload_search) {
             if (_args.onTransitionEnd.pageid) {
