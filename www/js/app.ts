@@ -193,9 +193,10 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
       $scope.title = "";
       $scope.article = "";
       $scope.is_redirects_exist = false;
+      $scope.is_links_exist = false;
+      $scope.show_redirects_pageid = false;
       $scope.redirects = [];
-
-
+      $scope.links = [];
 
       $scope._checkBElement = function(){
         console.log("in _checkBElement");
@@ -213,6 +214,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         console.log("in processRedirectItemSelect");
 
         var pageid = $scope.redirects[idx] ? $scope.redirects[idx].pageid : false;
+        var title = $scope.redirects[idx] ? $scope.redirects[idx].title : false;
         if(pageid){
           // 自身のページに遷移
           myNavigator.pushPage(
@@ -224,10 +226,18 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
               }
             });
         }
+        else if(title){
+
+        }
         else{
           alert("faild to get pageid...");
         }
       };
+
+      $scope.processRedirectItemSelect = function(idx, event){
+        alert("no operation defined");
+      };
+
 
       var handleGetDetail = (res: any) => {
           console.log("callback level1");
@@ -235,18 +245,29 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
           //console.log(res);
 
           $scope.title = res.title;
+          $scope.summary = "";
+
+          var article = "";
 
           if(res.extract){
-            var article = res.extract;
+            article = res.extract;
             article = article.replace(/[\r\n]/g,"<br />");
 
             $scope.article = $sce.trustAsHtml(article);
           }
           else if(res.revisions && res.revisions["0"] && res.revisions["0"]["*"]){
-            var article = res.revisions["0"]["*"];
+            article = res.revisions["0"]["*"];
             article = article.replace(/[\r\n]/g,"<br />");
 
             $scope.article = $sce.trustAsHtml(article);
+          }
+
+          //pタグが存在すれば、一致する先頭を取得
+          if(article){
+            var s = article.match(/<p>.*?<\/p>/);
+            if(s){
+              $scope.summary = $sce.trustAsHtml(s[0]);
+            }
           }
 
           //リダイレクトが存在すれば、リダイレクトの要素を表示させる
@@ -257,7 +278,18 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
               $scope.redirects.push(res.redirects[r]);
             }
             console.log("redirects exist");
-            //console.log($scope.redirects);
+            console.log($scope.redirects);
+          }
+
+          //リンクが存在すれば、リンク要素を表示させる
+          $scope.is_links_exist = !!(res.links);
+
+          if(res.links){
+            for(var l in res.links){
+              $scope.links.push(res.links[l]);
+            }
+            console.log("links exist");
+            console.log($scope.links);
           }
 
           $scope.$apply();

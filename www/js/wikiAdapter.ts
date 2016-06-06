@@ -145,16 +145,18 @@ var IS_DEBUG = false;
 
 
       //これ一応OK版
-      /*
+
       params["prop"] = "extracts|redirects|links";
       params["titles"] = main_query;
       params["pllimit"] = 50;
-      */
+      
+
+/*
       params["prop"] = "revisions|redirects|links";
       params["rvprop"] = "content";
       params["titles"] = main_query;
       params["pllimit"] = 50;
-
+      */
      }
 
 
