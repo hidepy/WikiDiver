@@ -147,6 +147,14 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         $scope.article = "";
         $scope.is_redirects_exist = false;
         $scope.redirects = [];
+        $scope._checkBElement = function () {
+            console.log("in _checkBElement");
+            var article = document.getElementById("detail_content");
+            console.log("b elements are:");
+            if (article) {
+                console.log(article.querySelectorAll("b"));
+            }
+        };
         $scope.processRedirectItemSelect = function (idx, event) {
             console.log("in processRedirectItemSelect");
             var pageid = $scope.redirects[idx] ? $scope.redirects[idx].pageid : false;
@@ -167,9 +175,16 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
             console.log("callback level1");
             //console.log(res);
             $scope.title = res.title;
-            var article = res.extract;
-            article = article.replace(/[\r\n]/g, "<br />");
-            $scope.article = $sce.trustAsHtml(article);
+            if (res.extract) {
+                var article = res.extract;
+                article = article.replace(/[\r\n]/g, "<br />");
+                $scope.article = $sce.trustAsHtml(article);
+            }
+            else if (res.revisions && res.revisions["0"] && res.revisions["0"]["*"]) {
+                var article = res.revisions["0"]["*"];
+                article = article.replace(/[\r\n]/g, "<br />");
+                $scope.article = $sce.trustAsHtml(article);
+            }
             //リダイレクトが存在すれば、リダイレクトの要素を表示させる
             $scope.is_redirects_exist = !!(res.redirects);
             if (res.redirects) {

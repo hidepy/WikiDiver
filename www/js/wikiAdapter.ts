@@ -9,7 +9,7 @@ tag
 emmet
 */
 
-var IS_DEBUG = true;
+var IS_DEBUG = false;
 
  class WikiAdapter{
 
@@ -141,10 +141,20 @@ var IS_DEBUG = true;
       case "4": //[明細] タイトル検索
       //params["prop"] = "extracts|redirects";
       //params["prop"] = "revisions|redirects|links";
-      params["prop"] = "extracts|redirects|links";
       //params["rvprop"] = "content";
+
+
+      //これ一応OK版
+      /*
+      params["prop"] = "extracts|redirects|links";
       params["titles"] = main_query;
       params["pllimit"] = 50;
+      */
+      params["prop"] = "revisions|redirects|links";
+      params["rvprop"] = "content";
+      params["titles"] = main_query;
+      params["pllimit"] = 50;
+
      }
 
 
@@ -172,8 +182,7 @@ var IS_DEBUG = true;
        },
        success: function(data){
          console.log("ajax success!!");
-         //console.log(JSON.stringify(data));
-         //console.log(data);
+         if(!isDevice()){ console.log(console.log(data)); }
          callback(data);
          return;
        },

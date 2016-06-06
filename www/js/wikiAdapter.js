@@ -7,7 +7,7 @@ http://qiita.com/yubessy/items/16d2a074be84ee67c01f
 tag
 emmet
 */
-var IS_DEBUG = true;
+var IS_DEBUG = false;
 var WikiAdapter = (function () {
     function WikiAdapter() {
         this._getDummyHeader = function () {
@@ -149,8 +149,15 @@ var WikiAdapter = (function () {
             case "4":
                 //params["prop"] = "extracts|redirects";
                 //params["prop"] = "revisions|redirects|links";
-                params["prop"] = "extracts|redirects|links";
                 //params["rvprop"] = "content";
+                //これ一応OK版
+                /*
+                params["prop"] = "extracts|redirects|links";
+                params["titles"] = main_query;
+                params["pllimit"] = 50;
+                */
+                params["prop"] = "revisions|redirects|links";
+                params["rvprop"] = "content";
                 params["titles"] = main_query;
                 params["pllimit"] = 50;
         }
@@ -176,8 +183,9 @@ var WikiAdapter = (function () {
             },
             success: function (data) {
                 console.log("ajax success!!");
-                //console.log(JSON.stringify(data));
-                //console.log(data);
+                if (!isDevice()) {
+                    console.log(console.log(data));
+                }
                 callback(data);
                 return;
             },

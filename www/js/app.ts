@@ -195,6 +195,20 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
       $scope.is_redirects_exist = false;
       $scope.redirects = [];
 
+
+
+      $scope._checkBElement = function(){
+        console.log("in _checkBElement");
+
+        var article = document.getElementById("detail_content");
+        console.log("b elements are:");
+        if(article){
+            console.log(article.querySelectorAll("b"));
+        }
+      };
+
+
+
       $scope.processRedirectItemSelect = function(idx, event){
         console.log("in processRedirectItemSelect");
 
@@ -222,10 +236,18 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
 
           $scope.title = res.title;
 
-          var article = res.extract;
-          article = article.replace(/[\r\n]/g,"<br />");
+          if(res.extract){
+            var article = res.extract;
+            article = article.replace(/[\r\n]/g,"<br />");
 
-          $scope.article = $sce.trustAsHtml(article);
+            $scope.article = $sce.trustAsHtml(article);
+          }
+          else if(res.revisions && res.revisions["0"] && res.revisions["0"]["*"]){
+            var article = res.revisions["0"]["*"];
+            article = article.replace(/[\r\n]/g,"<br />");
+
+            $scope.article = $sce.trustAsHtml(article);
+          }
 
           //リダイレクトが存在すれば、リダイレクトの要素を表示させる
           $scope.is_redirects_exist = !!(res.redirects);
@@ -239,6 +261,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
           }
 
           $scope.$apply();
+
       };
 
       //idから詳細情報を取得する
