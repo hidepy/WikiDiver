@@ -15,6 +15,7 @@
 
     <script src="js/commonFunctions.js"></script>
     <script src="js/storageManager.js"></script>
+    <script src="js/treeManager.js"></script>
     <script src="js/wikiAdapter.js"></script>
 
     <script src="lib/onsen/js/angular/angular.js"></script>
@@ -23,6 +24,113 @@
 
     <script src="cordova.js"></script>
     <script src="js/app.js"></script>
+
+<style>
+.contents_wrapper {
+  text-align: center;
+}
+#home_searchKey {
+  margin : 4px;
+}
+</style>
+<!-- Home画面　index > home -->
+<ons-template id="home.html">
+    <ons-page ng-controller="HomeController" id="home">
+
+      <ons-toolbar>
+          <div class="center">WikiDiver</div>
+      </ons-toolbar>
+
+      <div class="contents_wrapper">
+        <div>
+          <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="">
+        </div>
+
+        <div>
+          <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
+        </div>
+
+        <div>
+          <!-- favoriteとhistory -->
+
+          <!--
+          history: headerの所から再開する.
+          -->
+
+          <!--
+          favorite: headerの所から再開する.
+
+
+          -->
+        </div>
+      </div>
+
+    </ons-page>
+</ons-template>
+
+<ons-template id="search_result_header.html">
+  <ons-page ng-controller="HeaderListController" var="pageSearchResultHeader">
+
+    <ons-toolbar>
+      <div class="left"><ons-back-button>Back</ons-back-button></div>
+      <div class="center">Headers</div>
+    </ons-toolbar>
+
+    <ons-list>
+      <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
+        <ons-col>
+          {{item.pageid}}
+        </ons-col>
+        <ons-col>
+          {{item.title}}
+        </ons-col>
+      </ons-list-item>
+    </ons-list>
+
+  </ons-page>
+</ons-template>
+
+<ons-template id="search_result_detail.html">
+  <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
+
+    <ons-toolbar>
+      <div class="left"><ons-back-button>Back</ons-back-button></div>
+      <div class="center">Detail</div>
+      <!-- ここにお気に入りボタンを, あと、トップに戻るボタンも -->
+    </ons-toolbar>
+
+    <p>
+      <h1 id="detail_title" class="title">
+        {{title}}
+      </h1>
+    </p>
+
+    <p>
+      <h3 id="detail_summary" ng-bind-html="summary"></h3>
+    </p>
+
+    <p ng-show="is_links_exist">
+      <ons-list>
+        <ons-list-header>links</ons-list-header>
+        <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in links" ng-click="processLinkItemSelect($index, $event)">
+          <span>{{item.title}}</span>
+        </ons-list-item>
+      </ons-list>
+    </p>
+
+    <p id="detail_content" ng-bind-html="article" class="article"></p>
+
+  </ons-page>
+  </ons-page>
+</ons-template>
+
+<ons-template id="settings.html">
+
+</ons-template>
+
+</body>
+</html>
+
 
 <!--
 
@@ -150,116 +258,3 @@ bower
 
 
 -->
-
-<style>
-.contents_wrapper {
-  text-align: center;
-}
-#home_searchKey {
-  margin : 4px;
-}
-</style>
-<!-- Home画面　index > home -->
-<ons-template id="home.html">
-    <ons-page ng-controller="HomeController" id="home">
-
-        <ons-toolbar>
-            <div class="center">WikiDiver</div>
-        </ons-toolbar>
-
-      <div class="contents_wrapper">
-        <div>
-          <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="">
-        </div>
-
-        <div>
-          <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
-        </div>
-
-    </div>
-
-    </ons-page>
-</ons-template>
-
-<ons-template id="search_result_header.html">
-  <ons-page ng-controller="HeaderListController">
-
-    <ons-toolbar>
-      <div class="left"><ons-back-button>Back</ons-back-button></div>
-      <div class="center">Headers</div>
-    </ons-toolbar>
-
-    <ons-list>
-      <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
-        <ons-col>
-          {{item.pageid}}
-        </ons-col>
-        <ons-col>
-          {{item.title}}
-        </ons-col>
-      </ons-list-item>
-    </ons-list>
-
-  </ons-page>
-</ons-template>
-
-<ons-template id="search_result_detail.html">
-  <ons-page ng-controller="DetailController">
-
-    <ons-toolbar>
-      <div class="left"><ons-back-button>Back</ons-back-button></div>
-      <div class="center">Detail</div>
-    </ons-toolbar>
-<!--
-    <p>
-      <ons-button ng-click="_checkBElement()">check B element</ons-button>
-    </p>
--->
-    <p>
-      <h1 id="detail_title" class="title">
-        {{title}}
-      </h1>
-    </p>
-
-    <p>
-      <h3 id="detail_summary" ng-bind-html="summary"></h3>
-    </p>
-
-    <p ng-show="is_redirects_exist">
-      <p>
-        redirects:
-      </p>
-      <ons-list>
-        <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in redirects" ng-click="processRedirectItemSelect($index, $event)">
-          <span ng-show="show_redirects_pageid">{{item.pageid}}:</span>
-          <span>{{item.title}}</span>
-        </ons-list-item>
-      </ons-list>
-    </p>
-
-    <p ng-show="is_links_exist">
-      <p>
-        links:
-      </p>
-      <ons-list>
-        <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in links" ng-click="processLinkItemSelect($index, $event)">
-          <span>{{item.title}}</span>
-        </ons-list-item>
-      </ons-list>
-    </p>
-
-<!-- links は、header一覧と同じ扱いにする？？-->
-
-    <p id="detail_content" ng-bind-html="article" class="article">
-    </p>
-
-  </ons-page>
-  </ons-page>
-</ons-template>
-
-<ons-template id="settings.html">
-
-</ons-template>
-
-</body>
-</html>

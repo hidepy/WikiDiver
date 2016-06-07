@@ -1,4 +1,5 @@
 /// <reference path="./storageManager.ts" />
+/// <reference path="./treeManager.ts"/>
 /// <reference path="./commonFunctions.ts" />
 /*
 コンテナとしてならgenericが有利！
@@ -48,29 +49,24 @@ log.message("hello");
 
 
 */
-/*
-43行目の<HTMLCanvasElement>は、Type Assertionと呼ばれる機能で、キャストみたいなものです。
-document.getElementByIdが返すのがHTMLElementなので、そのままでは次の行でcanvas.getContextしたらコンパイルエラーになってしまうのですね。
-Type Assertionはコンパイルすると消えてしまうので実行時には効きません。
-
-HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みのインタフェースは、TypeScriptがデフォルトで読み込むlib.d.tsというファイルで定義されています。
-
-*/
 //(function(){
 {
     'use strict';
     var module = angular.module('app', ['onsen', 'checklist-model']);
-    var storage_manager = new StorageManager("WIKI_DIVER_INFO");
+    var storage_manager_favorite = new StorageManager("WIKI_DIVER_FAVORITE");
+    var tree_manager_history = new TreeManager();
     var wikiAdapter = new WikiAdapter();
-    module.controller('MasterController', function ($scope, $data) {
-        $scope.items = $data.items;
-        $scope.showDetail = function (index) {
-            console.log("show detail comes");
-            var selectedItem = $data.items[index];
-            $data.selectedItem = selectedItem;
-            //$scope.ons.navigator.pushPage('detail.html', {title : selectedItem.title});
-            //myNavigator.pushPage('entry_record.html', {title : selectedItem.title});
-        };
+    ons.ready(function () {
+        //pageにback-button設定
+        if (isDevice()) {
+            //全ページ分back-buttonイベントをアタッチ
+            var pages = [pageSearchResultHeader, pageSearchResultDetail];
+            for (var p in pages) {
+                p.setDeviceBackButtonHandler(function () {
+                    console.log("back button pushed!!");
+                });
+            }
+        }
     });
     module.controller("HomeController", function ($scope) {
         $scope.search_key = "";
@@ -78,10 +74,12 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
             var el_keyword = document.getElementById("home_searchKey");
             var search_key = el_keyword.value;
             //次画面遷移
-            myNavigator.pushPage("search_result_header.html", { onTransitionEnd: {
+            myNavigator.pushPage("search_result_header.html", {
+                onTransitionEnd: {
                     search_key: search_key,
                     is_from_home: true
-                } });
+                }
+            });
         };
     });
     module.controller("HeaderListController", function ($scope) {
@@ -106,7 +104,6 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         var getHeaderList = function (keyword) {
             wikiAdapter.getHeaderList(keyword, function (res) {
                 console.log("callback level1");
-                //console.log(res);
                 for (var p in res) {
                     if (res[p].pageid) {
                         $scope.items.push(res[p]);
@@ -143,41 +140,32 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
         }
     });
     module.controller("DetailController", function ($scope, $sce) {
-        $scope.title = "";
-        $scope.article = "";
-        $scope.is_redirects_exist = false;
-        $scope.is_links_exist = false;
-        $scope.show_redirects_pageid = false;
-        $scope.redirects = [];
-        $scope.links = [];
-        $scope._checkBElement = function () {
-            console.log("in _checkBElement");
-            var article = document.getElementById("detail_content");
-            console.log("b elements are:");
-            if (article) {
-                console.log(article.querySelectorAll("b"));
-            }
-        };
+        $scope.title = ""; //詳細ページ-> タイトル
+        $scope.article = ""; //詳細ページ-> メイン記事
+        $scope.is_redirects_exist = false; //詳細ページ-> リダイレクト有無フラグ
+        $scope.is_links_exist = false; //詳細ページ-> リンク有無フラグ
+        $scope.show_redirects_pageid = false; //詳細ページ-> リダイレクト可視性フラグ
+        $scope.redirects = []; //詳細ページ-> リダイレクトlist
+        $scope.links = []; //詳細ページ-> リンクlist
         $scope.processRedirectItemSelect = function (idx, event) {
             console.log("in processRedirectItemSelect");
-            var pageid = $scope.redirects[idx] ? $scope.redirects[idx].pageid : false;
+            //var pageid = $scope.redirects[idx] ? $scope.redirects[idx].pageid : false;
             var title = $scope.redirects[idx] ? $scope.redirects[idx].title : false;
-            if (pageid) {
+            if (title) {
+                console.log("redirect search. title exist.");
                 // 自身のページに遷移
                 myNavigator.pushPage("search_result_detail.html", {
                     onTransitionEnd: {
-                        pageid: pageid,
+                        title: title,
                         need_onload_search: true
                     }
                 });
-            }
-            else if (title) {
             }
             else {
                 alert("faild to get pageid...");
             }
         };
-        $scope.processRedirectItemSelect = function (idx, event) {
+        $scope.processLinkItemSelect = function (idx, event) {
             alert("no operation defined");
         };
         var handleGetDetail = function (res) {
@@ -210,7 +198,6 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
                     $scope.redirects.push(res.redirects[r]);
                 }
                 console.log("redirects exist");
-                console.log($scope.redirects);
             }
             //リンクが存在すれば、リンク要素を表示させる
             $scope.is_links_exist = !!(res.links);
@@ -219,7 +206,6 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
                     $scope.links.push(res.links[l]);
                 }
                 console.log("links exist");
-                console.log($scope.links);
             }
             $scope.$apply();
         };
@@ -242,6 +228,7 @@ HTMLCanvasElementとかCanvasRenderingContext2DとかのJavaScript組込みの�
             }
             else {
                 //pageidがない場合、titleにて明細検索を行う
+                // 以降、メインはこっち！
                 getDetailByTitle(_args.onTransitionEnd.title);
             }
         }

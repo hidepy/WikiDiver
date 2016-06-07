@@ -147,11 +147,8 @@ var WikiAdapter = (function () {
                 params["pageids"] = main_query;
                 break;
             case "4":
-                //params["prop"] = "extracts|redirects";
-                //params["prop"] = "revisions|redirects|links";
-                //params["rvprop"] = "content";
                 //これ一応OK版
-                params["prop"] = "extracts|redirects|links";
+                params["prop"] = "extracts|links"; //redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
                 params["titles"] = main_query;
                 params["pllimit"] = 50;
         }
