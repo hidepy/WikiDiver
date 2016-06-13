@@ -89,18 +89,30 @@ var WikiAdapter = (function () {
     };
     WikiAdapter.prototype.getDetailByTitle = function (keyword, callback) {
         console.log("in getDetailByTitle. param=keyword: " + keyword);
-        this.sendRequest("4", function (res) {
+        var req_type = "5"; //or "4"
+        this.sendRequest(req_type, function (res) {
             console.log("in getDetailByTitle callback!!");
             //console.log(res);
-            if (res && res.query && res.query.pages) {
-                var key = "";
-                for (key in res.query.pages) {
-                    break;
+            if (req_type == "4") {
+                if (res && res.query && res.query.pages) {
+                    var key = "";
+                    for (key in res.query.pages) {
+                        break;
+                    }
+                    callback(res.query.pages[key]);
                 }
-                callback(res.query.pages[key]);
+                else {
+                    console.log("cannnot find target article...");
+                }
             }
-            else {
-                console.log("cannnot find target article...");
+            else if (req_type == "5") {
+                if (res && res.parse) {
+                    res.parse.isTypeParse = true; //parseルートと認識させる
+                    callback(res.parse);
+                }
+                else {
+                    console.log("cannot find target...");
+                }
             }
         }, keyword);
     };
@@ -151,6 +163,12 @@ var WikiAdapter = (function () {
                 params["prop"] = "extracts|links"; //redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
                 params["titles"] = main_query;
                 params["pllimit"] = 50;
+                break;
+            case "5":
+                params["action"] = "parse";
+                params["page"] = main_query;
+                params["prop"] = "text|sections";
+                break;
         }
         if (IS_DEBUG) {
             if (type == "1" || type == "4") {
@@ -175,7 +193,7 @@ var WikiAdapter = (function () {
             success: function (data) {
                 console.log("ajax success!!");
                 if (!isDevice()) {
-                    console.log(console.log(data));
+                    console.log(data);
                 }
                 callback(data);
                 return;

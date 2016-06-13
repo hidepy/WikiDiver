@@ -1,4 +1,8 @@
 /// <reference path="../../tsd/cordova/cordova.d.ts"/>
+/* デバイス上実行か確認 */
+function isDevice() {
+    return (window && window.device);
+}
 /* 時間を文字列に変換 */
 function formatDate(date) {
     return ("" + date.getFullYear() + ("00" + (date.getMonth() + 1)).slice(-2) + ("00" + date.getDate()).slice(-2) + ("00" + date.getHours()).slice(-2) + ("00" + date.getMinutes()).slice(-2) + ("00" + date.getSeconds()).slice(-2));

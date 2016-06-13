@@ -32,6 +32,36 @@
 #home_searchKey {
   margin : 4px;
 }
+
+
+
+.list__item {
+  min-height: 0px;
+}
+
+.item-accordion {
+  line-height: 37px;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: 0.07s all linear;
+}
+
+.item-accordion.ng-hide {
+  line-height: 0px;
+}
+
+.item-accordion.ng-hide-add,
+.item-accordion.ng-hide-remove {
+  display: block !important;
+}
+
+.title {
+  background: #F5F5F5;
+}
+
+.active {
+  background: #EFEFEF;
+}
 </style>
 <!-- Home画面　index > home -->
 <ons-template id="home.html">
@@ -106,7 +136,7 @@
     </p>
 
     <p>
-      <h3 id="detail_summary" ng-bind-html="summary"></h3>
+      <span id="detail_summary" ng-bind-html="summary"></span>
     </p>
 
     <p ng-show="is_links_exist">

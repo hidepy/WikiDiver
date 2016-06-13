@@ -74,18 +74,31 @@ var IS_DEBUG = false;
    public getDetailByTitle(keyword: string, callback: (res: any)=>void): void{
      console.log("in getDetailByTitle. param=keyword: " + keyword);
 
-     this.sendRequest("4", res => {
+     var req_type = "5"; //or "4"
+
+     this.sendRequest(req_type, res => {
        console.log("in getDetailByTitle callback!!");
        //console.log(res);
 
-       if(res && res.query && res.query.pages){
-         var key = "";
-         for(key in res.query.pages){ break; }
+       if(req_type == "4"){ //extractの場合
+         if(res && res.query && res.query.pages){
+           var key = "";
+           for(key in res.query.pages){ break; }
 
-         callback(res.query.pages[key]);
+           callback(res.query.pages[key]);
+         }
+         else{
+           console.log("cannnot find target article...");
+         }
        }
-       else{
-         console.log("cannnot find target article...");
+       else if(req_type == "5"){ //parseの場合
+        if(res && res.parse){
+          res.parse.isTypeParse = true; //parseルートと認識させる
+          callback(res.parse);
+        }
+        else{
+          console.log("cannot find target...");
+        }
        }
      }, keyword);
    }
@@ -139,10 +152,18 @@ var IS_DEBUG = false;
         params["pageids"] = main_query;
         break;
       case "4": //[明細] タイトル検索
-      //これ一応OK版
-      params["prop"] = "extracts|links";//redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
-      params["titles"] = main_query;
-      params["pllimit"] = 50;
+        //これ一応OK版
+        params["prop"] = "extracts|links";//redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
+        params["titles"] = main_query;
+        params["pllimit"] = 50;
+
+
+        break;
+      case "5": //[明細] parseお願い
+        params["action"] = "parse";
+        params["page"] = main_query;
+        params["prop"] = "text|sections";
+        break;
      }
 
 
@@ -170,7 +191,7 @@ var IS_DEBUG = false;
        },
        success: function(data){
          console.log("ajax success!!");
-         if(!isDevice()){ console.log(console.log(data)); }
+         if(!isDevice()){ console.log(data); }
          callback(data);
          return;
        },

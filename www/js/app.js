@@ -171,41 +171,50 @@ log.message("hello");
         var handleGetDetail = function (res) {
             console.log("callback level1");
             //console.log(res);
-            $scope.title = res.title;
-            $scope.summary = "";
-            var article = "";
-            if (res.extract) {
-                article = res.extract;
-                article = article.replace(/[\r\n]/g, "<br />");
+            if (!res.isTypeParse) {
+                //※※※ parseじゃなくてextractルート ※※※
+                $scope.title = res.title;
+                $scope.summary = "";
+                var article = "";
+                if (res.extract) {
+                    article = res.extract;
+                    article = article.replace(/[\r\n]/g, "<br />");
+                    $scope.article = $sce.trustAsHtml(article);
+                }
+                else if (res.revisions && res.revisions["0"] && res.revisions["0"]["*"]) {
+                    article = res.revisions["0"]["*"];
+                    article = article.replace(/[\r\n]/g, "<br />");
+                    $scope.article = $sce.trustAsHtml(article);
+                }
+                //pタグが存在すれば、一致する先頭を取得
+                if (article) {
+                    var s = article.match(/<p>.*?<\/p>/);
+                    if (s) {
+                        $scope.summary = $sce.trustAsHtml(s[0]);
+                    }
+                }
+                //リダイレクトが存在すれば、リダイレクトの要素を表示させる
+                $scope.is_redirects_exist = !!(res.redirects);
+                if (res.redirects) {
+                    for (var r in res.redirects) {
+                        $scope.redirects.push(res.redirects[r]);
+                    }
+                    console.log("redirects exist");
+                }
+                //リンクが存在すれば、リンク要素を表示させる
+                $scope.is_links_exist = !!(res.links);
+                if (res.links) {
+                    for (var l in res.links) {
+                        $scope.links.push(res.links[l]);
+                    }
+                    console.log("links exist");
+                }
+            }
+            else {
+                // ※※※ parseルート！！※※※
+                $scope.title = res.title;
+                var article = res.text["*"];
                 $scope.article = $sce.trustAsHtml(article);
-            }
-            else if (res.revisions && res.revisions["0"] && res.revisions["0"]["*"]) {
-                article = res.revisions["0"]["*"];
-                article = article.replace(/[\r\n]/g, "<br />");
-                $scope.article = $sce.trustAsHtml(article);
-            }
-            //pタグが存在すれば、一致する先頭を取得
-            if (article) {
-                var s = article.match(/<p>.*?<\/p>/);
-                if (s) {
-                    $scope.summary = $sce.trustAsHtml(s[0]);
-                }
-            }
-            //リダイレクトが存在すれば、リダイレクトの要素を表示させる
-            $scope.is_redirects_exist = !!(res.redirects);
-            if (res.redirects) {
-                for (var r in res.redirects) {
-                    $scope.redirects.push(res.redirects[r]);
-                }
-                console.log("redirects exist");
-            }
-            //リンクが存在すれば、リンク要素を表示させる
-            $scope.is_links_exist = !!(res.links);
-            if (res.links) {
-                for (var l in res.links) {
-                    $scope.links.push(res.links[l]);
-                }
-                console.log("links exist");
             }
             $scope.$apply();
         };
