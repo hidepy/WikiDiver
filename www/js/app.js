@@ -139,7 +139,7 @@ log.message("hello");
             }
         }
     });
-    module.controller("DetailController", function ($scope, $sce) {
+    module.controller("DetailController", function ($scope, $sce, $compile) {
         $scope.title = ""; //詳細ページ-> タイトル
         $scope.article = ""; //詳細ページ-> メイン記事
         $scope.is_redirects_exist = false; //詳細ページ-> リダイレクト有無フラグ
@@ -147,6 +147,12 @@ log.message("hello");
         $scope.show_redirects_pageid = false; //詳細ページ-> リダイレクト可視性フラグ
         $scope.redirects = []; //詳細ページ-> リダイレクトlist
         $scope.links = []; //詳細ページ-> リンクlist
+        $scope.testCall = function (s) {
+            alert("in testCall:" + s);
+        };
+        function testCall(s) {
+            alert("this is original js function!!");
+        }
         $scope.processRedirectItemSelect = function (idx, event) {
             console.log("in processRedirectItemSelect");
             //var pageid = $scope.redirects[idx] ? $scope.redirects[idx].pageid : false;
@@ -214,7 +220,37 @@ log.message("hello");
                 // ※※※ parseルート！！※※※
                 $scope.title = res.title;
                 var article = res.text["*"];
-                $scope.article = $sce.trustAsHtml(article);
+                // html 消毒
+                {
+                    //1. hrefを削除(※必須)
+                    {
+                        article = article.replace(/href="[^"]*"/g, "");
+                    }
+                    //2. aタグにDetailページへの遷移を仕込む(任意)
+                    {
+                        //article = article.replace(/<a.*(?=title)title="([^"]*)"/g, "<a result='$1' onclick='alert(" + "\"$1\"" + ");' ");
+                        article = article.replace(/<a.*(?=title)title="([^"]*)"/g, "<a result='$1' onclick='testCall(" + "\"$1\"" + ")'");
+                    }
+                }
+                /*
+                directiveを利用する場面のようです
+                http://qiita.com/Quramy/items/dd4e7d2693c32d92048c
+                */
+                var parsedHTML = parseHtml(article);
+                console.log("parse result");
+                console.log(parsedHTML);
+                // 編集セクション部を削除
+                jQuery(".mw-editsection", parsedHTML).remove();
+                //
+                /*
+                            console.log(jQuery(".mw-editsection", parsedHTML).contents());
+                
+                            $(".mw-editsection", parsedHTML).remove();
+                
+                            //$scope.article = $sce.trustAsHtml(article);
+                
+                */
+                jQuery("#detail_content_ts").append(parsedHTML);
             }
             $scope.$apply();
         };

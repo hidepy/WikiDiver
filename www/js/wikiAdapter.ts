@@ -172,6 +172,10 @@ var IS_DEBUG = false;
          console.log("dummy detail");
          return callback(this._getDeummyDetail());
        }
+       else if(type == "5"){ //明細(parse)なら
+         console.log("dummy detail(parse)");
+         return callback(this._getDeummyDetailParsed());
+       }
        else{
          console.log("dummy header");
          return callback(this._getDummyHeader());
@@ -231,6 +235,19 @@ var IS_DEBUG = false;
                  pageid: "1173386"
                }
              }
+           }
+         }
+       }
+     };
+   };
+
+   private _getDeummyDetailParsed = function(): any{
+     return {
+       parse: {
+         title: "Go (プログラミング言語)",
+         text: {
+           "*":{
+             
            }
          }
        }

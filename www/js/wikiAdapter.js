@@ -44,6 +44,16 @@ var WikiAdapter = (function () {
                 }
             };
         };
+        this._getDeummyDetailParsed = function () {
+            return {
+                parse: {
+                    title: "Go (プログラミング言語)",
+                    text: {
+                        "*": {}
+                    }
+                }
+            };
+        };
     }
     WikiAdapter.prototype.getHeaderList = function (search_key, callback) {
         console.log("in getHeaderList. param=search_key: " + search_key);
@@ -174,6 +184,10 @@ var WikiAdapter = (function () {
             if (type == "1" || type == "4") {
                 console.log("dummy detail");
                 return callback(this._getDeummyDetail());
+            }
+            else if (type == "5") {
+                console.log("dummy detail(parse)");
+                return callback(this._getDeummyDetailParsed());
             }
             else {
                 console.log("dummy header");
