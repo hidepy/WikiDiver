@@ -184,6 +184,10 @@ log.message("hello");
             searchHeadersFromKeyword(_args.onTransitionEnd.search_key);
           }
         }
+        // link選択時
+        else if(_args.onTransitionEnd && _args.onTransitionEnd.is_link){
+          $scope.items = _args.onTransitionEnd.links;
+        }
     });
 
     module.controller("DetailController", function($scope, $sce, $compile) {
@@ -197,14 +201,31 @@ log.message("hello");
       $scope.links = []; //詳細ページ-> リンクlist
 
 
-$scope.testCall = function(s: string): void{
-  alert("in testCall:" + s);
-}
+      $scope.linktest = function(e){
 
-function testCall(s){
-  alert("this is original js function!!");
-}
+        console.log("linktest");
 
+        //console.log(e);
+
+        // 対象のリンク要素なら
+        if(e && e.target && e.target.tagName && (e.target.tagName.toLowerCase() == "a")){
+          let title = e.target.getAttribute("title");
+
+          if(title){
+            // 自身のページに遷移
+            myNavigator.pushPage(
+              "search_result_detail.html",
+              {
+                onTransitionEnd: {
+                  title: title,
+                  need_onload_search: true
+                }
+              });
+          }
+        }
+
+        //対象でなかったら無視
+      };
 
       $scope.processRedirectItemSelect = function(idx, event){
         console.log("in processRedirectItemSelect");
@@ -234,6 +255,17 @@ function testCall(s){
         alert("no operation defined");
       };
 
+      $scope.processLinkSearch = function(){
+        myNavigator.pushPage(
+          "search_result_header.html",
+          {
+            onTransitionEnd: {
+              is_link: true,
+              links: $scope.links
+            }
+          });
+      }
+
 
       var handleGetDetail = (res: any) => {
           console.log("callback level1");
@@ -241,6 +273,9 @@ function testCall(s){
           //console.log(res);
 
           if(!res.isTypeParse){ //parseでなければ
+
+console.log("is not parse root");
+
             //※※※ parseじゃなくてextractルート ※※※
             $scope.title = res.title;
             $scope.summary = "";
@@ -290,6 +325,9 @@ function testCall(s){
 
           }
           else{
+
+console.log("is parse root");
+
             // ※※※ parseルート！！※※※
             $scope.title = res.title;
 
@@ -305,43 +343,25 @@ function testCall(s){
               //2. aタグにDetailページへの遷移を仕込む(任意)
               {
                 //article = article.replace(/<a.*(?=title)title="([^"]*)"/g, "<a result='$1' onclick='alert(" + "\"$1\"" + ");' ");
-                article = article.replace(/<a.*(?=title)title="([^"]*)"/g, "<a result='$1' onclick='testCall(" + "\"$1\"" + ")'");
+                //article = article.replace(/<a.*(?=title)title="([^"]*)"/g, "<a result='$1' onclick='testCall(" + "\"$1\"" + ")'");
+                //いったん削除
               }
             }
 
 /*
-directiveを利用する場面のようです
-http://qiita.com/Quramy/items/dd4e7d2693c32d92048c
-*/
-
             var parsedHTML = parseHtml(article);
-            console.log("parse result");
-            console.log(parsedHTML);
 
             // 編集セクション部を削除
             jQuery(".mw-editsection", parsedHTML).remove();
 
-            //
-/*
-            console.log(jQuery(".mw-editsection", parsedHTML).contents());
-
-            $(".mw-editsection", parsedHTML).remove();
-
-            //$scope.article = $sce.trustAsHtml(article);
-
+            jQuery("#detail_content_ts").empty(); //いったんすべて解放
+            jQuery("#detail_content_ts").append(parsedHTML);
 */
 
+            $scope.article = $sce.trustAsHtml(article);
 
-            jQuery("#detail_content_ts").append(parsedHTML);
 
-
-//今後の方針！！！！！！！！！
-//  保存は必要
-//  extractだけも軽量でよさそう。
-//    とりあえずlinkをクリックするとheader listに
-//  基本はparseで。
-//    parseでは画像とかづしよう。リンクとか。課題多い
-
+            console.log("all root through");
           }
 
           $scope.$apply();

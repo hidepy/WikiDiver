@@ -66,27 +66,16 @@ function ImgB64Resize(imgB64_src, width, height, callback) {
     };
     //imageObj.src = "http://www.html5canvastutorials.com/demos/assets/darth-vader.jpg";
     imageObj.src = imgB64_src;
-    /*
-    // Image Type
-    var img_type = imgB64_src.substring(5, imgB64_src.indexOf(";"));
-    // Source Image
-    var img = new Image();
-    img.onload = function() {
-
-        console.log("on img.onload");
-
-        // New Canvas
-        var canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        // Draw (Resize)
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        // Destination Image
-        var imgB64_dst = canvas.toDataURL(img_type);
-        callback(imgB64_dst);
-    };
-    img.src = imgB64_src;
-    */
     console.log("img ImgB64Resize end");
+}
+function parseHtml(data) {
+    if (jQuery) {
+        //jqueryのparseを使用する
+        var dom = jQuery.parseHTML(data);
+        if (dom) {
+            return dom;
+        }
+    }
+    var dom_parser = new DOMParser();
+    return dom_parser.parseFromString(data, "text/html");
 }

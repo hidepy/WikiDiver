@@ -13,6 +13,7 @@
 
     <script src="jquery/jquery-1.11.3.min.js"></script>
 
+    <script src="js/DomParserExtention.js"></script>
     <script src="js/commonFunctions.js"></script>
     <script src="js/storageManager.js"></script>
     <script src="js/treeManager.js"></script>
@@ -25,44 +26,33 @@
     <script src="cordova.js"></script>
     <script src="js/app.js"></script>
 
-<style>
-.contents_wrapper {
-  text-align: center;
-}
-#home_searchKey {
-  margin : 4px;
-}
+    <style>
+    .contents_wrapper {
+      text-align: center;
+    }
+    #home_searchKey {
+      margin : 4px;
+    }
+
+    a{
+      font-size: 120%;
+      color: blue !important;
+      cursor: pointer;
+    }
+
+    .mw-editsection{
+      display: none;
+    }
+
+    </style>
 
 
+</head>
 
-.list__item {
-  min-height: 0px;
-}
+<body>
 
-.item-accordion {
-  line-height: 37px;
-  padding-top: 0;
-  padding-bottom: 0;
-  transition: 0.07s all linear;
-}
+<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 
-.item-accordion.ng-hide {
-  line-height: 0px;
-}
-
-.item-accordion.ng-hide-add,
-.item-accordion.ng-hide-remove {
-  display: block !important;
-}
-
-.title {
-  background: #F5F5F5;
-}
-
-.active {
-  background: #EFEFEF;
-}
-</style>
 <!-- Home画面　index > home -->
 <ons-template id="home.html">
     <ons-page ng-controller="HomeController" id="home">
@@ -77,7 +67,10 @@
         </div>
 
         <div>
+          <!--
           <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
+        -->
+        <ons-button ng-click="dive()">search</ons-button>
         </div>
 
         <div>
@@ -140,15 +133,23 @@
     </p>
 
     <p ng-show="is_links_exist">
+
+      <ons-button ng-click="processLinkSearch()">Link search</ons-button>
+
+      <!-- 昔はlinkをこっちに表示していたが！ -->
+      <!--
       <ons-list>
         <ons-list-header>links</ons-list-header>
         <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in links" ng-click="processLinkItemSelect($index, $event)">
           <span>{{item.title}}</span>
         </ons-list-item>
       </ons-list>
+      -->
     </p>
 
-    <p id="detail_content" ng-bind-html="article" class="article"></p>
+    <p id="detail_content" ng-click="linktest($event)" ng-bind-html="article" class="article"></p>
+
+    <p id="detail_content_ts" ng-click="linktest($event)"></p>
 
   </ons-page>
   </ons-page>
@@ -184,19 +185,7 @@ tree構造の
 
 -->
 
-</head>
 
-<body>
-
-<!--
-<ons-tabbar>
-  <ons-tab page="index.html" label="Home" icon="ion-ios-home" active="true"></ons-tab>
-  <ons-tab page="search_result_header.html" label="Collection" icon="ion-ios-book"></ons-tab>
-  <ons-tab page="search_result_detail.html" label="Record" icon="ion-edit"></ons-tab>
-  <ons-tab page="settings.html" label="Settings" icon="ion-ios-cog"></ons-tab>
-</ons-tabbar>
--->
-<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 
 <!-- 各親ページのnavigatorを定義 -->
 <!--

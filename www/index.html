@@ -34,10 +34,16 @@
       margin : 4px;
     }
 
-    a:link { color: blue }
-    a:visited { color: blue }
-    a:hover { color: blue }
-    a:active { color: blue }
+    a{
+      font-size: 120%;
+      color: blue !important;
+      cursor: pointer;
+    }
+
+    .mw-editsection{
+      display: none;
+    }
+
     </style>
 
 
@@ -127,17 +133,23 @@
     </p>
 
     <p ng-show="is_links_exist">
+
+      <ons-button ng-click="processLinkSearch()">Link search</ons-button>
+
+      <!-- 昔はlinkをこっちに表示していたが！ -->
+      <!--
       <ons-list>
         <ons-list-header>links</ons-list-header>
         <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in links" ng-click="processLinkItemSelect($index, $event)">
           <span>{{item.title}}</span>
         </ons-list-item>
       </ons-list>
+      -->
     </p>
 
-    <p id="detail_content" ng-bind-html="article" class="article"></p>
+    <p id="detail_content" ng-click="linktest($event)" ng-bind-html="article" class="article"></p>
 
-    <p id="detail_content_ts"></p>
+    <p id="detail_content_ts" ng-click="linktest($event)"></p>
 
   </ons-page>
   </ons-page>

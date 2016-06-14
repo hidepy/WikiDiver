@@ -74,7 +74,7 @@ var IS_DEBUG = false;
    public getDetailByTitle(keyword: string, callback: (res: any)=>void): void{
      console.log("in getDetailByTitle. param=keyword: " + keyword);
 
-     var req_type = "5"; //or "4"
+     var req_type = "5"; //"5" or "4"
 
      this.sendRequest(req_type, res => {
        console.log("in getDetailByTitle callback!!");
@@ -156,12 +156,13 @@ var IS_DEBUG = false;
         params["prop"] = "extracts|links";//redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
         params["titles"] = main_query;
         params["pllimit"] = 50;
-
+        params["exsectionformat"] = "raw";
 
         break;
       case "5": //[明細] parseお願い
         params["action"] = "parse";
         params["page"] = main_query;
+        params["prop"] = "text|sections";
         break;
      }
 
@@ -170,6 +171,10 @@ var IS_DEBUG = false;
        if(type == "1" || type == "4"){ //明細なら
          console.log("dummy detail");
          return callback(this._getDeummyDetail());
+       }
+       else if(type == "5"){ //明細(parse)なら
+         console.log("dummy detail(parse)");
+         return callback(this._getDeummyDetailParsed());
        }
        else{
          console.log("dummy header");
@@ -230,6 +235,19 @@ var IS_DEBUG = false;
                  pageid: "1173386"
                }
              }
+           }
+         }
+       }
+     };
+   };
+
+   private _getDeummyDetailParsed = function(): any{
+     return {
+       parse: {
+         title: "Go (プログラミング言語)",
+         text: {
+           "*":{
+
            }
          }
        }

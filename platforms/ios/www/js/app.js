@@ -138,8 +138,11 @@ log.message("hello");
                 searchHeadersFromKeyword(_args.onTransitionEnd.search_key);
             }
         }
+        else if (_args.onTransitionEnd && _args.onTransitionEnd.is_link) {
+            $scope.items = _args.onTransitionEnd.links;
+        }
     });
-    module.controller("DetailController", function ($scope, $sce) {
+    module.controller("DetailController", function ($scope, $sce, $compile) {
         $scope.title = ""; //詳細ページ-> タイトル
         $scope.article = ""; //詳細ページ-> メイン記事
         $scope.is_redirects_exist = false; //詳細ページ-> リダイレクト有無フラグ
@@ -147,6 +150,24 @@ log.message("hello");
         $scope.show_redirects_pageid = false; //詳細ページ-> リダイレクト可視性フラグ
         $scope.redirects = []; //詳細ページ-> リダイレクトlist
         $scope.links = []; //詳細ページ-> リンクlist
+        $scope.linktest = function (e) {
+            console.log("linktest");
+            //console.log(e);
+            // 対象のリンク要素なら
+            if (e && e.target && e.target.tagName && (e.target.tagName.toLowerCase() == "a")) {
+                var title = e.target.getAttribute("title");
+                if (title) {
+                    // 自身のページに遷移
+                    myNavigator.pushPage("search_result_detail.html", {
+                        onTransitionEnd: {
+                            title: title,
+                            need_onload_search: true
+                        }
+                    });
+                }
+            }
+            //対象でなかったら無視
+        };
         $scope.processRedirectItemSelect = function (idx, event) {
             console.log("in processRedirectItemSelect");
             //var pageid = $scope.redirects[idx] ? $scope.redirects[idx].pageid : false;
@@ -168,10 +189,19 @@ log.message("hello");
         $scope.processLinkItemSelect = function (idx, event) {
             alert("no operation defined");
         };
+        $scope.processLinkSearch = function () {
+            myNavigator.pushPage("search_result_header.html", {
+                onTransitionEnd: {
+                    is_link: true,
+                    links: $scope.links
+                }
+            });
+        };
         var handleGetDetail = function (res) {
             console.log("callback level1");
             //console.log(res);
             if (!res.isTypeParse) {
+                console.log("is not parse root");
                 //※※※ parseじゃなくてextractルート ※※※
                 $scope.title = res.title;
                 $scope.summary = "";
@@ -211,10 +241,31 @@ log.message("hello");
                 }
             }
             else {
+                console.log("is parse root");
                 // ※※※ parseルート！！※※※
                 $scope.title = res.title;
                 var article = res.text["*"];
+                // html 消毒
+                {
+                    //1. hrefを削除(※必須)
+                    {
+                        article = article.replace(/href="[^"]*"/g, "");
+                    }
+                    //2. aタグにDetailページへの遷移を仕込む(任意)
+                    {
+                    }
+                }
+                /*
+                            var parsedHTML = parseHtml(article);
+                
+                            // 編集セクション部を削除
+                            jQuery(".mw-editsection", parsedHTML).remove();
+                
+                            jQuery("#detail_content_ts").empty(); //いったんすべて解放
+                            jQuery("#detail_content_ts").append(parsedHTML);
+                */
                 $scope.article = $sce.trustAsHtml(article);
+                console.log("all root through");
             }
             $scope.$apply();
         };

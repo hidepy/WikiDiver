@@ -99,7 +99,7 @@ var WikiAdapter = (function () {
     };
     WikiAdapter.prototype.getDetailByTitle = function (keyword, callback) {
         console.log("in getDetailByTitle. param=keyword: " + keyword);
-        var req_type = "5"; //or "4"
+        var req_type = "5"; //"5" or "4"
         this.sendRequest(req_type, function (res) {
             console.log("in getDetailByTitle callback!!");
             //console.log(res);
@@ -173,6 +173,7 @@ var WikiAdapter = (function () {
                 params["prop"] = "extracts|links"; //redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
                 params["titles"] = main_query;
                 params["pllimit"] = 50;
+                params["exsectionformat"] = "raw";
                 break;
             case "5":
                 params["action"] = "parse";

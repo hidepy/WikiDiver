@@ -74,7 +74,7 @@ var IS_DEBUG = false;
    public getDetailByTitle(keyword: string, callback: (res: any)=>void): void{
      console.log("in getDetailByTitle. param=keyword: " + keyword);
 
-     var req_type = "5"; //or "4"
+     var req_type = "5"; //"5" or "4"
 
      this.sendRequest(req_type, res => {
        console.log("in getDetailByTitle callback!!");
@@ -156,7 +156,7 @@ var IS_DEBUG = false;
         params["prop"] = "extracts|links";//redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
         params["titles"] = main_query;
         params["pllimit"] = 50;
-
+        params["exsectionformat"] = "raw";
 
         break;
       case "5": //[明細] parseお願い
@@ -247,7 +247,7 @@ var IS_DEBUG = false;
          title: "Go (プログラミング言語)",
          text: {
            "*":{
-             
+
            }
          }
        }
