@@ -6,61 +6,11 @@ declare var pageSearchResultDetail: any;
 /// <reference path="./treeManager.ts"/>
 /// <reference path="./commonFunctions.ts" />
 
-/*
-コンテナとしてならgenericが有利！
-class DataContainer<Type> {
-    data: Type;
-}
-
-var a = new DataContainer<string>() ;
-
-a.data = "data"; //OK
-var b = new DataContainer<boolean>() ;
-    b.data = true;//OK
-
-
-*/
-
-/*
-複数ファイルのはなし
-
-で、次のシンプルなサンプルを試してみると、ようやくうまく行きました。
-
-log.ts
-export function message( s: string ) {
- console.log( s );
-}
-
-main.ts
-import log = module("log");
-log.message("hello");
-
-tsc main.ts -e
-
-→helloとコンソールに出力された！
-
-出力されたJavaScriptファイルを見ると、こんな感じになってます。
-
-log.js
-function message(s) {
-    console.log(s);
-}
-exports.message = message;
-
-main.js
-var log = require("./log")
-log.message("hello");
-
-どうやらCommonJSのmodule仕様というのは、「exportしたいオブジェクトを"exports"っていうオブジェクトの中に入れておいて、importしたい側では、そのファイル名を指定してrequireを呼び出せばOK!」って感じみたいです。内部ではファイルを非同期に読み込んで独立した名前空間の中でevalしてるようです。へーへーへー。
-
-
-*/
-
-
 //(function(){
 {
     'use strict';
-    var module = angular.module('app', ['onsen','checklist-model']);
+    //var module = angular.module('app', ['onsen','checklist-model']);
+    var module = ons.bootstrap('app', ['onsen','checklist-model']);
     var storage_manager_favorite: StorageManager = new StorageManager("WIKI_DIVER_FAVORITE");
     var tree_manager_history: TreeManager = new TreeManager();
     var wikiAdapter = new WikiAdapter();
@@ -76,10 +26,18 @@ log.message("hello");
           (<any>p).setDeviceBackButtonHandler(function() {
             console.log("back button pushed!!");
           });
+
         }
       }
-    });
 
+      // prepushイベントハンドラ (prepush, prepop時に、treeに変更を加える)
+      myNavigator.on('prepush', function(event) {
+        console.log("in prepush");
+        var page = event.currentPage; // 現在のページオブジェクトを取得する
+        // 果たして望み通りの値は取れるのか...
+      });
+
+    });
 
 
     module.controller("HomeController", function($scope){
@@ -100,7 +58,14 @@ log.message("hello");
             }
           );
         };
+
+        $scope.showMenu = function(){
+          console.log("in showMenu");
+          //menu.toggleMenu();
+        }
+
     });
+
 
     module.controller("HeaderListController", function($scope){
 
@@ -190,6 +155,7 @@ log.message("hello");
         }
     });
 
+
     module.controller("DetailController", function($scope, $sce, $compile) {
 
       $scope.title = "";　//詳細ページ-> タイトル
@@ -201,11 +167,22 @@ log.message("hello");
       $scope.links = []; //詳細ページ-> リンクlist
 
 
-      $scope.linktest = function(e){
+      $scope.saveAsFavorite = function(){
+        // favorite layout
+        // title. article, is_links_exist, links
+        let favorite = {
+          title: $scope.title,
+          article: $scope.article,
+          is_links_exist: $scope.is_links_exist,
+          links: $scope.links,
+          update_date: formatDate(new Date())
+        };
 
-        console.log("linktest");
+        //保存 キーはtitleだが...問題なし？ wiki的には重複しない 文字化けが心配
+        storage_manager_favorite.saveItem2Storage(favorite.title, favorite);
+      }
 
-        //console.log(e);
+      $scope.processArticleClick = function(e){
 
         // 対象のリンク要素なら
         if(e && e.target && e.target.tagName && (e.target.tagName.toLowerCase() == "a")){
@@ -220,12 +197,23 @@ log.message("hello");
                   title: title,
                   need_onload_search: true
                 }
-              });
+              }
+            );
           }
         }
 
         //対象でなかったら無視
       };
+
+
+      $scope.showMenu = function(){
+
+      }
+
+      $scope.back2home = function(){
+        //resetToPage
+        myNavigator.resetToPage("home.html");
+      }
 
       $scope.processRedirectItemSelect = function(idx, event){
         console.log("in processRedirectItemSelect");
@@ -251,10 +239,6 @@ log.message("hello");
         }
       };
 
-      $scope.processLinkItemSelect = function(idx, event){
-        alert("no operation defined");
-      };
-
       $scope.processLinkSearch = function(){
         myNavigator.pushPage(
           "search_result_header.html",
@@ -266,16 +250,10 @@ log.message("hello");
           });
       }
 
-
       var handleGetDetail = (res: any) => {
           console.log("callback level1");
 
-          //console.log(res);
-
           if(!res.isTypeParse){ //parseでなければ
-
-console.log("is not parse root");
-
             //※※※ parseじゃなくてextractルート ※※※
             $scope.title = res.title;
             $scope.summary = "";
@@ -325,47 +303,41 @@ console.log("is not parse root");
 
           }
           else{
-
-console.log("is parse root");
-
             // ※※※ parseルート！！※※※
             $scope.title = res.title;
 
-            var article: string = <string>res.text["*"];
-
-            // html 消毒
+            // article 抽出
             {
-              //1. hrefを削除(※必須)
-              {
-                article = article.replace(/href="[^"]*"/g, "");
-              }
+              var article: string = <string>res.text["*"];
 
-              //2. aタグにDetailページへの遷移を仕込む(任意)
-              {
-                //article = article.replace(/<a.*(?=title)title="([^"]*)"/g, "<a result='$1' onclick='alert(" + "\"$1\"" + ");' ");
-                //article = article.replace(/<a.*(?=title)title="([^"]*)"/g, "<a result='$1' onclick='testCall(" + "\"$1\"" + ")'");
-                //いったん削除
-              }
+              //hrefを削除(※必須)
+              article = article.replace(/href="[^"]*"/g, "");
+
+              $scope.article = $sce.trustAsHtml(article);
+
+              //リンクが存在すれば、リンク要素を表示させる
+              $scope.is_links_exist = !!(res.links);
             }
 
-/*
-            var parsedHTML = parseHtml(article);
+            // link 抽出
+            if(res.links){
+              for(let i = 0; i < res.links.length; i++){
 
-            // 編集セクション部を削除
-            jQuery(".mw-editsection", parsedHTML).remove();
+                let title = res.links[i]["*"];
+                let splitted_title = title.split(":");
 
-            jQuery("#detail_content_ts").empty(); //いったんすべて解放
-            jQuery("#detail_content_ts").append(parsedHTML);
-*/
+                if(splitted_title.length > 1){ continue; } //template: なんとか みたいな結果は除きたい
 
-            $scope.article = $sce.trustAsHtml(article);
-
-
-            console.log("all root through");
+                $scope.links.push({
+                    pageid: "",
+                    title: title
+                });
+              }
+              console.log("links exist");
+            }
           }
 
           $scope.$apply();
-
       };
 
       //idから詳細情報を取得する
@@ -434,56 +406,17 @@ console.log("is parse root");
             this.items.length = 0;
         };
         this.createItemsFromObjectArr = function(objArr, key_name, value_name){
-            /*
-            objArr.forEach(function(val, idx, objArr){
-                this.addItem(val[key_name], val[value_name]);
-            });
-            */
             for(var i = 0; i < objArr.length; i++){
                 this.addItem(objArr[i][key_name], objArr[i][value_name]);
             }
 
         };
         this.createItemsFromArr = function(arr){
-            /*
-            arr.forEach(function(val, idx){
-                this.addItem(idx, val);
-            });
-            */
             for(var i = 0; i < arr.length; i++){
                 this.addItem("" + i, arr[i]);
             }
         };
 
-    });
-
-    module.factory('$data', function() {
-        var data:any = {};
-
-        data.items = [
-            {
-                title: 'Item 1 Title',
-                label: '4h',
-                desc: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-            },
-            {
-                title: 'Another Item Title',
-                label: '6h',
-                desc: 'Ut enim ad minim veniam.'
-            },
-            {
-                title: 'Yet Another Item Title',
-                label: '1day ago',
-                desc: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'
-            },
-            {
-                title: 'Yet Another Item Title',
-                label: '1day ago',
-                desc: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'
-            }
-        ];
-
-        return data;
     });
 
 }
