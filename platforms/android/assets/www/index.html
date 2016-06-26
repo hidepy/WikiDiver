@@ -1,6 +1,7 @@
 <!doctype html>
 
-<html lang="en" ng-app="app">
+<!--<html lang="en" ng-app="app">-->
+<html>
 <head>
     <meta charset="utf-8">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -51,14 +52,61 @@
 
 <body>
 
+
+<ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="menu">
+
+<!--
 <ons-navigator var="myNavigator" page="home.html"></ons-navigator>
+-->
+
+
+<!--
+
+onsen navigator と slidemenuの並列
+http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigation/
+
+-->
+
+
+<!-- slide menu用 -->
+<ons-template id="menu.html">
+
+    <ons-list>
+<!--
+      <ons-list-item modifier="chevron" onclick="menu.setMainPage('search_result_header.html', {closeMenu: true})">
+      -->
+      <ons-list-item>
+        Home
+      </ons-list-item>
+      <!--
+      <ons-list-item modifier="chevron" onclick="menu.setMainPage('home.html', {closeMenu: true})">
+      -->
+      <ons-list-item>
+        Favorite
+      </ons-list-item>
+    </ons-list>
+
+</ons-template>
 
 <!-- Home画面　index > home -->
 <ons-template id="home.html">
+
+<ons-navigator var="myNavigator">
+
     <ons-page ng-controller="HomeController" id="home">
+
+<!--
+    <ons-sliding-menu menu-page="menu.html" side="right" max-slide-distance="250px" var="menu"></ons-sliding-menu>
+-->
 
       <ons-toolbar>
           <div class="center">WikiDiver</div>
+          <div class="right">
+            <!--<ons-toolbar-button ng-click="showMenu()">-->
+            <ons-toolbar-button ng-click="menu.toggleMenu()">
+              <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+          </div>
       </ons-toolbar>
 
       <div class="contents_wrapper">
@@ -70,25 +118,14 @@
           <!--
           <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
         -->
-        <ons-button ng-click="dive()">search</ons-button>
+          <ons-button ng-click="dive()">search</ons-button>
         </div>
 
-        <div>
-          <!-- favoriteとhistory -->
-
-          <!--
-          history: headerの所から再開する.
-          -->
-
-          <!--
-          favorite: headerの所から再開する.
-
-
-          -->
-        </div>
       </div>
 
     </ons-page>
+
+</ons-navigator>
 </ons-template>
 
 <ons-template id="search_result_header.html">
@@ -97,6 +134,12 @@
     <ons-toolbar>
       <div class="left"><ons-back-button>Back</ons-back-button></div>
       <div class="center">Headers</div>
+
+      <div class="right">
+        <ons-toolbar-button ng-click="menu.toggleMenu()">
+          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+        </ons-toolbar-button>
+      </div>
     </ons-toolbar>
 
     <ons-list>
@@ -120,6 +163,13 @@
       <div class="left"><ons-back-button>Back</ons-back-button></div>
       <div class="center">Detail</div>
       <!-- ここにお気に入りボタンを, あと、トップに戻るボタンも -->
+
+      <div class="right">
+        <ons-toolbar-button ng-click="menu.toggleMenu()">
+          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+
     </ons-toolbar>
 
     <p>
@@ -133,23 +183,14 @@
     </p>
 
     <p ng-show="is_links_exist">
-
       <ons-button ng-click="processLinkSearch()">Link search</ons-button>
-
-      <!-- 昔はlinkをこっちに表示していたが！ -->
-      <!--
-      <ons-list>
-        <ons-list-header>links</ons-list-header>
-        <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in links" ng-click="processLinkItemSelect($index, $event)">
-          <span>{{item.title}}</span>
-        </ons-list-item>
-      </ons-list>
-      -->
     </p>
 
-    <p id="detail_content" ng-click="linktest($event)" ng-bind-html="article" class="article"></p>
+    <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
 
+<!--
     <p id="detail_content_ts" ng-click="linktest($event)"></p>
+-->
 
   </ons-page>
   </ons-page>
@@ -159,7 +200,14 @@
 
 </ons-template>
 
+
+</ons-sliding-menu>
+
+
 </body>
+
+
+
 </html>
 
 

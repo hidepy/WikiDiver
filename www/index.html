@@ -52,8 +52,12 @@
 
 <body>
 
-<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
 
+<ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="menu">
+
+<!--
+<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
+-->
 
 
 <!--
@@ -86,9 +90,14 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
 
 <!-- Home画面　index > home -->
 <ons-template id="home.html">
+
+<ons-navigator var="myNavigator">
+
     <ons-page ng-controller="HomeController" id="home">
 
+<!--
     <ons-sliding-menu menu-page="menu.html" side="right" max-slide-distance="250px" var="menu"></ons-sliding-menu>
+-->
 
       <ons-toolbar>
           <div class="center">WikiDiver</div>
@@ -115,6 +124,8 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
       </div>
 
     </ons-page>
+
+</ons-navigator>
 </ons-template>
 
 <ons-template id="search_result_header.html">
@@ -123,6 +134,12 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
     <ons-toolbar>
       <div class="left"><ons-back-button>Back</ons-back-button></div>
       <div class="center">Headers</div>
+
+      <div class="right">
+        <ons-toolbar-button ng-click="menu.toggleMenu()">
+          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+        </ons-toolbar-button>
+      </div>
     </ons-toolbar>
 
     <ons-list>
@@ -146,11 +163,13 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
       <div class="left"><ons-back-button>Back</ons-back-button></div>
       <div class="center">Detail</div>
       <!-- ここにお気に入りボタンを, あと、トップに戻るボタンも -->
-      <!--
+
       <div class="right">
-        <ons-icon icon="ion-navicon" size="40px" fixed-width="true" ng-click="showMenu()"></ons-icon>
+        <ons-toolbar-button ng-click="menu.toggleMenu()">
+          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+        </ons-toolbar-button>
       </div>
-    -->
+
     </ons-toolbar>
 
     <p>
@@ -181,7 +200,14 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
 
 </ons-template>
 
+
+</ons-sliding-menu>
+
+
 </body>
+
+
+
 </html>
 
 

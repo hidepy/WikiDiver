@@ -162,7 +162,7 @@ var IS_DEBUG = false;
       case "5": //[明細] parseお願い
         params["action"] = "parse";
         params["page"] = main_query;
-        params["prop"] = "text|sections";
+        params["prop"] = "text|sections|links";
         break;
      }
 

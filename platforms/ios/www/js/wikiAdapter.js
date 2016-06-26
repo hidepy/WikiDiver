@@ -178,7 +178,7 @@ var WikiAdapter = (function () {
             case "5":
                 params["action"] = "parse";
                 params["page"] = main_query;
-                params["prop"] = "text|sections";
+                params["prop"] = "text|sections|links";
                 break;
         }
         if (IS_DEBUG) {
