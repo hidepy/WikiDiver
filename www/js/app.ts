@@ -1,3 +1,4 @@
+// はじめてのtypescriptプロジェクトなのでよくわかっていないところがありますが勘弁
 declare var angular: angular.IAngularStatic;
 declare var myNavigator: NavigatorView;
 declare var pageSearchResultHeader: any;
@@ -5,13 +6,26 @@ declare var pageSearchResultDetail: any;
 /// <reference path="./storageManager.ts" />
 /// <reference path="./treeManager.ts"/>
 /// <reference path="./commonFunctions.ts" />
+/// <reference path="../constants/constants.ts"/>
+
+
+
+// 残todo(2016/06/29)
+//   1次対応
+//   ・extractじゃなくてparseの時にimgとかどうするか
+//   ・保存できるように(ローカル対応, 名称のみ対応)
+//  　・tree対応(現在どこにいるか)
+//   ・メモ対応(wikiに対する自分のメモを残しておける)
+//      グローバルノートが欲しいな
+//   2次対応
+//   ・
+
 
 //(function(){
 {
     'use strict';
-    //var module = angular.module('app', ['onsen','checklist-model']);
-    var module = ons.bootstrap('app', ['onsen','checklist-model']);
-    var storage_manager_favorite: StorageManager = new StorageManager("WIKI_DIVER_FAVORITE");
+    var module = ons.bootstrap(APP_CONFIGS.NAME, ['onsen','checklist-model']);
+    var storage_manager_favorite: StorageManager = new StorageManager(STORAGE_TYPE.FAVORITE);
     var tree_manager_history: TreeManager = new TreeManager();
     var wikiAdapter = new WikiAdapter();
 
@@ -26,7 +40,6 @@ declare var pageSearchResultDetail: any;
           (<any>p).setDeviceBackButtonHandler(function() {
             console.log("back button pushed!!");
           });
-
         }
       }
 
@@ -36,7 +49,6 @@ declare var pageSearchResultDetail: any;
         var page = event.currentPage; // 現在のページオブジェクトを取得する
         // 果たして望み通りの値は取れるのか...
       });
-
     });
 
 
@@ -48,15 +60,12 @@ declare var pageSearchResultDetail: any;
           var search_key: string = (<HTMLInputElement>el_keyword).value;
 
           //次画面遷移
-          myNavigator.pushPage(
-            "search_result_header.html",
-            {
+          myNavigator.pushPage("search_result_header.html",{
               onTransitionEnd: {
                 search_key: search_key,
                 is_from_home: true
               }
-            }
-          );
+            });
         };
 
         $scope.showMenu = function(){
@@ -81,16 +90,13 @@ declare var pageSearchResultDetail: any;
           //遷移だけして、次画面に検索をゆだねる
           if(selectedItem){
             //次画面遷移
-            myNavigator.pushPage(
-              "search_result_detail.html",
-              {
+            myNavigator.pushPage("search_result_detail.html",{
                 onTransitionEnd: {
                   pageid: selectedItem.pageid || false,
                   title: selectedItem.title,
                   need_onload_search: true
                 }
-              }
-            );
+              });
           }
         };
 
@@ -166,7 +172,13 @@ declare var pageSearchResultDetail: any;
       $scope.redirects = []; //詳細ページ-> リダイレクトlist
       $scope.links = []; //詳細ページ-> リンクlist
 
+      // noteを開く
+      $scope.openNote = function(){
+        // note用のpopoverを表示する
 
+      };
+
+      // お気に入り保存
       $scope.saveAsFavorite = function(){
         // favorite layout
         // title. article, is_links_exist, links
@@ -186,19 +198,21 @@ declare var pageSearchResultDetail: any;
 
         // 対象のリンク要素なら
         if(e && e.target && e.target.tagName && (e.target.tagName.toLowerCase() == "a")){
+
+          e.preventDefault();
+
+          console.log("in processArticleClick");
+
           let title = e.target.getAttribute("title");
 
           if(title){
             // 自身のページに遷移
-            myNavigator.pushPage(
-              "search_result_detail.html",
-              {
+            myNavigator.pushPage("search_result_detail.html",{
                 onTransitionEnd: {
                   title: title,
                   need_onload_search: true
                 }
-              }
-            );
+              });
           }
         }
 
@@ -225,9 +239,7 @@ declare var pageSearchResultDetail: any;
           console.log("redirect search. title exist.");
 
           // 自身のページに遷移
-          myNavigator.pushPage(
-            "search_result_detail.html",
-            {
+          myNavigator.pushPage("search_result_detail.html",{
               onTransitionEnd: {
                 title: title,
                 need_onload_search: true
@@ -240,9 +252,7 @@ declare var pageSearchResultDetail: any;
       };
 
       $scope.processLinkSearch = function(){
-        myNavigator.pushPage(
-          "search_result_header.html",
-          {
+        myNavigator.pushPage("search_result_header.html",{
             onTransitionEnd: {
               is_link: true,
               links: $scope.links
@@ -311,7 +321,10 @@ declare var pageSearchResultDetail: any;
               var article: string = <string>res.text["*"];
 
               //hrefを削除(※必須)
-              article = article.replace(/href="[^"]*"/g, "");
+              //article = article.replace(/href="[^"]*"/g, "");
+              article = article.replace(/href="(?!#\.)([^"](?!\.png))*"/g, "");
+
+/* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
 
               $scope.article = $sce.trustAsHtml(article);
 

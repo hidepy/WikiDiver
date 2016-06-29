@@ -33,19 +33,14 @@ saveItem2Storage(key, data) -public
 */
 var StorageManager = function (storage_key_name) {
     this.storage_key_name = storage_key_name;
-    this.init(storage_key_name);
+    this.items = {};
+    this.init();
 };
 // プロトタイプ定義
 !function (proto) {
-    var _storage_key_name = "";
-    var _items = {};
-    var _ref_arr = [];
-    proto.init = function (storage_key_name) {
-        //initialize...
-        //対象となるlocalstorageのキーを格納
-        _storage_key_name = storage_key_name;
+    proto.init = function () {
         //インスタンス化直後、現在のストレージの情報をハッシュに格納する
-        _items = convStorage2Hash(storage_key_name);
+        this.items = convStorage2Hash(this.storage_key_name);
     };
     var convStorage2Hash = function (storage_key_name) {
         var item_hash = {};
@@ -61,34 +56,34 @@ var StorageManager = function (storage_key_name) {
         return item_hash;
     };
     proto.getAllItem = function () {
-        return _items;
+        return this.items;
     };
     proto.getItem = function (key) {
-        return _items[key];
+        return this.items[key];
     };
     proto.deleteItem = function (key) {
-        delete _items[key];
-        window.localStorage.setItem(this.storage_key_name, JSON.stringify(_items));
+        delete this.items[key];
+        window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
     };
     proto.deleteItems = function (keys) {
         if (keys && keys.length && (keys.length > 0)) {
             keys.forEach(function (v, i, arr) {
-                delete _items[v];
+                delete this.items[v];
             });
         }
-        window.localStorage.setItem(_storage_key_name, JSON.stringify(_items));
+        window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
     };
     proto.saveItem2Storage = function (key, data) {
-        _items[key] = data;
-        window.localStorage.setItem(_storage_key_name, JSON.stringify(_items));
+        this.items[key] = data;
+        window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
     };
     proto.sortByKey = function (key, desc) {
     };
     proto.getItemLength = function () {
-        return Object.keys(_items).length;
+        return Object.keys(this.items).length;
     };
     // ！！！！！！！！！！通常使用不可！！！！！！！！！！
     proto.deleteAllItem = function () {
-        window.localStorage.setItem(_storage_key_name, JSON.stringify({}));
+        window.localStorage.setItem(this.storage_key_name, JSON.stringify({}));
     };
 }(StorageManager.prototype);

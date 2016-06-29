@@ -1,0 +1,12 @@
+/*
+  定数定義
+*/
+//module APP_CONFIGS{
+var APP_CONFIGS;
+(function (APP_CONFIGS) {
+    APP_CONFIGS.NAME = "APP_WIKI_DIVER";
+})(APP_CONFIGS || (APP_CONFIGS = {}));
+var STORAGE_TYPE;
+(function (STORAGE_TYPE) {
+    STORAGE_TYPE.FAVORITE = "WIKI_DIVER_FAVORITE";
+})(STORAGE_TYPE || (STORAGE_TYPE = {}));

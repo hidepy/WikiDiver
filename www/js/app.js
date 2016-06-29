@@ -1,12 +1,21 @@
 /// <reference path="./storageManager.ts" />
 /// <reference path="./treeManager.ts"/>
 /// <reference path="./commonFunctions.ts" />
+/// <reference path="../constants/constants.ts"/>
+// 残todo(2016/06/29)
+//   1次対応
+//   ・extractじゃなくてparseの時にimgとかどうするか
+//   ・保存できるように(ローカル対応, 名称のみ対応)
+//  　・tree対応(現在どこにいるか)
+//   ・メモ対応(wikiに対する自分のメモを残しておける)
+//      グローバルノートが欲しいな
+//   2次対応
+//   ・
 //(function(){
 {
     'use strict';
-    //var module = angular.module('app', ['onsen','checklist-model']);
-    var module = ons.bootstrap('app', ['onsen', 'checklist-model']);
-    var storage_manager_favorite = new StorageManager("WIKI_DIVER_FAVORITE");
+    var module = ons.bootstrap(APP_CONFIGS.NAME, ['onsen', 'checklist-model']);
+    var storage_manager_favorite = new StorageManager(STORAGE_TYPE.FAVORITE);
     var tree_manager_history = new TreeManager();
     var wikiAdapter = new WikiAdapter();
     ons.ready(function () {
@@ -113,6 +122,11 @@
         $scope.show_redirects_pageid = false; //詳細ページ-> リダイレクト可視性フラグ
         $scope.redirects = []; //詳細ページ-> リダイレクトlist
         $scope.links = []; //詳細ページ-> リンクlist
+        // noteを開く
+        $scope.openNote = function () {
+            // note用のpopoverを表示する
+        };
+        // お気に入り保存
         $scope.saveAsFavorite = function () {
             // favorite layout
             // title. article, is_links_exist, links
@@ -129,6 +143,8 @@
         $scope.processArticleClick = function (e) {
             // 対象のリンク要素なら
             if (e && e.target && e.target.tagName && (e.target.tagName.toLowerCase() == "a")) {
+                e.preventDefault();
+                console.log("in processArticleClick");
                 var title = e.target.getAttribute("title");
                 if (title) {
                     // 自身のページに遷移
@@ -222,7 +238,9 @@
                 {
                     var article = res.text["*"];
                     //hrefを削除(※必須)
-                    article = article.replace(/href="[^"]*"/g, "");
+                    //article = article.replace(/href="[^"]*"/g, "");
+                    article = article.replace(/href="(?!#\.)([^"](?!\.png))*"/g, "");
+                    /* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
                     $scope.article = $sce.trustAsHtml(article);
                     //リンクが存在すれば、リンク要素を表示させる
                     $scope.is_links_exist = !!(res.links);

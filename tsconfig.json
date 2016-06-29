@@ -32,6 +32,7 @@
     "!./typings/**/*.ts"
   ],
   "files": [
+    "./www/constants/constants.ts",
     "./www/js/app.ts",
     "./www/js/commonFunctions.ts",
     "./www/js/storageManager.ts",

@@ -1,5 +1,15 @@
 /// <reference path="../../tsd/cordova/cordova.d.ts"/>
 
+/* 実機上でもobjectのログを安全に吐く */
+function outlog(v){
+	if(typeof v === "object"){
+		if(!isDevice()){ console.log(v); }
+	}
+	else{
+		console.log(v);
+	}
+}
+
 /* デバイス上実行か確認 */
 function isDevice(){
 	return (window && (<any>window).device);

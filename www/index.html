@@ -9,10 +9,14 @@
 
     <title>WikiDiver</title>
 
-    <link rel="stylesheet" href="lib/onsen/css/onsenui.css">
-    <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css">
+    <link rel="stylesheet" href="lib/onsen/css/onsenui.css" />
+    <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css" />
+
+    <link rel="stylesheet" href="css/home.css" />
 
     <script src="jquery/jquery-1.11.3.min.js"></script>
+
+    <script src="constants/constants.js"></script>
 
     <script src="js/DomParserExtention.js"></script>
     <script src="js/commonFunctions.js"></script>
@@ -49,23 +53,13 @@
 
 
 </head>
-
+<!--
+angular promise
+http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
+-->
 <body>
 
-
 <ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="menu">
-
-<!--
-<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
--->
-
-
-<!--
-
-onsen navigator と slidemenuの並列
-http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigation/
-
--->
 
 
 <!-- slide menu用 -->
@@ -95,10 +89,6 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
 
     <ons-page ng-controller="HomeController" id="home">
 
-<!--
-    <ons-sliding-menu menu-page="menu.html" side="right" max-slide-distance="250px" var="menu"></ons-sliding-menu>
--->
-
       <ons-toolbar>
           <div class="center">WikiDiver</div>
           <div class="right">
@@ -120,6 +110,9 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
         -->
           <ons-button ng-click="dive()">search</ons-button>
         </div>
+
+
+
 
       </div>
 
@@ -162,14 +155,17 @@ http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigatio
     <ons-toolbar>
       <div class="left"><ons-back-button>Back</ons-back-button></div>
       <div class="center">Detail</div>
-      <!-- ここにお気に入りボタンを, あと、トップに戻るボタンも -->
-
       <div class="right">
+        <ons-toolbar-button ng-click="openNote()">
+          <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
+        </ons-toolbar-button>
+        <ons-toolbar-button ng-click="saveAsFavorite()">
+          <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
+        </ons-toolbar-button>
         <ons-toolbar-button ng-click="menu.toggleMenu()">
           <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
         </ons-toolbar-button>
       </div>
-
     </ons-toolbar>
 
     <p>
