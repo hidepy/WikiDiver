@@ -2,6 +2,21 @@
 /// <reference path="./treeManager.ts"/>
 /// <reference path="./commonFunctions.ts" />
 /// <reference path="../constants/constants.ts"/>
+// 2016/07/01
+// 是非これから取り入れていくべきこと
+// 1. constantで共通関数、共通値定義
+//      http://flabo.io/code/20140926/01-angularjs-application-7-tips/
+// 2. filterで検索機能、ソート機能をcontrollerから除外する
+//      http://pote.hatenadiary.jp/entry/2012/11/09/140457
+//      | date を使用すれば、更新日などの表示をfilterで行える
+//      | limitを使用すれば最大件数絞り
+//      | orderByを使用すれば、オブジェクト(配列の)キーを指定するとソートしてくれる
+//      filter: searchなどで、
+/*
+        <li ng-repeat="article in articles | filter : { title: 'jQuery', url: 'buildinsider' }">
+        filter: にオブジェトを渡すと、その条件でフィルタしてくれる
+*/
+//        ちなみに、filterはjs側でも使える
 // 残todo(2016/06/29)
 //   1次対応
 //   ・extractじゃなくてparseの時にimgとかどうするか
@@ -35,6 +50,8 @@
             var page = event.currentPage; // 現在のページオブジェクトを取得する
             // 果たして望み通りの値は取れるのか...
         });
+        // onsen ポップオーバーを作成
+        myPopoverMemo = ons.createPopover('popover_memo.html');
     });
     module.controller("HomeController", function ($scope) {
         $scope.search_key = "";
@@ -114,7 +131,7 @@
             $scope.items = _args.onTransitionEnd.links;
         }
     });
-    module.controller("DetailController", function ($scope, $sce, $compile) {
+    module.controller("DetailController", function ($scope, $sce, $compile, popoverSharingService) {
         $scope.title = ""; //詳細ページ-> タイトル
         $scope.article = ""; //詳細ページ-> メイン記事
         $scope.is_redirects_exist = false; //詳細ページ-> リダイレクト有無フラグ
@@ -122,9 +139,22 @@
         $scope.show_redirects_pageid = false; //詳細ページ-> リダイレクト可視性フラグ
         $scope.redirects = []; //詳細ページ-> リダイレクトlist
         $scope.links = []; //詳細ページ-> リンクlist
+        $scope.openWithBrowser = function () {
+            console.log("in open browser");
+            //window.open($scope.detail.full_url, '_system');
+        };
         // noteを開く
         $scope.openNote = function () {
             // note用のpopoverを表示する
+            console.log("in open note");
+            // popover オープン前に必要情報をコピー
+            popoverSharingService.sharing.title = $scope.title;
+            popoverSharingService.sharing.caption = "";
+            popoverSharingService.sharing.memo = ""; // 
+            // sharingの値更新をsubscribeする
+            popoverSharingService.updateSharing();
+            // popover show
+            myPopoverMemo.show("#detail_note_button");
         };
         // お気に入り保存
         $scope.saveAsFavorite = function () {
@@ -274,18 +304,33 @@
         //---------- on detailpage load ----------
         var _args = myNavigator.getCurrentPage().options;
         console.log("in DetailController start");
-        //console.log(_args);
+        outlog(_args);
         // ロード時検索要求有りなら
         if (_args.onTransitionEnd && _args.onTransitionEnd.need_onload_search) {
             if (_args.onTransitionEnd.pageid) {
+                console.log("in pageid root");
                 getDetail(_args.onTransitionEnd.pageid);
             }
             else {
                 //pageidがない場合、titleにて明細検索を行う
                 // 以降、メインはこっち！
+                console.log("in title root");
                 getDetailByTitle(_args.onTransitionEnd.title);
             }
         }
+    });
+    module.controller("popoverController", function ($scope, popoverSharingService) {
+        $scope.sharing = {
+            title: "",
+            caption: "",
+            memo: ""
+        };
+        console.log("title = " + popoverSharingService.title);
+        console.log("sharing.title = " + popoverSharingService.sharing.title);
+        $scope.$on('updateSharing', function (event, data) {
+            console.log(data);
+            $scope.sharing = data;
+        });
     });
     module.factory("currentBikeInfo", function () {
         var data = {};

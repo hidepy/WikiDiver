@@ -12,9 +12,11 @@
     <link rel="stylesheet" href="lib/onsen/css/onsenui.css" />
     <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css" />
 
-    <link rel="stylesheet" href="css/home.css" />
 
     <script src="jquery/jquery-1.11.3.min.js"></script>
+    <script src="lib/onsen/js/angular/angular.js"></script>
+    <script src="lib/onsen/js/angular/checklist-model.js"></script>
+    <script src="lib/onsen/js/onsenui.js"></script>
 
     <script src="constants/constants.js"></script>
 
@@ -24,12 +26,14 @@
     <script src="js/treeManager.js"></script>
     <script src="js/wikiAdapter.js"></script>
 
-    <script src="lib/onsen/js/angular/angular.js"></script>
-    <script src="lib/onsen/js/angular/checklist-model.js"></script>
-    <script src="lib/onsen/js/onsenui.js"></script>
+
 
     <script src="cordova.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/wikidiverController.js"></script>
+
+<script src="js/popoverSharingService.js"></script>
+
+
 
     <style>
     .contents_wrapper {
@@ -62,143 +66,155 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 <ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="menu">
 
 
-<!-- slide menu用 -->
-<ons-template id="menu.html">
+  <!-- slide menu用 -->
+  <ons-template id="menu.html">
 
-    <ons-list>
-<!--
-      <ons-list-item modifier="chevron" onclick="menu.setMainPage('search_result_header.html', {closeMenu: true})">
-      -->
-      <ons-list-item>
-        Home
-      </ons-list-item>
-      <!--
-      <ons-list-item modifier="chevron" onclick="menu.setMainPage('home.html', {closeMenu: true})">
-      -->
-      <ons-list-item>
-        Favorite
-      </ons-list-item>
-    </ons-list>
+      <ons-list>
+  <!--
+        <ons-list-item modifier="chevron" onclick="menu.setMainPage('search_result_header.html', {closeMenu: true})">
+        -->
+        <ons-list-item>
+          Home
+        </ons-list-item>
+        <!--
+        <ons-list-item modifier="chevron" onclick="menu.setMainPage('home.html', {closeMenu: true})">
+        -->
+        <ons-list-item>
+          Favorite
+        </ons-list-item>
+      </ons-list>
 
-</ons-template>
+  </ons-template>
 
-<!-- Home画面　index > home -->
-<ons-template id="home.html">
+  <!-- Home画面　index > home -->
+  <ons-template id="home.html">
 
-<ons-navigator var="myNavigator">
+  <ons-navigator var="myNavigator">
 
-    <ons-page ng-controller="HomeController" id="home">
+      <ons-page ng-controller="HomeController" id="home">
+
+        <ons-toolbar>
+            <div class="center">WikiDiver</div>
+            <div class="right">
+              <!--<ons-toolbar-button ng-click="showMenu()">-->
+              <ons-toolbar-button ng-click="menu.toggleMenu()">
+                <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
+
+        <div class="contents_wrapper">
+          <div>
+            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="">
+          </div>
+
+          <div>
+            <!--
+            <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
+          -->
+            <ons-button ng-click="dive()" modifier="large--quiet">search</ons-button>
+          </div>
+
+        </div>
+
+      </ons-page>
+
+  </ons-navigator>
+  </ons-template>
+
+  <ons-template id="search_result_header.html">
+    <ons-page ng-controller="HeaderListController" var="pageSearchResultHeader">
 
       <ons-toolbar>
-          <div class="center">WikiDiver</div>
-          <div class="right">
-            <!--<ons-toolbar-button ng-click="showMenu()">-->
-            <ons-toolbar-button ng-click="menu.toggleMenu()">
-              <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-            </ons-toolbar-button>
-          </div>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Headers</div>
+
+        <div class="right">
+          <ons-toolbar-button ng-click="menu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
       </ons-toolbar>
 
-      <div class="contents_wrapper">
-        <div>
-          <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="">
-        </div>
-
-        <div>
-          <!--
-          <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
-        -->
-          <ons-button ng-click="dive()">search</ons-button>
-        </div>
-
-
-
-
-      </div>
+      <ons-list>
+        <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
+          <ons-col>
+            {{item.pageid}}
+          </ons-col>
+          <ons-col>
+            {{item.title}}
+          </ons-col>
+        </ons-list-item>
+      </ons-list>
 
     </ons-page>
+  </ons-template>
 
-</ons-navigator>
-</ons-template>
+  <ons-template id="search_result_detail.html">
+    <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
 
-<ons-template id="search_result_header.html">
-  <ons-page ng-controller="HeaderListController" var="pageSearchResultHeader">
+      <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Detail</div>
+        <div class="right">
+          <ons-toolbar-button ng-click="openWithBrowser()">
+            <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+          <ons-toolbar-button id="detail_note_button" ng-click="openNote()">
+            <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+          <ons-toolbar-button ng-click="saveAsFavorite()">
+            <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+          <ons-toolbar-button ng-click="menu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
 
-    <ons-toolbar>
-      <div class="left"><ons-back-button>Back</ons-back-button></div>
-      <div class="center">Headers</div>
+      <p>
+        <h1 id="detail_title" class="title">
+          {{title}}
+        </h1>
+      </p>
 
-      <div class="right">
-        <ons-toolbar-button ng-click="menu.toggleMenu()">
-          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-        </ons-toolbar-button>
+      <p>
+        <span id="detail_summary" ng-bind-html="summary"></span>
+      </p>
+
+      <p ng-show="is_links_exist">
+        <ons-button modifier="large--quiet" ng-click="processLinkSearch()">Link search</ons-button>
+      </p>
+
+      <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
+
+  <!--
+      <p id="detail_content_ts" ng-click="linktest($event)"></p>
+  -->
+
+    </ons-page>
+    </ons-page>
+  </ons-template>
+
+  <ons-template id="settings.html">
+
+  </ons-template>
+
+
+  <ons-template id="popover_memo.html">
+    <ons-popover var="myPopoverMemo" ng-controller="popoverController" cancelable style="width: 80%; max-width: 300px;">
+      <h2>memo for {{sharing.title}}</h2>
+      <p class="caption">{{sharing.caption}}</p>
+      <p>disp value = {{sharing.memo}}</p>
+      <div>
+        <ons-button>save</ons-button>
+        <ons-button>close</ons-button>
       </div>
-    </ons-toolbar>
-
-    <ons-list>
-      <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
-        <ons-col>
-          {{item.pageid}}
-        </ons-col>
-        <ons-col>
-          {{item.title}}
-        </ons-col>
-      </ons-list-item>
-    </ons-list>
-
-  </ons-page>
-</ons-template>
-
-<ons-template id="search_result_detail.html">
-  <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
-
-    <ons-toolbar>
-      <div class="left"><ons-back-button>Back</ons-back-button></div>
-      <div class="center">Detail</div>
-      <div class="right">
-        <ons-toolbar-button ng-click="openNote()">
-          <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
-        </ons-toolbar-button>
-        <ons-toolbar-button ng-click="saveAsFavorite()">
-          <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
-        </ons-toolbar-button>
-        <ons-toolbar-button ng-click="menu.toggleMenu()">
-          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-        </ons-toolbar-button>
-      </div>
-    </ons-toolbar>
-
-    <p>
-      <h1 id="detail_title" class="title">
-        {{title}}
-      </h1>
-    </p>
-
-    <p>
-      <span id="detail_summary" ng-bind-html="summary"></span>
-    </p>
-
-    <p ng-show="is_links_exist">
-      <ons-button ng-click="processLinkSearch()">Link search</ons-button>
-    </p>
-
-    <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
-
-<!--
-    <p id="detail_content_ts" ng-click="linktest($event)"></p>
--->
-
-  </ons-page>
-  </ons-page>
-</ons-template>
-
-<ons-template id="settings.html">
-
-</ons-template>
-
+      <textarea ng-model="memo" rows="5" cols="20"></textarea>
+    </ons-popover>
+  </ons-template>
 
 </ons-sliding-menu>
-
 
 </body>
 
