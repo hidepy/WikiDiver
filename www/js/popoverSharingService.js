@@ -3,6 +3,7 @@
     var module = angular.module(APP_CONFIGS.NAME);
     module.service("popoverSharingService", function ($rootScope) {
         this.sharing = {
+            id: "",
             title: "",
             caption: "",
             memo: ""

@@ -42,17 +42,17 @@
     #home_searchKey {
       margin : 4px;
     }
-
     a{
       font-size: 120%;
       color: blue !important;
       cursor: pointer;
     }
-
     .mw-editsection{
       display: none;
     }
-
+    .infobox{
+      width: 100% !important;
+    }
     </style>
 
 
@@ -73,7 +73,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
   <!--
         <ons-list-item modifier="chevron" onclick="menu.setMainPage('search_result_header.html', {closeMenu: true})">
         -->
-        <ons-list-item>
+        <ons-list-item onclick="menu.setMainPage('home.html', {closeMenu: true})">
           Home
         </ons-list-item>
         <!--
@@ -160,8 +160,11 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
           <ons-toolbar-button ng-click="openWithBrowser()">
             <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
           </ons-toolbar-button>
-          <ons-toolbar-button id="detail_note_button" ng-click="openNote()">
+          <ons-toolbar-button id="detail_note_button" ng-click="openNote()" style="position: relative;">
             <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
+            <div style="position: absolute; border-style: solid; border-radius: 8px; width: 14px; height: 14px; font-size: 9px; border-width: 1px; top: 2px; left: 2px;">
+              <span style="position: relative; top: -14px; left: -4px;">2</span>
+            </div>
           </ons-toolbar-button>
           <ons-toolbar-button ng-click="saveAsFavorite()">
             <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
@@ -188,10 +191,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
       <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
 
-  <!--
-      <p id="detail_content_ts" ng-click="linktest($event)"></p>
-  -->
-
     </ons-page>
     </ons-page>
   </ons-template>
@@ -205,12 +204,12 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
     <ons-popover var="myPopoverMemo" ng-controller="popoverController" cancelable style="width: 80%; max-width: 300px;">
       <h2>memo for {{sharing.title}}</h2>
       <p class="caption">{{sharing.caption}}</p>
-      <p>disp value = {{sharing.memo}}</p>
       <div>
-        <ons-button>save</ons-button>
-        <ons-button>close</ons-button>
+        <ons-button ng-click="saveMemo()">save</ons-button>
+        <ons-button ng-click="closePopover()">close</ons-button>
+        <ons-button ng-click="deleteMemo()">delete</ons-button>
       </div>
-      <textarea ng-model="memo" rows="5" cols="20"></textarea>
+      <textarea ng-model="sharing.memo" rows="5" cols="20"></textarea>
     </ons-popover>
   </ons-template>
 

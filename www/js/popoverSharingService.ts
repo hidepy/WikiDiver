@@ -5,6 +5,7 @@
     module.service("popoverSharingService", function($rootScope){
 
       this.sharing = {
+        id: "",
         title: "",
         caption: "",
         memo: ""

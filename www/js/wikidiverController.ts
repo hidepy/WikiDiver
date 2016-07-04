@@ -9,6 +9,19 @@ declare var pageSearchResultDetail: any;
 /// <reference path="./commonFunctions.ts" />
 /// <reference path="../constants/constants.ts"/>
 
+//2016/07/04
+/*
+TODO
+  memo 保存ok
+  クリップ機能追加ok
+  スライドメニュー実装
+    menu項目
+      home
+      tree
+      favorite
+      history
+      settings
+*/
 
 // 2016/07/01
 // 是非これから取り入れていくべきこと
@@ -42,7 +55,11 @@ declare var pageSearchResultDetail: any;
     'use strict';
     var module = ons.bootstrap(APP_CONFIGS.NAME, ['onsen','checklist-model']);
 
+    // 記事のお気に入り
     var storage_manager_favorite: StorageManager = new StorageManager(STORAGE_TYPE.FAVORITE);
+    // ノートの保存(キー=title又はid)
+    var storage_manager_memo: StorageManager = new StorageManager(STORAGE_TYPE.NOTE_FOR_ARTICLE);
+
     var tree_manager_history: TreeManager = new TreeManager();
     var wikiAdapter = new WikiAdapter();
 
@@ -184,6 +201,7 @@ declare var pageSearchResultDetail: any;
 
     module.controller("DetailController", function($scope, $sce, $compile, popoverSharingService) {
 
+      $scope.id = ""; //詳細ページ-> id
       $scope.title = "";　//詳細ページ-> タイトル
       $scope.article = ""; //詳細ページ-> メイン記事
       $scope.is_redirects_exist = false; //詳細ページ-> リダイレクト有無フラグ
@@ -202,10 +220,15 @@ declare var pageSearchResultDetail: any;
         // note用のpopoverを表示する
         console.log("in open note");
 
+        var memo_data = storage_manager_memo.getItem($scope.id);
+
+        if(!memo_data){ memo_data = ""; }
+
         // popover オープン前に必要情報をコピー
+        popoverSharingService.sharing.id = $scope.id;
         popoverSharingService.sharing.title = $scope.title;
         popoverSharingService.sharing.caption = "";
-        popoverSharingService.sharing.memo = ""; // 
+        popoverSharingService.sharing.memo = memo_data; //タイトルから名称を引いてくる
 
         // sharingの値更新をsubscribeする
         popoverSharingService.updateSharing();
@@ -216,6 +239,9 @@ declare var pageSearchResultDetail: any;
 
       // お気に入り保存
       $scope.saveAsFavorite = function(){
+
+        console.log("in saveAsFavorite");
+
         // favorite layout
         // title. article, is_links_exist, links
         let favorite = {
@@ -228,6 +254,7 @@ declare var pageSearchResultDetail: any;
 
         //保存 キーはtitleだが...問題なし？ wiki的には重複しない 文字化けが心配
         storage_manager_favorite.saveItem2Storage(favorite.title, favorite);
+        showAlert("save2favorite!! ... nocheck...");
       }
 
       $scope.processArticleClick = function(e){
@@ -301,6 +328,7 @@ declare var pageSearchResultDetail: any;
 
           if(!res.isTypeParse){ //parseでなければ
             //※※※ parseじゃなくてextractルート ※※※
+            $scope.id = res.pageid;
             $scope.title = res.title;
             $scope.summary = "";
 
@@ -350,6 +378,7 @@ declare var pageSearchResultDetail: any;
           }
           else{
             // ※※※ parseルート！！※※※
+            $scope.id = res.pageid;
             $scope.title = res.title;
 
             // article 抽出
@@ -359,6 +388,9 @@ declare var pageSearchResultDetail: any;
               //hrefを削除(※必須)
               //article = article.replace(/href="[^"]*"/g, "");
               article = article.replace(/href="(?!#\.)([^"](?!\.png))*"/g, "");
+
+              // imgを削除
+              article = article.replace(/<img[^>]+>/g, "");
 
 /* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
 
@@ -430,18 +462,35 @@ declare var pageSearchResultDetail: any;
 
     module.controller("popoverController", function($scope, popoverSharingService){
       $scope.sharing = {
+        id: "",
         title: "",
         caption: "",
         memo: ""
       };
 
-      console.log("title = " + popoverSharingService.title);
-      console.log("sharing.title = " + popoverSharingService.sharing.title);
+      // 保存
+      $scope.saveMemo = function(){
+        storage_manager_memo.saveItem2Storage($scope.sharing.id, $scope.sharing.memo);
+        showAlert("save success!! but, actually needed to check success or failure...");
+      };
+
+      $scope.deleteMemo = function(){
+        storage_manager_memo.deleteItem($scope.sharing.id);
+        $scope.sharing.memo = "";
+        showAlert("delete success!! but, actually needed to check success or failure...");
+      };
+
+      // close押下時
+      $scope.closePopover = function(){
+        myPopoverMemo.hide();
+      };
 
       $scope.$on('updateSharing', function(event, data) {
         console.log(data);
 
         $scope.sharing = data;
+
+        console.log("memo is=" + $scope.sharing.memo);
       });
     });
 

@@ -9,4 +9,5 @@ namespace APP_CONFIGS{
 
 namespace STORAGE_TYPE{
   export const FAVORITE = "WIKI_DIVER_FAVORITE";
+  export const NOTE_FOR_ARTICLE = "WIKI_DIVER_NOTE";
 }
