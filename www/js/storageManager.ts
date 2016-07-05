@@ -32,9 +32,10 @@ saveItem2Storage(key, data) -public
 	key に指定された値をキーとし、dataを現在保持しているハッシュ、localstorageに1件登録する
 
 */
-var StorageManager = function(storage_key_name){
+var StorageManager = function(storage_key_name, limit_length?: number){
 	this.storage_key_name = storage_key_name;
 	this.items = {};
+	this.limit_length = (limit_length) ? limit_length : 0; // limit_lengthには0より大きい値をセットすること
 
 	this.init();
 
@@ -98,13 +99,21 @@ var StorageManager = function(storage_key_name){
 
 	proto.saveItem2Storage = function(key, data){
 
-		this.items[key] = data;
+		if(this.limit_length > 0){
+			var tmp_arr = convHash2Arr(data);
+		}
+		else{
+			this.items[key] = data;
+		}
+
+
 
 		window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
 
 	};
 
-	proto.sortByKey = function(key, desc){
+	proto.sortByKey = function(key?: string, desc?: boolean){
+
 
 	};
 

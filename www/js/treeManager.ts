@@ -1,23 +1,18 @@
 class TreeManager{
   private _tree = [];
-  private _STORAGE_KEY_NAME= "WIKI_DIVER_HISTORY_TREE";
+  private _STORAGE_KEY_NAME= STORAGE_TYPE.TREE;
+  private _save_history_tree = true;
 
   constructor(){
-
-    var save_history_tree = true;
-
-    if(save_history_tree){
+    if(this._save_history_tree){
       var data = window.localStorage.getItem(this._STORAGE_KEY_NAME);
 
-      if(data){
-        this._tree = JSON.parse(data);
-      }
-      else{
-        this._set2storage();
-      }
+      if(data){ this._tree = JSON.parse(data); }
+      else{ this._set2storage(); }
     }
   };
   private _set2storage(){
+    if(!this._save_history_tree){ return; } // 保存しないなら無視
     window.localStorage.setItem(this._STORAGE_KEY_NAME, JSON.stringify(this._tree));
   };
   public push(obj: any){
@@ -33,5 +28,8 @@ class TreeManager{
       return this._tree[this._tree.length - 1];
     }
     return null;
+  };
+  public getAll(){
+    return this._tree;
   };
 }

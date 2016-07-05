@@ -2,6 +2,7 @@
 declare var angular: angular.IAngularStatic;
 declare var myNavigator: NavigatorView;
 declare var myPopoverMemo: PopoverView;
+declare var myMenu: SlidingMenuView;
 declare var pageSearchResultHeader: any;
 declare var pageSearchResultDetail: any;
 /// <reference path="./storageManager.ts" />
@@ -21,6 +22,11 @@ TODO
       favorite
       history
       settings
+
+  2016/07/05
+  treeかhistoryかsettingsから
+
+  storageManagerに件数機能を
 */
 
 // 2016/07/01
@@ -59,8 +65,13 @@ TODO
     var storage_manager_favorite: StorageManager = new StorageManager(STORAGE_TYPE.FAVORITE);
     // ノートの保存(キー=title又はid)
     var storage_manager_memo: StorageManager = new StorageManager(STORAGE_TYPE.NOTE_FOR_ARTICLE);
+    // 履歴の保存
+    var storage_manager_history: StorageManager = new StorageManager(STORAGE_TYPE.HISTORY);
 
+    // 木構造
     var tree_manager_history: TreeManager = new TreeManager();
+
+    // wikiadapter
     var wikiAdapter = new WikiAdapter();
 
     ons.ready(function(){
@@ -82,22 +93,57 @@ TODO
         console.log("in prepush");
         var page = event.currentPage; // 現在のページオブジェクトを取得する
         // 果たして望み通りの値は取れるのか...
+        outlog(page);
       });
 
       // onsen ポップオーバーを作成
       myPopoverMemo = ons.createPopover('popover_memo.html');
 
+    });
 
+
+    module.controller("MenuController", function($scope){
+
+      // favoriteとhistory共通
+      $scope.move2FavoriteOrHistory = function(type: string){
+
+        var type_string = type; // favorite or history
+
+        myMenu.setMainPage('home.html', {
+          closeMenu: true,
+          callback: function(){ // 直接favoriteに飛ぶのは難しそうなので...
+
+            // ここでtreeをクリアする
+
+            myNavigator.pushPage("search_result_header.html", {
+              onTransitionEnd: {
+                is_favorite: (type_string == "favorite"),
+                is_history: (type_string == "history")
+              }
+            });
+          }
+        });
+      };
+
+      $scope.move2setting = function(){
+        myNavigator.pushPage("settings.html");
+      };
 
     });
 
 
     module.controller("HomeController", function($scope){
         $scope.search_key = "";
-        $scope.dive = function(){
+        $scope.favorite_length = storage_manager_favorite.getItemLength();
 
+        $scope.dive = function(){
           var el_keyword: HTMLElement = document.getElementById("home_searchKey");
           var search_key: string = (<HTMLInputElement>el_keyword).value;
+
+          if(isEmpty(search_key)){ // 入力なしなら
+            showAlert("please input search key...");
+            return;
+          }
 
           //次画面遷移
           myNavigator.pushPage("search_result_header.html",{
@@ -111,7 +157,32 @@ TODO
         $scope.showMenu = function(){
           console.log("in showMenu");
           //menu.toggleMenu();
-        }
+        };
+
+        $scope.move2setting = function(){
+          console.log("in move2setting");
+          myNavigator.pushPage("settings.html");
+        };
+
+        $scope.move2favorite = function(){
+          console.log("in move2favorite");
+
+          myNavigator.pushPage("search_result_header.html", {
+            onTransitionEnd: {
+              is_favorite: true
+            }
+          });
+        };
+
+        $scope.move2history = function(){
+          console.log("in move2history");
+
+          myNavigator.pushPage("search_result_header.html", {
+            onTransitionEnd: {
+              is_history: true
+            }
+          });
+        };
 
     });
 
@@ -186,6 +257,7 @@ TODO
 
         // ホーム画面からの呼出の場合
         if(_args.onTransitionEnd && _args.onTransitionEnd.is_from_home && _args.onTransitionEnd.search_key){
+          console.log("header. normal search");
           if($scope.completeMatch){ //完全一致検索
             getHeaderList(_args.onTransitionEnd.search_key);
           }
@@ -193,10 +265,25 @@ TODO
             searchHeadersFromKeyword(_args.onTransitionEnd.search_key);
           }
         }
+        // favorite検索時
+        else if(_args.onTransitionEnd && _args.onTransitionEnd.is_favorite){
+          console.log("header. favorite");
+          $scope.items = convHash2Arr(storage_manager_favorite.getAllItem());
+        }
+        // history検索時
+        else if(_args.onTransitionEnd && _args.onTransitionEnd.is_history){
+          $scope.items = convHash2Arr(storage_manager_history.getAllItem());
+          console.log("header. history");
+        }
         // link選択時
         else if(_args.onTransitionEnd && _args.onTransitionEnd.is_link){
           $scope.items = _args.onTransitionEnd.links;
+          console.log("header. link");
         }
+        else{
+          console.log("header. no operation");
+        }
+
     });
 
     module.controller("DetailController", function($scope, $sce, $compile, popoverSharingService) {
@@ -441,6 +528,9 @@ TODO
       //---------- on detailpage load ----------
       var _args = myNavigator.getCurrentPage().options;
 
+      // 履歴又はお気に入りに存在すれば、そっちから持ってくる
+      //  マスタの設定が最新のものを取得する場合は例外
+
       console.log("in DetailController start");
       outlog(_args);
 
@@ -494,46 +584,8 @@ TODO
       });
     });
 
-    module.factory("currentBikeInfo", function(){
-        var data:any = {};
 
-        data.name = "gn125";
-        data.purchace_date = "2012/03/11";
-        data.comment = "this is my first bike";
-        data.img = "none";
-        data.maintainance_records = 11;
-        data.touring_records = 21;
-
-        return data;
-
-    });
-
-    module.service("selectList", function(){
-        this.items = [];
-        this.selectedItem = {};
-        this.addItem = function(_key, _value){
-            this.items.push({
-                key: _key,
-                value: _value
-            });
-        };
-        this.removeItem = function(idx){
-            this.items.splice(idx, 1);
-        };
-        this.removeAllItems = function(){
-            this.items.length = 0;
-        };
-        this.createItemsFromObjectArr = function(objArr, key_name, value_name){
-            for(var i = 0; i < objArr.length; i++){
-                this.addItem(objArr[i][key_name], objArr[i][value_name]);
-            }
-
-        };
-        this.createItemsFromArr = function(arr){
-            for(var i = 0; i < arr.length; i++){
-                this.addItem("" + i, arr[i]);
-            }
-        };
+    module.controller("SettingsController", function($scope){
 
     });
 

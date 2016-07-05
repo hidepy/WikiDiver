@@ -31,9 +31,7 @@
     <script src="cordova.js"></script>
     <script src="js/wikidiverController.js"></script>
 
-<script src="js/popoverSharingService.js"></script>
-
-
+    <script src="js/popoverSharingService.js"></script>
 
     <style>
     .contents_wrapper {
@@ -63,27 +61,33 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 -->
 <body>
 
-<ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="menu">
-
+<ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="myMenu">
 
   <!-- slide menu用 -->
   <ons-template id="menu.html">
-
+    <div ng-controller="MenuController">
       <ons-list>
-  <!--
-        <ons-list-item modifier="chevron" onclick="menu.setMainPage('search_result_header.html', {closeMenu: true})">
-        -->
-        <ons-list-item onclick="menu.setMainPage('home.html', {closeMenu: true})">
+        <ons-list-item onclick="myMenu.setMainPage('home.html', {closeMenu: true})">
           Home
         </ons-list-item>
-        <!--
-        <ons-list-item modifier="chevron" onclick="menu.setMainPage('home.html', {closeMenu: true})">
-        -->
-        <ons-list-item>
+
+        <ons-list-item ng-click="move2FavoriteOrHistory('favorite')">
           Favorite
         </ons-list-item>
-      </ons-list>
 
+        <ons-list-item ng-click="move2FavoriteOrHistory('history')">
+          History
+        </ons-list-item>
+
+        <ons-list-item>
+          Tree
+        </ons-list-item>
+
+        <ons-list-item ng-click="move2setting()">
+          Settings
+        </ons-list-item>
+      </ons-list>
+    </div>
   </ons-template>
 
   <!-- Home画面　index > home -->
@@ -96,8 +100,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         <ons-toolbar>
             <div class="center">WikiDiver</div>
             <div class="right">
-              <!--<ons-toolbar-button ng-click="showMenu()">-->
-              <ons-toolbar-button ng-click="menu.toggleMenu()">
+              <ons-toolbar-button ng-click="myMenu.toggleMenu()">
                 <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
               </ons-toolbar-button>
             </div>
@@ -109,12 +112,21 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
           </div>
 
           <div>
-            <!--
-            <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
-          -->
             <ons-button ng-click="dive()" modifier="large--quiet">search</ons-button>
           </div>
 
+          <div>
+            <div class="home_favorite" ng-click="move2favorite()">
+              favs ({{favorite_length}} records)
+            </div>
+            <div class="home_history" ng-click="move2history()">
+              hists
+            </div>
+          </div>
+
+          <div>
+            <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
+          </div>
         </div>
 
       </ons-page>
@@ -130,7 +142,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         <div class="center">Headers</div>
 
         <div class="right">
-          <ons-toolbar-button ng-click="menu.toggleMenu()">
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
             <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
           </ons-toolbar-button>
         </div>
@@ -169,16 +181,14 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
           <ons-toolbar-button ng-click="saveAsFavorite()">
             <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
           </ons-toolbar-button>
-          <ons-toolbar-button ng-click="menu.toggleMenu()">
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
             <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
           </ons-toolbar-button>
         </div>
       </ons-toolbar>
 
       <p>
-        <h1 id="detail_title" class="title">
-          {{title}}
-        </h1>
+        <h1 id="detail_title" class="title">{{title}}</h1>
       </p>
 
       <p>
@@ -196,9 +206,46 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
   </ons-template>
 
   <ons-template id="settings.html">
+    <ons-page ng-controller="SettingsController">
 
+      <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Settings</div>
+
+        <div class="right">
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
+
+      <div class="contents_wrapper">
+        <ons-row>
+          <ons-col>
+            <h2>Language</h2>
+          </ons-col>
+          <ons-col>
+            ja or en
+          </ons-col>
+        </ons-row>
+
+        <ons-row>
+          <ons-col>
+            <h2>Parse or Extract</h2>
+            </ons-col>
+          <ons-col>
+            parse or extract
+          </ons-col>
+        </ons-row>
+      </div>
+
+    </ons-page>
   </ons-template>
 
+
+  <ons-template id="tree_view.html">
+
+  </ons-template>
 
   <ons-template id="popover_memo.html">
     <ons-popover var="myPopoverMemo" ng-controller="popoverController" cancelable style="width: 80%; max-width: 300px;">
