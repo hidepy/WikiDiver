@@ -13,8 +13,19 @@ var IS_DEBUG = false;
 
  class WikiAdapter{
 
-   constructor(){
+   private language_type;
+   private article_type;
 
+   constructor(language?: string, article_type?: string){
+      this.language_type = language || "ja"; // default
+      this.article_type = article_type || "5";// default(parse) "4" means extract
+   }
+
+   public setLanguage(language: string){
+     this.language_type = language;
+   }
+   public setArticleType(article_type: string){
+     this.article_type = article_type;
    }
    public getHeaderList(search_key: string, callback: (res: any)=>void): void{
      console.log("in getHeaderList. param=search_key: " + search_key);
@@ -114,7 +125,7 @@ var IS_DEBUG = false;
      //var main_query = main_query_orig ? encodeURIComponent(main_query_orig) : "";
      var main_query = main_query_orig;
 
-     var l_type = language_type ? language_type : "ja";
+     var l_type = this.language_type ? this.language_type : "ja"; // 言語設定
 
      var params = {
        format: "json",
@@ -129,17 +140,6 @@ var IS_DEBUG = false;
         break;
       case "1": //=> [明細]ID検索
         //応答が微妙なんで一旦prop削除
-
-/*
-        params["prop"] = "revisions";
-        params["pageids"] = main_query;
-        params["rvprop"] = "content";
-        params["rvparse"] = "";
-
-        //params["prop"] = "extracts|redirects";
-        //params["prop"] = "extracts|links";
-*/
-
         params["prop"] = "extracts|redirects";
         params["pageids"] = main_query;
         break;
@@ -191,11 +191,12 @@ var IS_DEBUG = false;
        data: params,
        beforeSend: function(){
          console.log("ajax beforeSend. params=");
-         //console.log(params);
+         outlog(params);
        },
        success: function(data){
          console.log("ajax success!!");
-         if(!isDevice()){ console.log(data); }
+         outlog(data);
+
          callback(data);
          return;
        },

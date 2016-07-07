@@ -16,9 +16,9 @@
     </feature>
     <allow-intent href="itms:*" />
     <allow-intent href="itms-apps:*" />
-    <name>WikiDiver2</name>
+    <name>WikiDiver</name>
     <description>
-        Dive into the Wikipedia!!
+        Dive into the Wikipedia!! can you install newest??
     </description>
     <author email="support@phonegap.com" href="http://phonegap.com">
         PhoneGap Team

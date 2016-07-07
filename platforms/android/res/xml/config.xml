@@ -9,9 +9,9 @@
         <param name="android-package" value="org.apache.cordova.inappbrowser.InAppBrowser" />
     </feature>
     <allow-intent href="market:*" />
-    <name>WikiDiver2</name>
+    <name>WikiDiver</name>
     <description>
-        Dive into the Wikipedia!!
+        Dive into the Wikipedia!! can you install newest??
     </description>
     <author email="support@phonegap.com" href="http://phonegap.com">
         PhoneGap Team

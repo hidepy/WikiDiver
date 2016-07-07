@@ -1,6 +1,10 @@
 <!doctype html>
 
-<!--<html lang="en" ng-app="app">-->
+<!--
+historyからtreeしてーとかやってると、treeでindex求める時にバグるもよう...
+
+-->
+
 <html>
 <head>
     <meta charset="utf-8">
@@ -9,23 +13,24 @@
 
     <title>WikiDiver</title>
 
-    <link rel="stylesheet" href="lib/onsen/css/onsenui.css">
-    <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css">
+    <link rel="stylesheet" href="lib/onsen/css/onsenui.css" />
+    <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css" />
 
     <script src="jquery/jquery-1.11.3.min.js"></script>
-
-    <script src="js/DomParserExtention.js"></script>
-    <script src="js/commonFunctions.js"></script>
-    <script src="js/storageManager.js"></script>
-    <script src="js/treeManager.js"></script>
-    <script src="js/wikiAdapter.js"></script>
-
     <script src="lib/onsen/js/angular/angular.js"></script>
     <script src="lib/onsen/js/angular/checklist-model.js"></script>
     <script src="lib/onsen/js/onsenui.js"></script>
 
+    <script src="constants/constants.js"></script>
+
+    <script src="js/DomParserExtention.js"></script>
+    <script src="js/commonFunctions.js"></script>
+    <script src="js/storageManager.js"></script>
+    <script src="js/wikiAdapter.js"></script>
+
     <script src="cordova.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/wikidiverController.js"></script>
+    <script src="js/popoverSharingService.js"></script>
 
     <style>
     .contents_wrapper {
@@ -34,294 +39,277 @@
     #home_searchKey {
       margin : 4px;
     }
-
     a{
       font-size: 120%;
       color: blue !important;
       cursor: pointer;
     }
-
     .mw-editsection{
       display: none;
     }
-
+    .infobox{
+      width: 100% !important;
+    }
     </style>
 
 
 </head>
-
+<!--
+angular promise
+http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
+-->
 <body>
 
+<ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="myMenu">
 
-<ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="menu">
+  <!-- slide menu用 -->
+  <ons-template id="menu.html">
+    <div ng-controller="MenuController">
+      <ons-list>
+        <ons-list-item onclick="myMenu.setMainPage('home.html', {closeMenu: true})">
+          Home
+        </ons-list-item>
 
-<!--
-<ons-navigator var="myNavigator" page="home.html"></ons-navigator>
--->
+        <ons-list-item ng-click="move2FavoriteOrHistory('favorite')">
+          Favorite
+        </ons-list-item>
 
+        <ons-list-item ng-click="move2FavoriteOrHistory('history')">
+          History
+        </ons-list-item>
 
-<!--
+        <ons-list-item ng-click="move2Tree()">
+          Tree
+        </ons-list-item>
 
-onsen navigator と slidemenuの並列
-http://oki2a24.com/2015/08/27/monaca-onsen-ui-app-with-sliding-menu-in-navigation/
+        <ons-list-item ng-click="move2setting()">
+          Settings
+        </ons-list-item>
+      </ons-list>
+    </div>
+  </ons-template>
 
--->
+  <!-- Home画面　index > home -->
+  <ons-template id="home.html">
 
+  <ons-navigator var="myNavigator">
+      <ons-page ng-controller="HomeController" id="home">
 
-<!-- slide menu用 -->
-<ons-template id="menu.html">
+        <ons-toolbar>
+            <div class="center">WikiDiver</div>
+            <div class="right">
+              <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+                <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+        </ons-toolbar>
 
-    <ons-list>
-<!--
-      <ons-list-item modifier="chevron" onclick="menu.setMainPage('search_result_header.html', {closeMenu: true})">
-      -->
-      <ons-list-item>
-        Home
-      </ons-list-item>
-      <!--
-      <ons-list-item modifier="chevron" onclick="menu.setMainPage('home.html', {closeMenu: true})">
-      -->
-      <ons-list-item>
-        Favorite
-      </ons-list-item>
-    </ons-list>
+        <div class="contents_wrapper">
+          <div>
+            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="">
+          </div>
 
-</ons-template>
+          <div>
+            <ons-button ng-click="dive()" modifier="large--quiet">search</ons-button>
+          </div>
 
-<!-- Home画面　index > home -->
-<ons-template id="home.html">
+          <div>
+            <ons-button ng-click="move2favorite()" modifier="large--quiet">view favorite({{favorite_length}} records)</ons-button>
+          </div>
 
-<ons-navigator var="myNavigator">
+          <div>
+            <ons-button ng-click="move2history()" modifier="large--quiet">view history</ons-button>
+          </div>
 
-    <ons-page ng-controller="HomeController" id="home">
+          <div>
+            <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
+          </div>
+        </div>
 
-<!--
-    <ons-sliding-menu menu-page="menu.html" side="right" max-slide-distance="250px" var="menu"></ons-sliding-menu>
--->
+      </ons-page>
+
+  </ons-navigator>
+  </ons-template>
+
+  <ons-template id="search_result_header.html">
+    <ons-page ng-controller="HeaderListController" var="pageSearchResultHeader">
 
       <ons-toolbar>
-          <div class="center">WikiDiver</div>
-          <div class="right">
-            <!--<ons-toolbar-button ng-click="showMenu()">-->
-            <ons-toolbar-button ng-click="menu.toggleMenu()">
-              <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-            </ons-toolbar-button>
-          </div>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Headers</div>
+
+        <div class="right">
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
+
+      <ons-list>
+        <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
+          <ons-col>
+            {{item.pageid}}
+          </ons-col>
+          <ons-col>
+            {{item.title}}
+          </ons-col>
+        </ons-list-item>
+      </ons-list>
+
+    </ons-page>
+  </ons-template>
+
+  <ons-template id="search_result_detail.html">
+    <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
+
+      <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Detail</div>
+        <div class="right">
+          <ons-toolbar-button ng-click="openWithBrowser()">
+            <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+          <ons-toolbar-button id="detail_note_button" ng-click="openNote()" style="position: relative;">
+            <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
+            <div style="position: absolute; border-style: solid; border-radius: 8px; width: 14px; height: 14px; font-size: 9px; border-width: 1px; top: 2px; left: 2px;">
+              <span style="position: relative; top: -14px; left: -4px;">2</span>
+            </div>
+          </ons-toolbar-button>
+          <ons-toolbar-button ng-click="saveAsFavorite()">
+            <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
+
+      <p>
+        <h1 id="detail_title" class="title">{{title}}</h1>
+      </p>
+
+      <p>
+        <span id="detail_summary" ng-bind-html="summary"></span>
+      </p>
+
+      <p ng-show="is_links_exist">
+        <ons-button modifier="large--quiet" ng-click="processLinkSearch()">Link search</ons-button>
+      </p>
+
+      <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
+
+    </ons-page>
+    </ons-page>
+  </ons-template>
+
+  <ons-template id="settings.html">
+    <ons-page ng-controller="SettingsController">
+
+      <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Settings</div>
+
+        <div class="right">
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
       </ons-toolbar>
 
       <div class="contents_wrapper">
-        <div>
-          <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="">
-        </div>
+        <ons-row>
+          <ons-col width="80%">
+            <h2>Language</h2>
+          </ons-col>
+          <ons-col width="20%">
+            <div class="button-bar__item">
+                <input type="radio" ng-model="radio_language" value="ja" />
+                <div class="button-bar__button">Japanese</div>
+            </div>
+            <div class="button-bar__item">
+                <input type="radio" ng-model="radio_language" value="en" />
+                <div class="button-bar__button">English</div>
+            </div>
+          </ons-col>
+        </ons-row>
 
-        <div>
-          <!--
-          <ons-button ng-click="dive()" modifier="large--cta">search</ons-button>
-        -->
-          <ons-button ng-click="dive()">search</ons-button>
-        </div>
+        <ons-row>
+          <ons-col width="80%">
+            <h2>Parse or Extract</h2>
+            </ons-col>
+          <ons-col width="20%">
+            <div class="button-bar__item">
+                <input type="radio" ng-model="radio_article" value="5" />
+                <div class="button-bar__button">Parse</div>
+            </div>
+            <div class="button-bar__item">
+                <input type="radio" ng-model="radio_article" value="4" />
+                <div class="button-bar__button">Extract</div>
+            </div>
+          </ons-col>
+        </ons-row>
 
+        <ons-row>
+          <ons-col width="80%">
+            <h2>Save History Length</h2>
+          </ons-col>
+          <ons-col width="20%">
+            <input type="number" ng-model="history_length">
+          </ons-col>
+        </ons-row>
+
+        <ons-row>
+          <ons-button modifier="large" ng-click="saveMasterSetting()">Commit Changes</ons-button>
+        </ons-row>
       </div>
 
     </ons-page>
+  </ons-template>
 
-</ons-navigator>
-</ons-template>
 
-<ons-template id="search_result_header.html">
-  <ons-page ng-controller="HeaderListController" var="pageSearchResultHeader">
+  <ons-template id="tree_view.html">
+    <ons-page ng-controller="TreeViewController">
 
-    <ons-toolbar>
-      <div class="left"><ons-back-button>Back</ons-back-button></div>
-      <div class="center">Headers</div>
+      <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Map</div>
+        <div class="right">
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
 
-      <div class="right">
-        <ons-toolbar-button ng-click="menu.toggleMenu()">
-          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-        </ons-toolbar-button>
+      <div class="contents_wrapper">
+        <ons-list>
+          <ons-list-item ng-repeat="page in page_stack" ng-click="move2SelectDepth($index)">
+            <ons-row>
+              <ons-col width="10%">{{page.depth}}</ons-col>
+              <ons-col width="10%">{{page.type}}</ons-col>
+              <ons-col width="80%">{{page.search_key}}</ons-col>
+            </ons-row>
+          </ons-list-item>
+        </ons-list>
+
       </div>
-    </ons-toolbar>
+    </ons-page>
+  </ons-template>
 
-    <ons-list>
-      <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
-        <ons-col>
-          {{item.pageid}}
-        </ons-col>
-        <ons-col>
-          {{item.title}}
-        </ons-col>
-      </ons-list-item>
-    </ons-list>
-
-  </ons-page>
-</ons-template>
-
-<ons-template id="search_result_detail.html">
-  <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
-
-    <ons-toolbar>
-      <div class="left"><ons-back-button>Back</ons-back-button></div>
-      <div class="center">Detail</div>
-      <!-- ここにお気に入りボタンを, あと、トップに戻るボタンも -->
-
-      <div class="right">
-        <ons-toolbar-button ng-click="menu.toggleMenu()">
-          <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-        </ons-toolbar-button>
+  <ons-template id="popover_memo.html">
+    <ons-popover var="myPopoverMemo" ng-controller="popoverController" cancelable style="width: 90%; max-width: 300px;">
+      <h3>Memo for{{sharing.title}}</h3>
+      <p class="caption">{{sharing.caption}}</p>
+      <div>
+        <ons-button ng-click="saveMemo()">save</ons-button>
+        <!--<ons-button ng-click="closePopover()">close</ons-button>-->
+        <ons-button ng-click="deleteMemo()">delete</ons-button>
       </div>
-
-    </ons-toolbar>
-
-    <p>
-      <h1 id="detail_title" class="title">
-        {{title}}
-      </h1>
-    </p>
-
-    <p>
-      <span id="detail_summary" ng-bind-html="summary"></span>
-    </p>
-
-    <p ng-show="is_links_exist">
-      <ons-button ng-click="processLinkSearch()">Link search</ons-button>
-    </p>
-
-    <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
-
-<!--
-    <p id="detail_content_ts" ng-click="linktest($event)"></p>
--->
-
-  </ons-page>
-  </ons-page>
-</ons-template>
-
-<ons-template id="settings.html">
-
-</ons-template>
-
+      <textarea ng-model="sharing.memo" rows="5" cols="20"></textarea>
+    </ons-popover>
+  </ons-template>
 
 </ons-sliding-menu>
 
-
 </body>
 
-
-
 </html>
-
-
-<!--
-
-media wiki
-https://en.wikipedia.org/w/api.php?action=help&modules=query
-
-
-
-Emmetの使い方
-
-!
-でtabすると、htmlを
-
-div#myId>ul>li*3
-でtabすると、この構造のhtmlを出してくれる
-
-
-軌跡もつけよう！
-tree構造の
-
-
--->
-
-
-
-<!-- 各親ページのnavigatorを定義 -->
-<!--
-<ons-template id="index.html">
-    <ons-navigator var="myNavigator" page="home.html"></ons-navigator>
-</ons-template>
-
-
-<ons-template id="search_result_header.html">
-    <ons-navigator var="myNavigator" page="view_record.html"></ons-navigator>
-</ons-template>
-
-<ons-template id="search_result_detail.html">
-    <ons-navigator var="myNavigator" page="entry_record.html"></ons-navigator>
-</ons-template>
--->
-
-<!--
-画面設計
-
-[[top screen]]
-    summary:
-        wikidiverのtitle画面. favorite, 履歴のtop5が見れる
-
-    content:
-        title
-        account (server連携用)
-        favorite items
-        history items (履歴)
-
-    action:
-
-        dive
-            とある文言をキーとしてwikiの検索を始める
-
-[[wiki header screen]]
-    summary:
-        あいまい検索候補一覧が表示
-
-    content:
-        header list
-            wiki headerのリスト. ヘッダとサマリ文の一覧が表示される
-
-    action:
-        get detail
-            wiki detailを取得しにいく
-            画面移動的には
-                wiki header screen ⇒ wiki detail screen
-
-        radiate(放射状に広がる), 横並びに検索
-            このキーに紐づくキーワード一覧を取得する
-            画面移動的には、
-                wiki header screen ⇒ wiki header screen
-
-
-[[wiki detail screen]]
-    summary:
-        詳細情報画面
-
-    content:
-        title
-        article
-
-    action:
-        favorite
-            お気に入りに追加
-                永続的に保存する
-
-        hold
-            一時ホールドしておく
-                後に全件削除とかが可能
-
-        dive
-            このキーをもとに他のキー一覧を取得する
-            画面移動的には
-                wiki detail ⇒　wiki header
-
-
-データ構造的には、
-    me
-        title, articleなどの実コンテンツをもつ
-    parent
-        複数親になる可能性あり...
-    childs
-        関連キーの子供たち
--------------------------------------------------------
-bower
-    フロントエンドパッケージマネージャ
-
-
--->
