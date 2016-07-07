@@ -127,7 +127,7 @@ TODO
                 showAlert("please input search key...");
                 return;
             }
-            showAlert("input check ok!!. move2header");
+            showAlert("search root in");
             //次画面遷移
             myNavigator.pushPage("search_result_header.html", {
                 onTransitionEnd: {
@@ -135,6 +135,10 @@ TODO
                     is_from_home: true
                 }
             });
+        };
+        $scope.showMenu = function () {
+            console.log("in showMenu");
+            //menu.toggleMenu();
         };
         $scope.move2setting = function () {
             console.log("in move2setting");
@@ -248,8 +252,6 @@ TODO
             // note用のpopoverを表示する
             console.log("in open note");
             var memo_data = storage_manager_memo.getItem($scope.id);
-            console.log("memodata=");
-            outlog(memo_data);
             if (!memo_data) {
                 memo_data = "";
             }
@@ -296,6 +298,8 @@ TODO
                 }
             }
             //対象でなかったら無視
+        };
+        $scope.showMenu = function () {
         };
         $scope.back2home = function () {
             //resetToPage
@@ -460,6 +464,7 @@ TODO
             myPopoverMemo.hide();
         };
         $scope.$on('updateSharing', function (event, data) {
+            console.log(data);
             $scope.sharing = data;
             console.log("memo is=" + $scope.sharing.memo);
         });

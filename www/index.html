@@ -91,6 +91,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
   <!-- Home画面　index > home -->
   <ons-template id="home.html">
+
     <ons-navigator var="myNavigator">
         <ons-page ng-controller="HomeController" id="home">
 
@@ -196,6 +197,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       </p>
 
       <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
+
     </ons-page>
   </ons-template>
 
@@ -251,7 +253,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             <h2>Save History Length</h2>
           </ons-col>
           <ons-col width="20%">
-            <input type="number" ng-model="history_length" />
+            <input type="number" ng-model="history_length">
           </ons-col>
         </ons-row>
 

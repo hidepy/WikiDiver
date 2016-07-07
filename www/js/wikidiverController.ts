@@ -169,7 +169,7 @@ TODO
             return;
           }
 
-          showAlert("input check ok!!. move2header");
+          showAlert("search root in");
 
           //次画面遷移
           myNavigator.pushPage("search_result_header.html",{
@@ -178,6 +178,11 @@ TODO
                 is_from_home: true
               }
             });
+        };
+
+        $scope.showMenu = function(){
+          console.log("in showMenu");
+          //menu.toggleMenu();
         };
 
         $scope.move2setting = function(){
@@ -330,9 +335,6 @@ TODO
 
         var memo_data = storage_manager_memo.getItem($scope.id);
 
-        console.log("memodata=");
-        outlog(memo_data);
-
         if(!memo_data){ memo_data = ""; }
 
         // popover オープン前に必要情報をコピー
@@ -366,7 +368,7 @@ TODO
         //保存 キーはtitleだが...問題なし？ wiki的には重複しない 文字化けが心配
         storage_manager_favorite.saveItem2Storage(favorite.title, favorite);
         showAlert("save2favorite!! ... nocheck...");
-      };
+      }
 
       $scope.processArticleClick = function(e){
 
@@ -393,10 +395,15 @@ TODO
         //対象でなかったら無視
       };
 
+
+      $scope.showMenu = function(){
+
+      }
+
       $scope.back2home = function(){
         //resetToPage
         myNavigator.resetToPage("home.html");
-      };
+      }
 
       $scope.processRedirectItemSelect = function(idx, event){
         console.log("in processRedirectItemSelect");
@@ -427,7 +434,7 @@ TODO
               links: $scope.links
             }
           });
-      };
+      }
 
       var handleGetDetail = (res: any)=> {
           console.log("callback level1");
@@ -602,6 +609,8 @@ TODO
       };
 
       $scope.$on('updateSharing', function(event, data) {
+        console.log(data);
+
         $scope.sharing = data;
 
         console.log("memo is=" + $scope.sharing.memo);
@@ -697,7 +706,7 @@ TODO
 
         // 安全に前画面に戻る
         popPageSafe(myNavigator);
-      };
+      }
 
     });
 
