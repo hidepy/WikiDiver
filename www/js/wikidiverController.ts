@@ -6,7 +6,6 @@ declare var myMenu: SlidingMenuView;
 declare var pageSearchResultHeader: any;
 declare var pageSearchResultDetail: any;
 /// <reference path="./storageManager.ts" />
-/// <reference path="./treeManager.ts"/>
 /// <reference path="./commonFunctions.ts" />
 /// <reference path="../constants/constants.ts"/>
 
@@ -65,16 +64,44 @@ TODO
     var storage_manager_favorite: StorageManager = new StorageManager(STORAGE_TYPE.FAVORITE);
     // ノートの保存(キー=title又はid)
     var storage_manager_memo: StorageManager = new StorageManager(STORAGE_TYPE.NOTE_FOR_ARTICLE);
+    // マスタ(設定)
+    var storage_manager_settings: StorageManager = new StorageManager(STORAGE_TYPE.SETTINGS);
     // 履歴の保存
-    var storage_manager_history: StorageManager = new StorageManager(STORAGE_TYPE.HISTORY);
-
-    // 木構造
-    var tree_manager_history: TreeManager = new TreeManager();
+    var storage_manager_history: StorageManager; // ons_readyでインスタンス化する
 
     // wikiadapter
-    var wikiAdapter = new WikiAdapter();
+    var wikiAdapter: WikiAdapter;
 
     ons.ready(function(){
+
+      // マスタ設定確認
+      // 言語設定
+      let m_lang = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE);
+      if(!m_lang){
+        m_lang = "ja";
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, m_lang);
+      }
+
+      let m_art_type = storage_manager_settings.getItem(SETTING_TYPE.ARTICLE_TYPE);
+      if(!m_art_type){
+        m_art_type = "5";
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, m_art_type);
+      }
+
+      let m_his_len = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_LENGTH);
+      if(!m_his_len){
+        m_his_len = 10;
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_LENGTH, m_his_len);
+      }
+
+
+
+      // WikiAdapter をインスタンス化
+      wikiAdapter = new WikiAdapter(m_lang, m_art_type);
+
+      // storage_manager_history(履歴管理) をインスタンス化
+      storage_manager_history = new StorageManager(STORAGE_TYPE.HISTORY, {length: m_his_len, sort_key: "timestamp"})
+
 
       //pageにback-button設定
       if(isDevice()){ //実機なら
@@ -87,14 +114,6 @@ TODO
           });
         }
       }
-
-      // prepushイベントハンドラ (prepush, prepop時に、treeに変更を加える)
-      myNavigator.on('prepush', function(event) {
-        console.log("in prepush");
-        var page = event.currentPage; // 現在のページオブジェクトを取得する
-        // 果たして望み通りの値は取れるのか...
-        outlog(event);
-      });
 
       // onsen ポップオーバーを作成
       myPopoverMemo = ons.createPopover('popover_memo.html');
@@ -510,6 +529,13 @@ TODO
             }
           }
 
+          // 詳細取得okならhistoryにタイトルを保存
+          storage_manager_history.saveItem2Storage($scope.id, {
+              pageid: $scope.id,
+              title: $scope.title,
+              timestamp: formatDate(new Date())
+          }); // とりあえず、pageidとtitleだけ！！後にキャッシュ数とか設定できれば...
+
           $scope.$apply();
       };
 
@@ -593,14 +619,92 @@ TODO
     module.controller("TreeViewController", function($scope){
       console.log("in TreeViewController");
 
-      $scope.page_stack = myNavigator.getPages();
+      // ---------- initial process start ----------
+
+      var nv_stack: any = myNavigator.getPages();
+      $scope.page_stack = [];
+
+      for(var i = 0; i < nv_stack.length; i++){
+
+        var type = PAGE_TYPE.TYPE_MAP[nv_stack[i].name]
+
+        if(!type || (type == "T")){ continue; } // 表示不要のものは表示対象としない
+
+        var options = nv_stack[i].options.onTransitionEnd; // ページへの引数を取得
+
+        $scope.page_stack.push({
+          p_name: nv_stack[i].name,
+          l_name: PAGE_TYPE.NAME_MAP[nv_stack[i].name],
+          type: type,
+          search_key: (type == "H") ? options.search_key : options.title,
+          depth: i
+        });
+      }
 
       outlog($scope.page_stack);
+
+      // ---------- initial process end ----------
+
+
+      // 選択した深さに遷移する 自身の深さ以降のスタックは削除する
+      $scope.move2SelectDepth = function(index){
+        console.log("in move2SelectDepth. index=" + index);
+
+        var stack_idx = $scope.page_stack[index].depth;
+
+        // 遷移先情報をコピーしておく(ループで削除予定なので)
+        var dest_info = {
+          page_url: nv_stack[stack_idx].page,
+          options: angular.copy(nv_stack[stack_idx].options.onTransitionEnd)
+        };
+
+        console.log("before delete stacks, length=" + (<any>myNavigator.getPages()).length);
+
+        for(var i = (nv_stack.length - 1); i >= stack_idx; i--){ // 末尾から今回選択のindexまでを削除する
+          nv_stack.pop(); // 削除
+        }
+
+        // navigatorの
+        (<any>myNavigator).pages = nv_stack;
+
+        console.log("deleted stacks=");
+        outlog(nv_stack);
+
+        console.log("after delete stacks, length=" + (<any>myNavigator.getPages()).length);
+
+        // treeを選択要素まで削除した後にpushPage
+        myNavigator.pushPage(dest_info.page_url, {
+          onTransitionEnd: dest_info.options
+        });
+      };
 
     });
 
 
     module.controller("SettingsController", function($scope){
+      $scope.radio_language = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE);
+      $scope.radio_article = storage_manager_settings.getItem(SETTING_TYPE.ARTICLE_TYPE);
+      $scope.history_length = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_LENGTH);
+
+      $scope.saveMasterSetting = function(){
+        if(isNaN($scope.history_length) || ($scope.history_length < 0)){
+          $scope.history_length = 0;
+        }
+
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, $scope.radio_language);
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, $scope.radio_article);
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_LENGTH, $scope.history_length);
+
+        wikiAdapter.setLanguage($scope.radio_language);
+        wikiAdapter.setArticleType($scope.radio_article);
+
+        storage_manager_history.setLimit({length: $scope.history_length, sort_key: "timestamp"});
+
+        showAlert("Commit Setting Change!!");
+
+        // 安全に前画面に戻る
+        popPageSafe(myNavigator);
+      }
 
     });
 

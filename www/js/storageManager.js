@@ -31,10 +31,10 @@ saveItem2Storage(key, data) -public
     key に指定された値をキーとし、dataを現在保持しているハッシュ、localstorageに1件登録する
 
 */
-var StorageManager = function (storage_key_name, limit_length) {
+var StorageManager = function (storage_key_name, limit_info) {
     this.storage_key_name = storage_key_name;
     this.items = {};
-    this.limit_length = (limit_length) ? limit_length : 0; // limit_lengthには0より大きい値をセットすること
+    this.setLimit(limit_info); // 制限をかける
     this.init();
 };
 // プロトタイプ定義
@@ -56,6 +56,13 @@ var StorageManager = function (storage_key_name, limit_length) {
         }
         return item_hash;
     };
+    proto.setLimit = function (limit_info) {
+        if (limit_info && limit_info.length && limit_info.sort_key) {
+            this.limit_info = limit_info;
+            return true;
+        }
+        return false;
+    };
     proto.getAllItem = function () {
         return this.items;
     };
@@ -75,15 +82,30 @@ var StorageManager = function (storage_key_name, limit_length) {
         window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
     };
     proto.saveItem2Storage = function (key, data) {
-        if (this.limit_length > 0) {
-            var tmp_arr = convHash2Arr(data);
+        if (this.limit_info) {
+            if (this.getItemLength > this.limit_info.length) {
+                var sorted_arr = this.getSorted(this.limit_info.sort_key, false);
+                var target_key = sorted_arr[0]["__key"];
+                console.log("saveItem2Storage#limit_item");
+                console.log("got target_key=" + target_key);
+                outlog(this.items[target_key]);
+                this.deleteItem(target_key);
+            }
         }
-        else {
-            this.items[key] = data;
-        }
+        this.items[key] = data;
         window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
     };
-    proto.sortByKey = function (key, desc) {
+    proto.getSorted = function (key, desc) {
+        var prefix = desc ? -1 : 1;
+        var tmp_arr = convHash2Arr(this.items);
+        tmp_arr.sort(function (a, b) {
+            if (a[key] < b[key])
+                return -1 * prefix;
+            if (a[key] > b[key])
+                return 1 * prefix;
+            return 0;
+        });
+        return tmp_arr;
     };
     proto.getItemLength = function () {
         return Object.keys(this.items).length;

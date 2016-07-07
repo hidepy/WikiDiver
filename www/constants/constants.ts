@@ -12,4 +12,24 @@ namespace STORAGE_TYPE{
   export const NOTE_FOR_ARTICLE = "WIKI_DIVER_NOTE";
   export const HISTORY = "WIKI_DIVER_HISOTRY";
   export const TREE = "WIKI_DIVER_TREE";
+  export const SETTINGS = "WIKI_DIVER_SETTINGS";
+}
+
+namespace SETTING_TYPE{
+    export const LANGUAGE = "language";
+    export const ARTICLE_TYPE = "article_type";
+    export const HISTORY_LENGTH = "history_length";
+}
+
+namespace PAGE_TYPE{
+  export const TYPE_MAP = {
+    "search_result_header.html": "H",
+    "search_result_detail.html": "D",
+    "tree_view.html": "T"
+  };
+  export const NAME_MAP = {
+    "search_result_header.html": "Header",
+    "search_result_detail.html": "Detail",
+    "tree_view.html": "Tree"
+  };
 }

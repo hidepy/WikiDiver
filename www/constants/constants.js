@@ -12,4 +12,24 @@ var STORAGE_TYPE;
     STORAGE_TYPE.NOTE_FOR_ARTICLE = "WIKI_DIVER_NOTE";
     STORAGE_TYPE.HISTORY = "WIKI_DIVER_HISOTRY";
     STORAGE_TYPE.TREE = "WIKI_DIVER_TREE";
+    STORAGE_TYPE.SETTINGS = "WIKI_DIVER_SETTINGS";
 })(STORAGE_TYPE || (STORAGE_TYPE = {}));
+var SETTING_TYPE;
+(function (SETTING_TYPE) {
+    SETTING_TYPE.LANGUAGE = "language";
+    SETTING_TYPE.ARTICLE_TYPE = "article_type";
+    SETTING_TYPE.HISTORY_LENGTH = "history_length";
+})(SETTING_TYPE || (SETTING_TYPE = {}));
+var PAGE_TYPE;
+(function (PAGE_TYPE) {
+    PAGE_TYPE.TYPE_MAP = {
+        "search_result_header.html": "H",
+        "search_result_detail.html": "D",
+        "tree_view.html": "T"
+    };
+    PAGE_TYPE.NAME_MAP = {
+        "search_result_header.html": "Header",
+        "search_result_detail.html": "Detail",
+        "tree_view.html": "Tree"
+    };
+})(PAGE_TYPE || (PAGE_TYPE = {}));

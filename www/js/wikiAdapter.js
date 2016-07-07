@@ -9,7 +9,7 @@ emmet
 */
 var IS_DEBUG = false;
 var WikiAdapter = (function () {
-    function WikiAdapter() {
+    function WikiAdapter(language, article_type) {
         this._getDummyHeader = function () {
             //return JSON.parse('{"batchcomplete":"","continue":{"sroffset":10,"continue":"-||"},"query":{"searchinfo":{"totalhits":81},"search":[{"ns":0,"title":"スズキ・GN","snippet":"ビジネスユースも意識したオールマイティな仕様         <span class=\"searchmatch\">GN125</span>は125cc4ストローク単気筒エンジンを搭載し、1982年4月に発売された。 日本国内では全車キャストホイール仕様のGN125Eという名称で販売されていたが、スポークホイール仕様の設定があった日本国外輸出向けモデルには<span class=\"searchmatch\">GN125</span>","size":5967,"wordcount":906,"timestamp":"2015-05-07T02:48:08Z"},{"ns":0,"title":"スズキ・GN125","snippet":"スズキ・GN &gt; スズキ・<span class=\"searchmatch\">GN125</span>      <span class=\"searchmatch\">GN125</span>（ジーエヌひゃくにじゅうご）とは、スズキが製造・発売するオートバイ（第二種原動機付自転車）である。 本項では、1980年代に販売された日本国内生産車種と、1990年以降に日本国外でOEM生産された車種とを、「<span class=\"searchmatch\">GN125</span>","size":9985,"wordcount":1377,"timestamp":"2016-02-09T05:09:05Z"},{"ns":0,"title":"スズキ・エポ","snippet":"(UZ50L5) · 薔薇 · 蘭    51 - 125cc  DF125 · DR125S · GP125 · GT100 · GT125（en） · <span class=\"searchmatch\">GN125</span> · GS125E（カタナ） · K90/125 · RA125 · RG80E · RG125/E · RG125Γ · RV75/90/125（バンバン） ·","size":2246,"wordcount":407,"timestamp":"2015-04-07T21:34:34Z"},{"ns":0,"title":"スズキ・GSX400FW","snippet":"(UZ50L5) · 薔薇 · 蘭    51 - 125cc  DF125 · DR125S · GP125 · GT100 · GT125（en） · <span class=\"searchmatch\">GN125</span> · GS125E（カタナ） · K90/125 · RA125 · RG80E · RG125/E · RG125Γ · RV75/90/125（バンバン） ·","size":2037,"wordcount":320,"timestamp":"2015-03-18T23:12:08Z"},{"ns":0,"title":"スズキ・RGV-Γ500","snippet":"(UZ50L5) · 薔薇 · 蘭    51 - 125cc  DF125 · DR125S · GP125 · GT100 · GT125（en） · <span class=\"searchmatch\">GN125</span> · GS125E（カタナ） · K90/125 · RA125 · RG80E · RG125/E · RG125Γ · RV75/90/125（バンバン） ·","size":4571,"wordcount":799,"timestamp":"2016-03-08T08:00:27Z"},{"ns":0,"title":"スズキ・マローダー","snippet":" 1998年に発売された排気量125ccクラスのアメリカンバイク。モデルネームはGZ125。 エンジンは<span class=\"searchmatch\">GN125</span>に搭載された124cc空冷単気筒4サイクル・SOHC2バルブを搭載する。最高出力12ps/9,000rpm。車体はマローダー250とほぼ共通で1","size":17851,"wordcount":2244,"timestamp":"2015-05-16T10:40:11Z"},{"ns":0,"title":"スズキ・K","snippet":"(UZ50L5) · 薔薇 · 蘭    51 - 125cc  DF125 · DR125S · GP125 · GT100 · GT125（en） · <span class=\"searchmatch\">GN125</span> · GS125E（カタナ） · K90/125 · RA125 · RG80E · RG125/E · RG125Γ · RV75/90/125（バンバン） ·","size":4066,"wordcount":645,"timestamp":"2016-01-14T09:28:07Z"},{"ns":0,"title":"スズキ・ジェンマ","snippet":"(UZ50L5) · 薔薇 · 蘭    51 - 125cc  DF125 · DR125S · GP125 · GT100 · GT125（en） · <span class=\"searchmatch\">GN125</span> · GS125E（カタナ） · K90/125 · RA125 · RG80E · RG125/E · RG125Γ · RV75/90/125（バンバン） ·","size":4355,"wordcount":717,"timestamp":"2015-12-08T07:04:29Z"},{"ns":0,"title":"スズキ・アクロス","snippet":"(UZ50L5) · 薔薇 · 蘭    51 - 125cc  DF125 · DR125S · GP125 · GT100 · GT125（en） · <span class=\"searchmatch\">GN125</span> · GS125E（カタナ） · K90/125 · RA125 · RG80E · RG125/E · RG125Γ · RV75/90/125（バンバン） ·","size":5497,"wordcount":390,"timestamp":"2015-04-06T04:00:45Z"},{"ns":0,"title":"スズキ・GS50","snippet":"(UZ50L5) · 薔薇 · 蘭    51 - 125cc  DF125 · DR125S · GP125 · GT100 · GT125（en） · <span class=\"searchmatch\">GN125</span> · GS125E（カタナ） · K90/125 · RA125 · RG80E · RG125/E · RG125Γ · RV75/90/125（バンバン） ·","size":4753,"wordcount":680,"timestamp":"2015-03-22T10:11:57Z"}]}}');
             return {
@@ -54,7 +54,15 @@ var WikiAdapter = (function () {
                 }
             };
         };
+        this.language_type = language || "ja"; // default
+        this.article_type = article_type || "5"; // default(parse) "4" means extract
     }
+    WikiAdapter.prototype.setLanguage = function (language) {
+        this.language_type = language;
+    };
+    WikiAdapter.prototype.setArticleType = function (article_type) {
+        this.article_type = article_type;
+    };
     WikiAdapter.prototype.getHeaderList = function (search_key, callback) {
         console.log("in getHeaderList. param=search_key: " + search_key);
         //callback地獄...jqueryのdefferedするべきか...
@@ -135,7 +143,7 @@ var WikiAdapter = (function () {
         // 4=> [明細]タイトル検索
         //var main_query = main_query_orig ? encodeURIComponent(main_query_orig) : "";
         var main_query = main_query_orig;
-        var l_type = language_type ? language_type : "ja";
+        var l_type = this.language_type ? this.language_type : "ja"; // 言語設定
         var params = {
             format: "json",
             action: "query",

@@ -1,4 +1,13 @@
 /// <reference path="../../tsd/cordova/cordova.d.ts"/>
+/* 安全にpoppageする. 戻り先がない場合はhomeに戻る */
+function popPageSafe(nav) {
+    if (nav.canPopPage()) {
+        nav.popPage();
+    }
+    else {
+        nav.resetToPage("home.html");
+    }
+}
 /* 実機上でもobjectのログを安全に吐く */
 function outlog(v) {
     if (typeof v === "object") {
@@ -31,6 +40,7 @@ function convJSON2QueryString(data) {
 function convHash2Arr(hash) {
     var arr = [];
     for (var prop in hash) {
+        hash[prop].__key = prop; // hash自体にキーを仕込んでおく
         arr.push(hash[prop]);
     }
     return arr;

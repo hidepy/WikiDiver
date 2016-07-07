@@ -8,6 +8,8 @@ interface StorageManager {
    */
     init(storage_key_name: string): void;
 
+    setLimit(obj: any): void;
+
     /**
      * @return {objectArray} storageの全オブジェクト
      * @description storageに保持する全オブジェクトを返却する

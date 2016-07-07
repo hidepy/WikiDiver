@@ -13,8 +13,19 @@ var IS_DEBUG = false;
 
  class WikiAdapter{
 
-   constructor(){
+   private language_type;
+   private article_type;
 
+   constructor(language?: string, article_type?: string){
+      this.language_type = language || "ja"; // default
+      this.article_type = article_type || "5";// default(parse) "4" means extract
+   }
+
+   public setLanguage(language: string){
+     this.language_type = language;
+   }
+   public setArticleType(article_type: string){
+     this.article_type = article_type;
    }
    public getHeaderList(search_key: string, callback: (res: any)=>void): void{
      console.log("in getHeaderList. param=search_key: " + search_key);
@@ -114,7 +125,7 @@ var IS_DEBUG = false;
      //var main_query = main_query_orig ? encodeURIComponent(main_query_orig) : "";
      var main_query = main_query_orig;
 
-     var l_type = language_type ? language_type : "ja";
+     var l_type = this.language_type ? this.language_type : "ja"; // 言語設定
 
      var params = {
        format: "json",
@@ -185,7 +196,7 @@ var IS_DEBUG = false;
        success: function(data){
          console.log("ajax success!!");
          outlog(data);
-         
+
          callback(data);
          return;
        },
