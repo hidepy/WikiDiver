@@ -91,44 +91,43 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
   <!-- Home画面　index > home -->
   <ons-template id="home.html">
+    <ons-navigator var="myNavigator">
+        <ons-page ng-controller="HomeController" id="home">
 
-  <ons-navigator var="myNavigator">
-      <ons-page ng-controller="HomeController" id="home">
+          <ons-toolbar>
+              <div class="center">WikiDiver</div>
+              <div class="right">
+                <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+                  <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+                </ons-toolbar-button>
+              </div>
+          </ons-toolbar>
 
-        <ons-toolbar>
-            <div class="center">WikiDiver</div>
-            <div class="right">
-              <ons-toolbar-button ng-click="myMenu.toggleMenu()">
-                <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-              </ons-toolbar-button>
+          <div class="contents_wrapper">
+            <div>
+              <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
             </div>
-        </ons-toolbar>
 
-        <div class="contents_wrapper">
-          <div>
-            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="">
+            <div>
+              <ons-button ng-click="dive()" modifier="large">search</ons-button>
+            </div>
+
+            <div>
+              <ons-button ng-click="move2favorite()" modifier="large--quiet">view favorite({{favorite_length}} records)</ons-button>
+            </div>
+
+            <div>
+              <ons-button ng-click="move2history()" modifier="large--quiet">view history</ons-button>
+            </div>
+
+            <div>
+              <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
+            </div>
           </div>
 
-          <div>
-            <ons-button ng-click="dive()" modifier="large--quiet">search</ons-button>
-          </div>
+        </ons-page>
 
-          <div>
-            <ons-button ng-click="move2favorite()" modifier="large--quiet">view favorite({{favorite_length}} records)</ons-button>
-          </div>
-
-          <div>
-            <ons-button ng-click="move2history()" modifier="large--quiet">view history</ons-button>
-          </div>
-
-          <div>
-            <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
-          </div>
-        </div>
-
-      </ons-page>
-
-  </ons-navigator>
+    </ons-navigator>
   </ons-template>
 
   <ons-template id="search_result_header.html">
@@ -234,7 +233,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         <ons-row>
           <ons-col width="80%">
             <h2>Parse or Extract</h2>
-            </ons-col>
+          </ons-col>
           <ons-col width="20%">
             <div class="button-bar__item">
                 <input type="radio" ng-model="radio_article" value="5" />
@@ -252,7 +251,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             <h2>Save History Length</h2>
           </ons-col>
           <ons-col width="20%">
-            <input type="number" ng-model="history_length">
+            <input type="number" ng-model="history_length" />
           </ons-col>
         </ons-row>
 
@@ -288,7 +287,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             </ons-row>
           </ons-list-item>
         </ons-list>
-
       </div>
     </ons-page>
   </ons-template>
@@ -299,7 +297,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       <p class="caption">{{sharing.caption}}</p>
       <div>
         <ons-button ng-click="saveMemo()">save</ons-button>
-        <!--<ons-button ng-click="closePopover()">close</ons-button>-->
         <ons-button ng-click="deleteMemo()">delete</ons-button>
       </div>
       <textarea ng-model="sharing.memo" rows="5" cols="20"></textarea>

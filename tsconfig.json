@@ -36,7 +36,6 @@
     "./www/js/commonFunctions.ts",
     "./www/js/popoverSharingService.ts",
     "./www/js/storageManager.ts",
-    "./www/js/treeManager.ts",
     "./www/js/wikiAdapter.ts",
     "./www/js/wikidiverController.ts",
     "./tsd/angular/angular-1.4.d.ts",
