@@ -148,15 +148,6 @@ var WikiAdapter = (function () {
                 break;
             case "1":
                 //応答が微妙なんで一旦prop削除
-                /*
-                        params["prop"] = "revisions";
-                        params["pageids"] = main_query;
-                        params["rvprop"] = "content";
-                        params["rvparse"] = "";
-                
-                        //params["prop"] = "extracts|redirects";
-                        //params["prop"] = "extracts|links";
-                */
                 params["prop"] = "extracts|redirects";
                 params["pageids"] = main_query;
                 break;
@@ -203,13 +194,11 @@ var WikiAdapter = (function () {
             data: params,
             beforeSend: function () {
                 console.log("ajax beforeSend. params=");
-                //console.log(params);
+                outlog(params);
             },
             success: function (data) {
                 console.log("ajax success!!");
-                if (!isDevice()) {
-                    console.log(data);
-                }
+                outlog(data);
                 callback(data);
                 return;
             },

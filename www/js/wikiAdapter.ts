@@ -129,17 +129,6 @@ var IS_DEBUG = false;
         break;
       case "1": //=> [明細]ID検索
         //応答が微妙なんで一旦prop削除
-
-/*
-        params["prop"] = "revisions";
-        params["pageids"] = main_query;
-        params["rvprop"] = "content";
-        params["rvparse"] = "";
-
-        //params["prop"] = "extracts|redirects";
-        //params["prop"] = "extracts|links";
-*/
-
         params["prop"] = "extracts|redirects";
         params["pageids"] = main_query;
         break;
@@ -191,11 +180,12 @@ var IS_DEBUG = false;
        data: params,
        beforeSend: function(){
          console.log("ajax beforeSend. params=");
-         //console.log(params);
+         outlog(params);
        },
        success: function(data){
          console.log("ajax success!!");
-         if(!isDevice()){ console.log(data); }
+         outlog(data);
+         
          callback(data);
          return;
        },

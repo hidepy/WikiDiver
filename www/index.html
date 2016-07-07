@@ -79,7 +79,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
           History
         </ons-list-item>
 
-        <ons-list-item>
+        <ons-list-item ng-click="move2Tree()">
           Tree
         </ons-list-item>
 
@@ -244,16 +244,36 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
 
   <ons-template id="tree_view.html">
+    <ons-page ng-controller="TreeViewController">
 
+      <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Where I am</div>
+        <div class="right">
+          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+      </ons-toolbar>
+
+      <div class="contents_wrapper">
+        <ons-list>
+          <ons-list-item ng-repeat="page in page_stack">
+            <p>{{page.}}</p>
+          </ons-list-item>
+        </ons-list>
+
+      </div>
+    </ons-page>
   </ons-template>
 
   <ons-template id="popover_memo.html">
     <ons-popover var="myPopoverMemo" ng-controller="popoverController" cancelable style="width: 80%; max-width: 300px;">
-      <h2>memo for {{sharing.title}}</h2>
+      <h2>Memo for</h2> <h3>{{sharing.title}}</h3>
       <p class="caption">{{sharing.caption}}</p>
       <div>
         <ons-button ng-click="saveMemo()">save</ons-button>
-        <ons-button ng-click="closePopover()">close</ons-button>
+        <!--<ons-button ng-click="closePopover()">close</ons-button>-->
         <ons-button ng-click="deleteMemo()">delete</ons-button>
       </div>
       <textarea ng-model="sharing.memo" rows="5" cols="20"></textarea>

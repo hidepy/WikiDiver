@@ -74,7 +74,7 @@ TODO
             console.log("in prepush");
             var page = event.currentPage; // 現在のページオブジェクトを取得する
             // 果たして望み通りの値は取れるのか...
-            outlog(page);
+            outlog(event);
         });
         // onsen ポップオーバーを作成
         myPopoverMemo = ons.createPopover('popover_memo.html');
@@ -95,6 +95,10 @@ TODO
                     });
                 }
             });
+        };
+        $scope.move2Tree = function () {
+            myMenu.closeMenu();
+            myNavigator.pushPage("tree_view.html");
         };
         $scope.move2setting = function () {
             myNavigator.pushPage("settings.html");
@@ -444,6 +448,11 @@ TODO
             $scope.sharing = data;
             console.log("memo is=" + $scope.sharing.memo);
         });
+    });
+    module.controller("TreeViewController", function ($scope) {
+        console.log("in TreeViewController");
+        $scope.page_stack = myNavigator.getPages();
+        outlog($scope.page_stack);
     });
     module.controller("SettingsController", function ($scope) {
     });
