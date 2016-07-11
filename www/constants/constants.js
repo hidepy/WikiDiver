@@ -33,3 +33,7 @@ var PAGE_TYPE;
         "tree_view.html": "Tree"
     };
 })(PAGE_TYPE || (PAGE_TYPE = {}));
+var FAVORITE_KEY_PROP;
+(function (FAVORITE_KEY_PROP) {
+    FAVORITE_KEY_PROP.KEY = "title";
+})(FAVORITE_KEY_PROP || (FAVORITE_KEY_PROP = {}));

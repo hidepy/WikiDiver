@@ -1,8 +1,8 @@
 // はじめてのtypescriptプロジェクトなのでよくわかっていないところがありますが勘弁
 declare var angular: angular.IAngularStatic;
 declare var myNavigator: NavigatorView;
-declare var myPopoverMemo: PopoverView;
 declare var myMenu: SlidingMenuView;
+declare var myPopoverMemo: PopoverView;
 declare var pageSearchResultHeader: any;
 declare var pageSearchResultDetail: any;
 /// <reference path="./storageManager.ts" />
@@ -67,12 +67,16 @@ TODO
     // マスタ(設定)
     var storage_manager_settings: StorageManager = new StorageManager(STORAGE_TYPE.SETTINGS);
     // 履歴の保存
-    var storage_manager_history: StorageManager; // ons_readyでインスタンス化する
+    var storage_manager_history: StorageManager = new StorageManager(STORAGE_TYPE.HISTORY);
 
     // wikiadapter
     var wikiAdapter: WikiAdapter;
 
+    var myPopoverMemo: PopoverView;
+
     ons.ready(function(){
+
+console.log("ons ready");
 
       // マスタ設定確認
       // 言語設定
@@ -95,13 +99,18 @@ TODO
       }
 
 
-
       // WikiAdapter をインスタンス化
       wikiAdapter = new WikiAdapter(m_lang, m_art_type);
 
       // storage_manager_history(履歴管理) をインスタンス化
-      storage_manager_history = new StorageManager(STORAGE_TYPE.HISTORY, {length: m_his_len, sort_key: "timestamp"})
+      //storage_manager_history = new StorageManager(STORAGE_TYPE.HISTORY, {length: m_his_len, sort_key: "timestamp"})
+      storage_manager_history.setLimit({length: m_his_len, sort_key: "timestamp"});
 
+      ons.createDialog('popover_memo.html').then(function(dialog) {
+        //dialog.show();
+
+        myPopoverMemo = dialog;
+      });
 
       //pageにback-button設定
       if(isDevice()){ //実機なら
@@ -114,9 +123,6 @@ TODO
           });
         }
       }
-
-      // onsen ポップオーバーを作成
-      myPopoverMemo = ons.createPopover('popover_memo.html');
 
     });
 
@@ -137,7 +143,8 @@ TODO
             myNavigator.pushPage("search_result_header.html", {
               onTransitionEnd: {
                 is_favorite: (type_string == "favorite"),
-                is_history: (type_string == "history")
+                is_history: (type_string == "history"),
+                is_notes: (type_string == "notes")
               }
             });
           }
@@ -159,6 +166,9 @@ TODO
     module.controller("HomeController", function($scope){
         $scope.search_key = "";
         $scope.favorite_length = storage_manager_favorite.getItemLength();
+        $scope.history_length = storage_manager_history.getItemLength();
+        $scope.notes_length = storage_manager_memo.getItemLength();
+
 
         $scope.dive = function(){
           var el_keyword: HTMLElement = document.getElementById("home_searchKey");
@@ -169,7 +179,7 @@ TODO
             return;
           }
 
-          showAlert("search root in");
+          //showAlert("search root in");
 
           //次画面遷移
           myNavigator.pushPage("search_result_header.html",{
@@ -210,30 +220,114 @@ TODO
           });
         };
 
+        $scope.move2notes = function(){
+          console.log("in move2notes");
+
+          myNavigator.pushPage("search_result_header.html", {
+            onTransitionEnd: {
+              is_notes: true
+            }
+          });
+        };
+
     });
 
 
     module.controller("HeaderListController", function($scope){
 
+        $scope.screen_title = "Header";
         $scope.items = [];
         $scope.completeMatch = false; //true-> getHeaderList, false-> searchHeadersFromKeyword
+        $scope.is_favorite = false;
+        $scope.is_history = false;
+        $scope.is_notes = false;
+        $scope.delete_mode = false;
+        $scope.delete_targets = {list: []}; // 削除対象リスト
+
+
+        // 削除モード切替
+        $scope.toggleDeletemode = function(){
+          $scope.delete_mode = !$scope.delete_mode;
+          $scope.delete_targets.list = []; // 削除リストはクリア
+        };
+
+        $scope.toggleAllTargets = function(){
+          if($scope.delete_targets.list.length == $scope.items.length){
+            $scope.delete_targets.list = [];
+          }
+          else{
+            // 全権削除対象にpush
+            for(var i = 0; i < $scope.items.length; i++){
+              $scope.delete_targets.list.push($scope.items[i][FAVORITE_KEY_PROP.KEY]);
+            }
+          }
+        };
+
+        // 削除処理
+        $scope.deleteFavOrHis = function(){
+          console.log("in deleteFavOrHis");
+          outlog($scope.delete_targets.list);
+
+          console.log("current fav his flag=" + $scope.is_favorite + ", " + $scope.is_history);
+
+          if($scope.is_favorite){
+            storage_manager_favorite.deleteItems($scope.delete_targets.list);
+
+            $scope.items = convHash2Arr(storage_manager_favorite.getAllItem());
+
+            console.log("in favorite root");
+          }
+          else if($scope.is_history){
+            storage_manager_history.deleteItems($scope.delete_targets.list);
+
+            $scope.items = convHash2Arr(storage_manager_history.getAllItem());
+
+            console.log("in history root");
+          }
+          else if($scope.is_notes){
+            storage_manager_memo.deleteItems($scope.delete_targets.list);
+
+            $scope.items = convHash2Arr(storage_manager_memo.getAllItem());
+
+            console.log("in memo root");
+          }
+
+          showAlert("item deleted");
+
+          $scope.toggleDeletemode(); // チェック切り替え
+          //$scope.$apply(); // 画面更新
+        };
 
         //レコード選択時
         $scope.processItemSelect = function(idx, event){
 
-          //idを求めてgetDetailByIdする
-          var selectedItem = $scope.items[idx];
+          if($scope.delete_mode){
+            var target_idx = $scope.delete_targets.list.indexOf($scope.items[idx][FAVORITE_KEY_PROP.KEY]);
 
-          //遷移だけして、次画面に検索をゆだねる
-          if(selectedItem){
-            //次画面遷移
-            myNavigator.pushPage("search_result_detail.html",{
-                onTransitionEnd: {
-                  pageid: selectedItem.pageid || false,
-                  title: selectedItem.title,
-                  need_onload_search: true
-                }
-              });
+            //既に登録されているか
+            if(target_idx != -1){
+                //登録されている
+                $scope.delete_targets.list.splice(target_idx, 1); //削除
+            }
+            else{
+                $scope.delete_targets.list.push($scope.items[idx][FAVORITE_KEY_PROP.KEY]);
+            }
+          }
+          else{
+            //idを求めてgetDetailByIdする
+            var selectedItem = $scope.items[idx];
+
+            //遷移だけして、次画面に検索をゆだねる
+            if(selectedItem){
+              //次画面遷移
+              myNavigator.pushPage("search_result_detail.html",{
+                  onTransitionEnd: {
+                    pageid: selectedItem.pageid || false,
+                    title: selectedItem.title,
+                    need_onload_search: true
+                  }
+                });
+            }
           }
         };
 
@@ -294,12 +388,25 @@ TODO
         // favorite検索時
         else if(_args.onTransitionEnd && _args.onTransitionEnd.is_favorite){
           console.log("header. favorite");
+          $scope.is_favorite = true;
+          $scope.screen_title = "Favorite";
           $scope.items = convHash2Arr(storage_manager_favorite.getAllItem());
+          outlog($scope.items);
         }
         // history検索時
         else if(_args.onTransitionEnd && _args.onTransitionEnd.is_history){
-          $scope.items = convHash2Arr(storage_manager_history.getAllItem());
           console.log("header. history");
+          $scope.is_history = true;
+          $scope.screen_title = "History";
+          $scope.items = convHash2Arr(storage_manager_history.getAllItem());
+        }
+        // notes検索時
+        else if(_args.onTransitionEnd && _args.onTransitionEnd.is_notes){
+          console.log("header. notes");
+          $scope.is_notes = true;
+          $scope.screen_title = "Note";
+          $scope.items = convHash2Arr(storage_manager_memo.getAllItem());
+          outlog($scope.items);
         }
         // link選択時
         else if(_args.onTransitionEnd && _args.onTransitionEnd.is_link){
@@ -333,21 +440,26 @@ TODO
         // note用のpopoverを表示する
         console.log("in open note");
 
-        var memo_data = storage_manager_memo.getItem($scope.id);
+        var memo_data = storage_manager_memo.getItem($scope[FAVORITE_KEY_PROP.KEY]);
 
-        if(!memo_data){ memo_data = ""; }
+        if(!memo_data){ memo_data = {title: $scope.title, memo: ""}; }
 
         // popover オープン前に必要情報をコピー
         popoverSharingService.sharing.id = $scope.id;
         popoverSharingService.sharing.title = $scope.title;
         popoverSharingService.sharing.caption = "";
-        popoverSharingService.sharing.memo = memo_data; //タイトルから名称を引いてくる
+        popoverSharingService.sharing.memo = memo_data.memo; //タイトルから名称を引いてくる
 
         // sharingの値更新をsubscribeする
         popoverSharingService.updateSharing();
 
-        // popover show
-        myPopoverMemo.show("#detail_note_button");
+        if(myPopoverMemo){
+          // popover show
+          myPopoverMemo.show("#detail_note_button");
+        }
+        else{
+          showAlert("cannnot find myPopoverMemo... create!!");
+        }
       };
 
       // お気に入り保存
@@ -366,7 +478,7 @@ TODO
         };
 
         //保存 キーはtitleだが...問題なし？ wiki的には重複しない 文字化けが心配
-        storage_manager_favorite.saveItem2Storage(favorite.title, favorite);
+        storage_manager_favorite.saveItem2Storage(favorite[FAVORITE_KEY_PROP.KEY], favorite);
         showAlert("save2favorite!! ... nocheck...");
       }
 
@@ -395,15 +507,10 @@ TODO
         //対象でなかったら無視
       };
 
-
-      $scope.showMenu = function(){
-
-      }
-
       $scope.back2home = function(){
         //resetToPage
         myNavigator.resetToPage("home.html");
-      }
+      };
 
       $scope.processRedirectItemSelect = function(idx, event){
         console.log("in processRedirectItemSelect");
@@ -434,7 +541,7 @@ TODO
               links: $scope.links
             }
           });
-      }
+      };
 
       var handleGetDetail = (res: any)=> {
           console.log("callback level1");
@@ -532,7 +639,7 @@ TODO
           }
 
           // 詳細取得okならhistoryにタイトルを保存
-          storage_manager_history.saveItem2Storage($scope.id, {
+          storage_manager_history.saveItem2Storage($scope[FAVORITE_KEY_PROP.KEY], {
               pageid: $scope.id,
               title: $scope.title,
               timestamp: formatDate(new Date())
@@ -542,21 +649,19 @@ TODO
       };
 
       //idから詳細情報を取得する
-      var getDetail = (key: string) =>
-      {
+      var getDetail = (key: string)=> {
           wikiAdapter.getDetailById(
               key,
               handleGetDetail
           );
-      }
+      };
       //titleから詳細情報を取得する(searchだとpageidが取得できないので...)
-      var getDetailByTitle = (key: string) =>
-      {
+      var getDetailByTitle = (key: string)=> {
           wikiAdapter.getDetailByTitle(
             key,
             handleGetDetail
           );
-      }
+      };
 
       //---------- on detailpage load ----------
       var _args = myNavigator.getCurrentPage().options;
@@ -569,9 +674,9 @@ TODO
 
       // ロード時検索要求有りなら
       if(_args.onTransitionEnd && _args.onTransitionEnd.need_onload_search){
-        if(_args.onTransitionEnd.pageid){
-          console.log("in pageid root");
-          getDetail(_args.onTransitionEnd.pageid);
+        //if(_args.onTransitionEnd.pageid){
+        if(false){ // 一旦、pageidルートは削除(お気に入り、履歴からの場合にこっちのルートに入ってしまう)
+          //getDetail(_args.onTransitionEnd.pageid);
         }
         else{
           //pageidがない場合、titleにて明細検索を行う
@@ -580,6 +685,7 @@ TODO
           getDetailByTitle(_args.onTransitionEnd.title);
         }
       }
+
     });
 
 
@@ -593,7 +699,13 @@ TODO
 
       // 保存
       $scope.saveMemo = function(){
-        storage_manager_memo.saveItem2Storage($scope.sharing.id, $scope.sharing.memo);
+        storage_manager_memo.saveItem2Storage($scope.sharing[FAVORITE_KEY_PROP.KEY], {
+          title: $scope.sharing[FAVORITE_KEY_PROP.KEY],
+          memo: $scope.sharing.memo
+        });
+
+        popoverSharingService.sharing = $scope.sharing; // 次ポップアップオープン時用にコピー
+
         showAlert("save success!! but, actually needed to check success or failure...");
       };
 
@@ -609,10 +721,7 @@ TODO
       };
 
       $scope.$on('updateSharing', function(event, data) {
-        console.log(data);
-
         $scope.sharing = data;
-
         console.log("memo is=" + $scope.sharing.memo);
       });
     });
@@ -628,7 +737,12 @@ TODO
 
       for(var i = 0; i < nv_stack.length; i++){
 
-        var type = PAGE_TYPE.TYPE_MAP[nv_stack[i].name]
+        var type = PAGE_TYPE.TYPE_MAP[nv_stack[i].name];
+
+        outlog(nv_stack[i]);
+
+        var is_favorite = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_favorite : false;
+        var is_history = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_history : false;
 
         if(!type || (type == "T")){ continue; } // 表示不要のものは表示対象としない
 
@@ -638,12 +752,20 @@ TODO
           p_name: nv_stack[i].name,
           l_name: PAGE_TYPE.NAME_MAP[nv_stack[i].name],
           type: type,
-          search_key: (type == "H") ? options.search_key : options.title,
+          search_key: (type == "H") ? (function(){
+            if(isEmpty(options.search_key)){
+              // 検索キーがない=> お気に入りか履歴から来た場合
+              if(is_favorite){ return "FAVORITE"; }
+              else if(is_history){ return "HISTORY"; }
+              else{ return "UNKNOWN..."; }
+            }
+            else{
+              return options.search_key;
+            }
+          })() : options.title,
           depth: i
         });
       }
-
-      outlog($scope.page_stack);
 
       // ---------- initial process end ----------
 

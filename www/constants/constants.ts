@@ -33,3 +33,7 @@ namespace PAGE_TYPE{
     "tree_view.html": "Tree"
   };
 }
+
+namespace FAVORITE_KEY_PROP{
+  export const KEY = "title";
+}

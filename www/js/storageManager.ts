@@ -100,8 +100,9 @@ var StorageManager = function(storage_key_name, limit_info?: any){ // limit_info
 
 	proto.deleteItems = function(keys){
 		if(keys && keys.length && (keys.length > 0)){
+			var items = this.items;
 			keys.forEach(function(v, i, arr){
-				delete this.items[v];
+				delete items[v];
 			});
 		}
 
@@ -110,8 +111,11 @@ var StorageManager = function(storage_key_name, limit_info?: any){ // limit_info
 
 	proto.saveItem2Storage = function(key, data){
 
+		console.log("in saveItem2Storage. my name is=" + this.storage_key_name);
+		outlog(this.limit_info);
+
 		if(this.limit_info){ // 制限ありの場合
-			if(this.getItemLength > this.limit_info.length){ // 制限長を超えた
+			if(this.getItemLength() >= this.limit_info.length){ // 制限長を超えた
 				var sorted_arr = this.getSorted(this.limit_info.sort_key, false);
 				var target_key = sorted_arr[0]["__key"];
 

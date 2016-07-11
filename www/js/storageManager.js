@@ -75,15 +75,18 @@ var StorageManager = function (storage_key_name, limit_info) {
     };
     proto.deleteItems = function (keys) {
         if (keys && keys.length && (keys.length > 0)) {
+            var items = this.items;
             keys.forEach(function (v, i, arr) {
-                delete this.items[v];
+                delete items[v];
             });
         }
         window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
     };
     proto.saveItem2Storage = function (key, data) {
+        console.log("in saveItem2Storage. my name is=" + this.storage_key_name);
+        outlog(this.limit_info);
         if (this.limit_info) {
-            if (this.getItemLength > this.limit_info.length) {
+            if (this.getItemLength() >= this.limit_info.length) {
                 var sorted_arr = this.getSorted(this.limit_info.sort_key, false);
                 var target_key = sorted_arr[0]["__key"];
                 console.log("saveItem2Storage#limit_item");

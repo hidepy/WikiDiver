@@ -814,7 +814,7 @@ interface onsStatic {
      * @return {Promise} Promise object that resolves to the dialog component object
      * @description Create a dialog instance from a template
      */
-    createDialog(page: string): any;
+    createDialog(page: string, options?: any): any;
     /**
      * @param {String} page Page name. Can be either an HTML file or an <ons-template> containing a <ons-dialog> component
      * @param {Object} [options] Parameter object

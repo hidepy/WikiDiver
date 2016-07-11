@@ -16,10 +16,13 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
     <link rel="stylesheet" href="lib/onsen/css/onsenui.css" />
     <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-blue-basic-theme.css" />
 
-    <script src="jquery/jquery-1.11.3.min.js"></script>
+
+
     <script src="lib/onsen/js/angular/angular.js"></script>
     <script src="lib/onsen/js/angular/checklist-model.js"></script>
     <script src="lib/onsen/js/onsenui.js"></script>
+
+    <script src="jquery/jquery-1.11.3.min.js"></script>
 
     <script src="constants/constants.js"></script>
 
@@ -50,6 +53,9 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
     .infobox{
       width: 100% !important;
     }
+    .red-button{
+      background-color: #f85050;
+    }
     </style>
 
 
@@ -60,6 +66,28 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 -->
 <body>
 
+
+  <script type="text/ons-template" id="dialog.html">
+    <ons-dialog cancelable>
+
+    </ons-dialog>
+  </script>
+
+  <script type="text/ons-template" id="popover_memo.html">
+    <ons-dialog ng-controller="popoverController" animation="none" cancelable style="width: 90%; max-width: 400px;">
+      <div style="padding: 8px;">
+      <p>Memo for <span font-size="120%">{{sharing.title}}</span></p>
+      <p class="caption">{{sharing.caption}}</p>
+      <div>
+        <ons-button ng-click="saveMemo()">save</ons-button>
+        <ons-button ng-click="deleteMemo()">delete</ons-button>
+      </div>
+      <textarea ng-model="sharing.memo" rows="5" cols="20" style="width: 100%;"></textarea>
+    </ons-dialog>
+  </script>
+
+
+
 <ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="myMenu">
 
   <!-- slide menu用 -->
@@ -67,23 +95,45 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
     <div ng-controller="MenuController">
       <ons-list>
         <ons-list-item onclick="myMenu.setMainPage('home.html', {closeMenu: true})">
-          Home
-        </ons-list-item>
-
-        <ons-list-item ng-click="move2FavoriteOrHistory('favorite')">
-          Favorite
-        </ons-list-item>
-
-        <ons-list-item ng-click="move2FavoriteOrHistory('history')">
-          History
+          <ons-row>
+            <ons-col width="30%"><ons-icon icon="home" style="font-size: 28px; width: 1em;"></ons-icon></ons-col>
+            <ons-col>Home</ons-col>
+          </ons-row>
         </ons-list-item>
 
         <ons-list-item ng-click="move2Tree()">
-          Tree
+          <ons-row>
+            <ons-col width="30%"><ons-icon icon="code-fork" style="font-size: 32px; width: 1em;"></ons-icon></ons-col>
+            <ons-col>Tree</ons-col>
+          </ons-row>
+        </ons-list-item>
+
+        <ons-list-item ng-click="move2FavoriteOrHistory('favorite')">
+          <ons-row>
+            <ons-col width="30%"><ons-icon icon="ion-android-star" style="font-size: 28px; width: 1em;"></ons-icon></ons-col>
+            <ons-col>Favorite</ons-col>
+          </ons-row>
+        </ons-list-item>
+
+        <ons-list-item ng-click="move2FavoriteOrHistory('history')">
+          <ons-row>
+            <ons-col width="30%"><ons-icon icon="history" style="font-size: 32px; width: 1em;"></ons-icon></ons-col>
+            <ons-col>History</ons-col>
+          </ons-row>
+        </ons-list-item>
+
+        <ons-list-item ng-click="move2FavoriteOrHistory('notes')">
+          <ons-row>
+            <ons-col width="30%"><ons-icon icon="book" style="font-size: 28px; width: 1em;"></ons-icon></ons-col>
+            <ons-col>Notes</ons-col>
+          </ons-row>
         </ons-list-item>
 
         <ons-list-item ng-click="move2setting()">
-          Settings
+          <ons-row>
+            <ons-col width="30%"><ons-icon icon="gear" style="font-size: 28px; width: 1em;"></ons-icon></ons-col>
+            <ons-col>Settings</ons-col>
+          </ons-row>
         </ons-list-item>
       </ons-list>
     </div>
@@ -110,7 +160,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             </div>
 
             <div>
-              <ons-button ng-click="dive()" modifier="large">search</ons-button>
+              <ons-button ng-click="dive()" modifier="large"><ons-icon icon="search" style="font-size: 24px; width: 1em;"></ons-icon>search</ons-button>
             </div>
 
             <div>
@@ -118,7 +168,18 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             </div>
 
             <div>
-              <ons-button ng-click="move2history()" modifier="large--quiet">view history</ons-button>
+              <ons-button ng-click="move2history()" modifier="large--quiet">view history({{history_length}} records)</ons-button>
+            </div>
+
+            <div>
+              <ons-button ng-click="move2notes()" modifier="large--quiet">view notes({{notes_length}} records)</ons-button>
+            </div>
+
+            <div>
+              <ons-button modifier="large--quiet">
+                <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
+                Random Search
+              </ons-button>
             </div>
 
             <div>
@@ -136,7 +197,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
       <ons-toolbar>
         <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">Headers</div>
+        <div class="center">{{screen_title}}</div>
 
         <div class="right">
           <ons-toolbar-button ng-click="myMenu.toggleMenu()">
@@ -146,13 +207,28 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       </ons-toolbar>
 
       <ons-list>
-        <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items" ng-click="processItemSelect($index, $event)">
-          <ons-col>
-            {{item.pageid}}
-          </ons-col>
-          <ons-col>
-            {{item.title}}
-          </ons-col>
+        <ons-list-item ng-show="is_favorite||is_history||is_notes">
+          <ons-button ng-hide="delete_mode" modifier="large" ng-disabled="items.length==0" ng-click="toggleDeletemode()">delete</ons-button>
+          <ons-row ng-show="delete_mode">
+            <ons-col>
+              <ons-button modifier="large" ng-click="toggleDeletemode()">cancel</ons-button>
+            </ons-col>
+            <ons-col>
+              <ons-button modifier="large--quiet" ng-click="toggleAllTargets()">check all</ons-button>
+            </ons-col>
+            <ons-col>
+              <ons-button modifier="large" class="red-button" ng-click="deleteFavOrHis()">delete</ons-button>
+            </ons-col>
+          </ons-row>
+        </ons-list-item>
+
+        <ons-list-header>items</ons-list-header>
+        <ons-list-item id="header_main_list" modifier="chevron" class="item list-item-container" ng-repeat="item in items track by $index" ng-click="processItemSelect($index, $event)">
+          <ons-row>
+            <ons-col ng-show="delete_mode" width="20%"><input type="checkbox" checklist-model="delete_targets.list" checklist-value="item.title"><div class="checkbox__checkmark"></div></ons-col>
+            <ons-col>{{item.title}}</ons-col>
+            <ons-col ng-hide="delete_mode" ng-show="is_notes" width="50%" style="overflow: hidden;">{{item.memo}}</ons-col>
+          </ons-row>
         </ons-list-item>
       </ons-list>
 
@@ -164,10 +240,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
       <ons-toolbar>
         <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">Detail</div>
+        <!--<div class="center">Detail</div>-->
         <div class="right">
           <ons-toolbar-button ng-click="openWithBrowser()">
-            <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
+            <ons-icon icon="globe" style="font-size: 32px; width: 1em;"></ons-icon>
           </ons-toolbar-button>
           <ons-toolbar-button id="detail_note_button" ng-click="openNote()" style="position: relative;">
             <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
@@ -217,10 +293,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
       <div class="contents_wrapper">
         <ons-row>
-          <ons-col width="80%">
+          <ons-col width="65%">
             <h2>Language</h2>
           </ons-col>
-          <ons-col width="20%">
+          <ons-col width="35%">
             <div class="button-bar__item">
                 <input type="radio" ng-model="radio_language" value="ja" />
                 <div class="button-bar__button">Japanese</div>
@@ -233,10 +309,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </ons-row>
 
         <ons-row>
-          <ons-col width="80%">
+          <ons-col width="65%">
             <h2>Parse or Extract</h2>
           </ons-col>
-          <ons-col width="20%">
+          <ons-col width="35%">
             <div class="button-bar__item">
                 <input type="radio" ng-model="radio_article" value="5" />
                 <div class="button-bar__button">Parse</div>
@@ -249,10 +325,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </ons-row>
 
         <ons-row>
-          <ons-col width="80%">
+          <ons-col width="65%">
             <h2>Save History Length</h2>
           </ons-col>
-          <ons-col width="20%">
+          <ons-col width="35%">
             <input type="number" ng-model="history_length">
           </ons-col>
         </ons-row>
@@ -291,18 +367,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </ons-list>
       </div>
     </ons-page>
-  </ons-template>
-
-  <ons-template id="popover_memo.html">
-    <ons-popover var="myPopoverMemo" ng-controller="popoverController" cancelable style="width: 90%; max-width: 300px;">
-      <h3>Memo for{{sharing.title}}</h3>
-      <p class="caption">{{sharing.caption}}</p>
-      <div>
-        <ons-button ng-click="saveMemo()">save</ons-button>
-        <ons-button ng-click="deleteMemo()">delete</ons-button>
-      </div>
-      <textarea ng-model="sharing.memo" rows="5" cols="20"></textarea>
-    </ons-popover>
   </ons-template>
 
 </ons-sliding-menu>
