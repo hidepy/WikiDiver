@@ -66,13 +66,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 -->
 <body>
 
-
-  <script type="text/ons-template" id="dialog.html">
-    <ons-dialog cancelable>
-
-    </ons-dialog>
-  </script>
-
   <script type="text/ons-template" id="popover_memo.html">
     <ons-dialog ng-controller="popoverController" animation="none" cancelable style="width: 90%; max-width: 400px;">
       <div style="padding: 8px;">
@@ -176,7 +169,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             </div>
 
             <div>
-              <ons-button modifier="large--quiet">
+              <ons-button ng-click="randomDive()" modifier="large--quiet">
                 <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
                 Random Search
               </ons-button>

@@ -56,7 +56,8 @@ var IS_DEBUG = false;
          callback(res.query.pages[id]);
        }
        else{
-         console.log("cannnot find target article...");
+         console.log("cannot find target...");
+         callback({has_no_contents: true});
        }
 
      }, id);
@@ -70,6 +71,10 @@ var IS_DEBUG = false;
 
        if(res && res.query && res.query.search){
          callback(res.query); //queryの階層にヒット件数があるので...
+       }
+       else{
+         console.log("cannot find target...");
+         callback({has_no_contents: true});
        }
 
      }, keyword);
@@ -85,7 +90,8 @@ var IS_DEBUG = false;
    public getDetailByTitle(keyword: string, callback: (res: any)=>void): void{
      console.log("in getDetailByTitle. param=keyword: " + keyword);
 
-     var req_type = "5"; //"5" or "4"
+     //var req_type = "5"; //"5" or "4"
+     var req_type = this.article_type || "5";
 
      this.sendRequest(req_type, res => {
        console.log("in getDetailByTitle callback!!");
@@ -100,6 +106,7 @@ var IS_DEBUG = false;
          }
          else{
            console.log("cannnot find target article...");
+           callback({has_no_contents: true});
          }
        }
        else if(req_type == "5"){ //parseの場合
@@ -109,9 +116,26 @@ var IS_DEBUG = false;
         }
         else{
           console.log("cannot find target...");
+          callback({parse: {}, has_no_contents: true});
         }
        }
      }, keyword);
+   }
+   public searchRandomHeaders(callback: (res: any)=>void): void{
+     console.log("in searchRandomHeaders");
+
+     this.sendRequest("6", res=> {
+       console.log("in searchRandomHeaders callback!!");
+
+       if(res && res.query && res.query.random){
+         callback(res.query);
+       }
+       else{
+         console.log("cannot find target...");
+         callback({has_no_contents: true});
+       }
+
+     });
    }
    private sendRequest(type: string, callback: (res: any)=>void, main_query_orig?: string, language_type?: string): any{
 
@@ -121,6 +145,8 @@ var IS_DEBUG = false;
      // 2=> [ヘッダ]キーワード検索
      // 3=> [ヘッダ]参照検索
      // 4=> [明細]タイトル検索
+     // 5=> [明細]parse
+     // 6=> [ヘッダ]ランダム検索
 
      //var main_query = main_query_orig ? encodeURIComponent(main_query_orig) : "";
      var main_query = main_query_orig;
@@ -157,13 +183,16 @@ var IS_DEBUG = false;
         params["titles"] = main_query;
         params["pllimit"] = 50;
         params["exsectionformat"] = "raw";
-
         break;
       case "5": //[明細] parseお願い
         params["action"] = "parse";
         params["page"] = main_query;
         params["prop"] = "text|sections|links";
         break;
+      case "6": //[ヘッダ] ランダム検索
+        params["list"] = "random";
+        params["rnnamespace"] = "0";
+        params["rnlimit"] = "20";
      }
 
 

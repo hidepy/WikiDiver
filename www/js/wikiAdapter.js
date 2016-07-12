@@ -84,7 +84,8 @@ var WikiAdapter = (function () {
                 callback(res.query.pages[id]);
             }
             else {
-                console.log("cannnot find target article...");
+                console.log("cannot find target...");
+                callback({ has_no_contents: true });
             }
         }, id);
     };
@@ -95,6 +96,10 @@ var WikiAdapter = (function () {
             //console.log(res);
             if (res && res.query && res.query.search) {
                 callback(res.query); //queryの階層にヒット件数があるので...
+            }
+            else {
+                console.log("cannot find target...");
+                callback({ has_no_contents: true });
             }
         }, keyword);
     };
@@ -107,7 +112,8 @@ var WikiAdapter = (function () {
     };
     WikiAdapter.prototype.getDetailByTitle = function (keyword, callback) {
         console.log("in getDetailByTitle. param=keyword: " + keyword);
-        var req_type = "5"; //"5" or "4"
+        //var req_type = "5"; //"5" or "4"
+        var req_type = this.article_type || "5";
         this.sendRequest(req_type, function (res) {
             console.log("in getDetailByTitle callback!!");
             //console.log(res);
@@ -121,6 +127,7 @@ var WikiAdapter = (function () {
                 }
                 else {
                     console.log("cannnot find target article...");
+                    callback({ has_no_contents: true });
                 }
             }
             else if (req_type == "5") {
@@ -130,9 +137,23 @@ var WikiAdapter = (function () {
                 }
                 else {
                     console.log("cannot find target...");
+                    callback({ parse: {}, has_no_contents: true });
                 }
             }
         }, keyword);
+    };
+    WikiAdapter.prototype.searchRandomHeaders = function (callback) {
+        console.log("in searchRandomHeaders");
+        this.sendRequest("6", function (res) {
+            console.log("in searchRandomHeaders callback!!");
+            if (res && res.query && res.query.random) {
+                callback(res.query);
+            }
+            else {
+                console.log("cannot find target...");
+                callback({ has_no_contents: true });
+            }
+        });
     };
     WikiAdapter.prototype.sendRequest = function (type, callback, main_query_orig, language_type) {
         // type 検索タイプ
@@ -141,6 +162,8 @@ var WikiAdapter = (function () {
         // 2=> [ヘッダ]キーワード検索
         // 3=> [ヘッダ]参照検索
         // 4=> [明細]タイトル検索
+        // 5=> [明細]parse
+        // 6=> [ヘッダ]ランダム検索
         //var main_query = main_query_orig ? encodeURIComponent(main_query_orig) : "";
         var main_query = main_query_orig;
         var l_type = this.language_type ? this.language_type : "ja"; // 言語設定
@@ -179,6 +202,10 @@ var WikiAdapter = (function () {
                 params["page"] = main_query;
                 params["prop"] = "text|sections|links";
                 break;
+            case "6":
+                params["list"] = "random";
+                params["rnnamespace"] = "0";
+                params["rnlimit"] = "20";
         }
         if (IS_DEBUG) {
             if (type == "1" || type == "4") {

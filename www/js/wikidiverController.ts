@@ -12,20 +12,15 @@ declare var pageSearchResultDetail: any;
 //2016/07/04
 /*
 TODO
-  memo 保存ok
-  クリップ機能追加ok
-  スライドメニュー実装
-    menu項目
-      home
-      tree
-      favorite
-      history
-      settings
 
-  2016/07/05
-  treeかhistoryかsettingsから
+  2016/07/12
+    残りタスク
+      image表示, 表示用のオプション追加
+      概要のみ表示、その後展開的な
+      コピーokにする
 
-  storageManagerに件数機能を
+
+
 */
 
 // 2016/07/01
@@ -179,8 +174,6 @@ console.log("ons ready");
             return;
           }
 
-          //showAlert("search root in");
-
           //次画面遷移
           myNavigator.pushPage("search_result_header.html",{
               onTransitionEnd: {
@@ -189,6 +182,17 @@ console.log("ons ready");
               }
             });
         };
+
+        // ランダム検索
+        $scope.randomDive = function(){
+          //次画面遷移
+          myNavigator.pushPage("search_result_header.html",{
+            onTransitionEnd: {
+              is_from_home: true,
+              is_random: true
+            }
+          });
+        }
 
         $scope.showMenu = function(){
           console.log("in showMenu");
@@ -241,8 +245,10 @@ console.log("ons ready");
         $scope.is_favorite = false;
         $scope.is_history = false;
         $scope.is_notes = false;
+        $scope.is_random = false;
         $scope.delete_mode = false;
         $scope.delete_targets = {list: []}; // 削除対象リスト
+        $scope.no_result = false; // 結果0件の場合にtrue
 
 
         // 削除モード切替
@@ -337,10 +343,8 @@ console.log("ons ready");
                 (res: any) => {
                   console.log("callback level1");
 
-                  for(var p in res){
-                    if(res[p].pageid){ //page idが存在すれば規定通りのレコードと判断
-                      $scope.items.push(res[p]);
-                    }
+                  for(var p in res){ //page idが存在すれば規定通りのレコードと判断
+                    if(res[p].pageid){ $scope.items.push(res[p]); }
                   }
 
                   $scope.$apply();
@@ -348,25 +352,39 @@ console.log("ons ready");
             );
         };
 
+        var searchHeadersFromKeywordCallback = function(res){
+          console.log("callback level1(search headers)");
+
+          $scope.items = [];
+
+          if(res){ // 返却値があれば
+            if(res.has_no_contents){ // データ無しの場合
+              $scope.no_result = true;
+            }
+            else if(res.search){ // 通常検索の場合
+              for(var r in res.search){ $scope.items.push(res.search[r]); }
+            }
+            else if(res.random){ // ランダム検索の場合
+              for(var r in res.random){ $scope.items.push(res.random[r]); }
+            }
+          }
+          else{
+            $scope.no_result = true;
+          }
+
+          $scope.$apply();
+        };
+
         var searchHeadersFromKeyword = (keyword: string)=> {
           wikiAdapter.searchHeadersFromKeyword(
             keyword,
-            res=>{
-              console.log("callback level1(search headers)");
-              //console.log(res);
+            searchHeadersFromKeywordCallback
+          );
+        };
 
-              var hit_count = (res.searchinfo && res.searchinfo.totalhits) ? res.searchinfo.totalhits : 0;
-
-              $scope.items = [];
-
-              if(res && res.search){
-                for(var r in res.search){
-                  $scope.items.push(res.search[r]);
-                }
-              }
-
-              $scope.$apply();
-            }
+        var searchRandomHeaders = ()=> {
+          wikiAdapter.searchRandomHeaders(
+            searchHeadersFromKeywordCallback // コールバック
           );
         };
 
@@ -376,13 +394,19 @@ console.log("ons ready");
         //console.log(_args);
 
         // ホーム画面からの呼出の場合
-        if(_args.onTransitionEnd && _args.onTransitionEnd.is_from_home && _args.onTransitionEnd.search_key){
-          console.log("header. normal search");
-          if($scope.completeMatch){ //完全一致検索
-            getHeaderList(_args.onTransitionEnd.search_key);
+        if(_args.onTransitionEnd && _args.onTransitionEnd.is_from_home){
+          if(_args.onTransitionEnd.search_key){
+            console.log("header. normal search");
+            if($scope.completeMatch){ //完全一致検索
+              getHeaderList(_args.onTransitionEnd.search_key);
+            }
+            else{ //本文検索
+              searchHeadersFromKeyword(_args.onTransitionEnd.search_key);
+            }
           }
-          else{ //本文検索
-            searchHeadersFromKeyword(_args.onTransitionEnd.search_key);
+          else{ //検索キーがないということは...random検索に全ておとす
+            console.log("header. random search");
+            searchRandomHeaders();
           }
         }
         // favorite検索時
@@ -406,7 +430,6 @@ console.log("ons ready");
           $scope.is_notes = true;
           $scope.screen_title = "Note";
           $scope.items = convHash2Arr(storage_manager_memo.getAllItem());
-          outlog($scope.items);
         }
         // link選択時
         else if(_args.onTransitionEnd && _args.onTransitionEnd.is_link){
@@ -429,6 +452,7 @@ console.log("ons ready");
       $scope.show_redirects_pageid = false; //詳細ページ-> リダイレクト可視性フラグ
       $scope.redirects = []; //詳細ページ-> リダイレクトlist
       $scope.links = []; //詳細ページ-> リンクlist
+      $scope.no_result = false; // 結果無しの場合にtrue
 
       $scope.openWithBrowser = function(){
         console.log("in open browser");
@@ -546,7 +570,10 @@ console.log("ons ready");
       var handleGetDetail = (res: any)=> {
           console.log("callback level1");
 
-          if(!res.isTypeParse){ //parseでなければ
+          if(res.has_no_contents){ // データがなければ
+            $scope.no_result = true;
+          }
+          else if(!res.isTypeParse){ //parseでなければ
             //※※※ parseじゃなくてextractルート ※※※
             $scope.id = res.pageid;
             $scope.title = res.title;
@@ -610,7 +637,8 @@ console.log("ons ready");
               article = article.replace(/href="(?!#\.)([^"](?!\.png))*"/g, "");
 
               // imgを削除
-              article = article.replace(/<img[^>]+>/g, "");
+              //article = article.replace(/<img[^>]+>/g, "");
+              article = article.replace(/(<img.*src=")(?=\/\/)/g, "$1http:");
 
 /* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
 
@@ -743,6 +771,8 @@ console.log("ons ready");
 
         var is_favorite = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_favorite : false;
         var is_history = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_history : false;
+        var is_notes = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_notes : false;
+        var is_random = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_random : false;
 
         if(!type || (type == "T")){ continue; } // 表示不要のものは表示対象としない
 
@@ -757,6 +787,8 @@ console.log("ons ready");
               // 検索キーがない=> お気に入りか履歴から来た場合
               if(is_favorite){ return "FAVORITE"; }
               else if(is_history){ return "HISTORY"; }
+              else if(is_notes){ return "NOTES"; }
+              else if(is_random){ return "RANDOM Search"; }
               else{ return "UNKNOWN..."; }
             }
             else{
