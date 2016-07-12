@@ -459,6 +459,28 @@ console.log("ons ready");
         //window.open($scope.detail.full_url, '_system');
       };
 
+$scope._showImages = function(){
+
+
+  var el_content = document.getElementById("detail_content");
+  var el_imgs = el_content.querySelectorAll("img");
+  console.log("in _showImages. img length=" + el_imgs.length);
+
+  var el_parent = document.querySelector("#detail_summary");
+
+  for(var i = 0; i < el_imgs.length; i++){
+    console.log(el_imgs[i].getAttribute("src"));
+    var img_tag = document.createElement("img");
+    img_tag.setAttribute("src", el_imgs[i].getAttribute("src"));
+    el_parent.appendChild(img_tag);
+    if(i > 10){
+      break;
+    }
+  }
+
+
+}
+
       // noteを開く
       $scope.openNote = function(){
         // note用のpopoverを表示する
@@ -638,7 +660,12 @@ console.log("ons ready");
 
               // imgを削除
               //article = article.replace(/<img[^>]+>/g, "");
+
               article = article.replace(/(<img.*src=")(?=\/\/)/g, "$1http:");
+              //article = article.replace(/(<img.*)src="([^"]*)"/g, "$1 class='lazy' data-original='http:$2'"); //'$1 class="lazy" data-original="http:$2');
+
+//console.log(article);
+
 
 /* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
 
