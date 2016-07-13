@@ -54,7 +54,6 @@ TODO
     var wikiAdapter;
     var myPopoverMemo;
     ons.ready(function () {
-        console.log("ons ready");
         // マスタ設定確認
         // 言語設定
         var m_lang = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE);
@@ -62,11 +61,19 @@ TODO
             m_lang = "ja";
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, m_lang);
         }
+        // 画像ハンドル設定
+        var m_img = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE);
+        if (!m_img) {
+            m_img = "0";
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.IMG_HANDLE, m_img);
+        }
+        // 記事取得タイプ設定
         var m_art_type = storage_manager_settings.getItem(SETTING_TYPE.ARTICLE_TYPE);
         if (!m_art_type) {
             m_art_type = "5";
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, m_art_type);
         }
+        // 履歴件数設定
         var m_his_len = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_LENGTH);
         if (!m_his_len) {
             m_his_len = 10;
@@ -77,8 +84,8 @@ TODO
         // storage_manager_history(履歴管理) をインスタンス化
         //storage_manager_history = new StorageManager(STORAGE_TYPE.HISTORY, {length: m_his_len, sort_key: "timestamp"})
         storage_manager_history.setLimit({ length: m_his_len, sort_key: "timestamp" });
+        // メモのポップアップを生成しておく
         ons.createDialog('popover_memo.html').then(function (dialog) {
-            //dialog.show();
             myPopoverMemo = dialog;
         });
         //pageにback-button設定
@@ -358,24 +365,19 @@ TODO
         $scope.redirects = []; //詳細ページ-> リダイレクトlist
         $scope.links = []; //詳細ページ-> リンクlist
         $scope.no_result = false; // 結果無しの場合にtrue
+        $scope.img_handle_type = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) || "0"; // 設定無しならデフォルト"0"
         $scope.openWithBrowser = function () {
             console.log("in open browser");
             //window.open($scope.detail.full_url, '_system');
         };
         $scope._showImages = function () {
-            var el_content = document.getElementById("detail_content");
-            var el_imgs = el_content.querySelectorAll("img");
-            console.log("in _showImages. img length=" + el_imgs.length);
-            var el_parent = document.querySelector("#detail_summary");
+            var el_imgs = document.querySelectorAll("#detail_content img[data-original]");
+            console.log("el_imgs=");
+            outlog(el_imgs);
             for (var i = 0; i < el_imgs.length; i++) {
-                console.log(el_imgs[i].getAttribute("src"));
-                var img_tag = document.createElement("img");
-                img_tag.setAttribute("src", el_imgs[i].getAttribute("src"));
-                el_parent.appendChild(img_tag);
-                if (i > 10) {
-                    break;
-                }
+                el_imgs[i].setAttribute("src", el_imgs[i].getAttribute("data-original"));
             }
+            return;
         };
         // noteを開く
         $scope.openNote = function () {
@@ -417,10 +419,14 @@ TODO
             showAlert("save2favorite!! ... nocheck...");
         };
         $scope.processArticleClick = function (e) {
+            var tag = (e && e.target && e.target.tagName) ? e.target.tagName : null;
+            if (!tag) {
+                return;
+            }
             // 対象のリンク要素なら
-            if (e && e.target && e.target.tagName && (e.target.tagName.toLowerCase() == "a")) {
+            if (tag.toLowerCase() == "a") {
                 e.preventDefault();
-                console.log("in processArticleClick");
+                console.log("in processArticleClick(a tag)");
                 var title = e.target.getAttribute("title");
                 if (title) {
                     // 自身のページに遷移
@@ -430,6 +436,18 @@ TODO
                             need_onload_search: true
                         }
                     });
+                }
+            }
+            // img要素で、かつ、マスタ設定が画像クリックロードの場合
+            if (tag.toLowerCase() == "img") {
+                e.preventDefault();
+                console.log("in processArticleClick(img tag)");
+                // タッチロードなら
+                if (storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "1") {
+                    var src = e.target.getAttribute("data-original");
+                    if (src) {
+                        e.target.setAttribute("src", src);
+                    }
                 }
             }
             //対象でなかったら無視
@@ -521,9 +539,8 @@ TODO
                     article = article.replace(/href="(?!#\.)([^"](?!\.png))*"/g, "");
                     // imgを削除
                     //article = article.replace(/<img[^>]+>/g, "");
-                    article = article.replace(/(<img.*src=")(?=\/\/)/g, "$1http:");
-                    //article = article.replace(/(<img.*)src="([^"]*)"/g, "$1 class='lazy' data-original='http:$2'"); //'$1 class="lazy" data-original="http:$2');
-                    //console.log(article);
+                    //article = article.replace(/(<img.*src=")(?=\/\/)/g, "$1http:");
+                    article = article.replace(/(<img.*)src="([^"]*)"([^>]*)/g, "$1 data-original='http:$2' $3"); //'$1 class="lazy" data-original="http:$2');
                     /* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
                     $scope.article = $sce.trustAsHtml(article);
                     //リンクが存在すれば、リンク要素を表示させる
@@ -552,6 +569,11 @@ TODO
                 timestamp: formatDate(new Date())
             }); // とりあえず、pageidとtitleだけ！！後にキャッシュ数とか設定できれば...
             $scope.$apply();
+            if (storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "2") {
+                setTimeout(function () {
+                    $scope._showImages();
+                }, 1);
+            }
         };
         //idから詳細情報を取得する
         var getDetail = function (key) {
@@ -569,7 +591,6 @@ TODO
         outlog(_args);
         // ロード時検索要求有りなら
         if (_args.onTransitionEnd && _args.onTransitionEnd.need_onload_search) {
-            //if(_args.onTransitionEnd.pageid){
             if (false) {
             }
             else {
@@ -622,6 +643,7 @@ TODO
             var is_history = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_history : false;
             var is_notes = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_notes : false;
             var is_random = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_random : false;
+            var is_link = (nv_stack[i].options && nv_stack[i].options.onTransitionEnd && nv_stack[i].options.onTransitionEnd) ? nv_stack[i].options.onTransitionEnd.is_link : false;
             if (!type || (type == "T")) {
                 continue;
             } // 表示不要のものは表示対象としない
@@ -644,6 +666,9 @@ TODO
                         }
                         else if (is_random) {
                             return "RANDOM Search";
+                        }
+                        else if (is_link) {
+                            return "LINK Search";
                         }
                         else {
                             return "UNKNOWN...";
@@ -682,7 +707,10 @@ TODO
         };
     });
     module.controller("SettingsController", function ($scope) {
+        $scope.w_ratio_label = "45%";
+        $scope.w_ratio_value = "55%";
         $scope.radio_language = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE);
+        $scope.radio_imghandle = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE);
         $scope.radio_article = storage_manager_settings.getItem(SETTING_TYPE.ARTICLE_TYPE);
         $scope.history_length = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_LENGTH);
         $scope.saveMasterSetting = function () {
@@ -690,6 +718,7 @@ TODO
                 $scope.history_length = 0;
             }
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, $scope.radio_language);
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.IMG_HANDLE, $scope.radio_imghandle);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, $scope.radio_article);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_LENGTH, $scope.history_length);
             wikiAdapter.setLanguage($scope.radio_language);

@@ -7,9 +7,9 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
 
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta charset="utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
 
     <title>WikiDiver</title>
 
@@ -53,6 +53,9 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
     }
     .red-button{
       background-color: #f85050;
+    }
+    img:not([src]){
+      border: 2px #40ff48 solid;
     }
     </style>
 
@@ -132,57 +135,54 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
   <!-- Home画面　index > home -->
   <ons-template id="home.html">
-
     <ons-navigator var="myNavigator">
-        <ons-page ng-controller="HomeController" id="home">
+      <ons-page ng-controller="HomeController" id="home">
 
-          <ons-toolbar>
-              <div class="center">WikiDiver</div>
-              <div class="right">
-                <ons-toolbar-button ng-click="myMenu.toggleMenu()">
-                  <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-                </ons-toolbar-button>
-              </div>
-          </ons-toolbar>
-
-          <div class="contents_wrapper">
-            <div>
-              <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
+        <ons-toolbar>
+            <div class="center">WikiDiver</div>
+            <div class="right">
+              <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+                <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+              </ons-toolbar-button>
             </div>
+        </ons-toolbar>
 
-            <div>
-              <ons-button ng-click="dive()" modifier="large"><ons-icon icon="search" style="font-size: 24px; width: 1em;"></ons-icon>search</ons-button>
-            </div>
+        <div class="contents_wrapper">
 
-            <div>
-              <ons-button ng-click="move2favorite()" modifier="large--quiet">view favorite({{favorite_length}} records)</ons-button>
-            </div>
-
-            <div>
-              <ons-button ng-click="move2history()" modifier="large--quiet">view history({{history_length}} records)</ons-button>
-            </div>
-
-            <div>
-              <ons-button ng-click="move2notes()" modifier="large--quiet">view notes({{notes_length}} records)</ons-button>
-            </div>
-
-            <div>
-              <ons-button ng-click="randomDive()" modifier="large--quiet">
-                <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
-                Random Search
-              </ons-button>
-            </div>
-
-            <div>
-              <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
-            </div>
-
-            <p>http://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Flag_of_Japan.svg/125px-Flag_of_Japan.svg.png</p>
-            <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Flag_of_Japan.svg/125px-Flag_of_Japan.svg.png" />
+          <div>
+            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
           </div>
 
-        </ons-page>
+          <div>
+            <ons-button ng-click="dive()" modifier="large"><ons-icon icon="search" style="font-size: 24px; width: 1em;"></ons-icon>search</ons-button>
+          </div>
 
+          <div>
+            <ons-button ng-click="move2favorite()" modifier="large--quiet">view favorite({{favorite_length}} records)</ons-button>
+          </div>
+
+          <div>
+            <ons-button ng-click="move2history()" modifier="large--quiet">view history({{history_length}} records)</ons-button>
+          </div>
+
+          <div>
+            <ons-button ng-click="move2notes()" modifier="large--quiet">view notes({{notes_length}} records)</ons-button>
+          </div>
+
+          <div>
+            <ons-button ng-click="randomDive()" modifier="large--quiet">
+              <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
+              Random Search
+            </ons-button>
+          </div>
+
+          <div>
+            <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
+          </div>
+
+        </div>
+
+      </ons-page>
     </ons-navigator>
   </ons-template>
 
@@ -254,10 +254,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </div>
       </ons-toolbar>
 
-
-  <ons-button ng-click="_showImages()">create image element</ons-button>
-
-
       <p>
         <h1 id="detail_title" class="title">{{title}}</h1>
       </p>
@@ -268,6 +264,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
       <p ng-show="is_links_exist">
         <ons-button modifier="large--quiet" ng-click="processLinkSearch()">Link search</ons-button>
+      </p>
+
+      <p ng-show="img_handle_type=='0'">
+        <ons-button ng-click="_showImages()">get images</ons-button>
       </p>
 
       <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
@@ -291,10 +291,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
       <div class="contents_wrapper">
         <ons-row>
-          <ons-col width="65%">
+          <ons-col width="50%">
             <h2>Language</h2>
           </ons-col>
-          <ons-col width="35%">
+          <ons-col width="50%">
             <div class="button-bar__item">
                 <input type="radio" ng-model="radio_language" value="ja" />
                 <div class="button-bar__button">Japanese</div>
@@ -307,10 +307,30 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </ons-row>
 
         <ons-row>
-          <ons-col width="65%">
+          <ons-col width="30%">
+            <h2>Image Handle</h2>
+          </ons-col>
+          <ons-col width="70%">
+            <div class="button-bar__item">
+                <input type="radio" ng-model="radio_imghandle" value="0" />
+                <div class="button-bar__button">no disp</div>
+            </div>
+            <div class="button-bar__item">
+                <input type="radio" ng-model="radio_imghandle" value="1" />
+                <div class="button-bar__button">disp when touch</div>
+            </div>
+            <div class="button-bar__item">
+                <input type="radio" ng-model="radio_imghandle" value="2" />
+                <div class="button-bar__button">disp always</div>
+            </div>
+          </ons-col>
+        </ons-row>
+
+        <ons-row>
+          <ons-col width="{{w_ratio_label}}">
             <h2>Parse or Extract</h2>
           </ons-col>
-          <ons-col width="35%">
+          <ons-col width="{{w_ratio_value}}">
             <div class="button-bar__item">
                 <input type="radio" ng-model="radio_article" value="5" />
                 <div class="button-bar__button">Parse</div>
@@ -323,10 +343,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </ons-row>
 
         <ons-row>
-          <ons-col width="65%">
+          <ons-col width="50%">
             <h2>Save History Length</h2>
           </ons-col>
-          <ons-col width="35%">
+          <ons-col width="50%">
             <input type="number" ng-model="history_length">
           </ons-col>
         </ons-row>

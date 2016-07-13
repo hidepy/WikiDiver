@@ -17,6 +17,7 @@ namespace STORAGE_TYPE{
 
 namespace SETTING_TYPE{
     export const LANGUAGE = "language";
+    export const IMG_HANDLE = "img_handle"; // value 0=トップのボタン押下で全画像ロード, 1=画像タッチでロード, 2=常にロード
     export const ARTICLE_TYPE = "article_type";
     export const HISTORY_LENGTH = "history_length";
 }
