@@ -187,12 +187,14 @@ var IS_DEBUG = false;
       case "5": //[明細] parseお願い
         params["action"] = "parse";
         params["page"] = main_query;
-        params["prop"] = "text|sections|links";
+        //params["prop"] = "text|sections|links";
+        params["prop"] = "text|sections|links|images";
         break;
       case "6": //[ヘッダ] ランダム検索
         params["list"] = "random";
         params["rnnamespace"] = "0";
         params["rnlimit"] = "20";
+        break;
      }
 
 

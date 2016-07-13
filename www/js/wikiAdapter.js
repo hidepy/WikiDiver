@@ -200,12 +200,14 @@ var WikiAdapter = (function () {
             case "5":
                 params["action"] = "parse";
                 params["page"] = main_query;
-                params["prop"] = "text|sections|links";
+                //params["prop"] = "text|sections|links";
+                params["prop"] = "text|sections|links|images";
                 break;
             case "6":
                 params["list"] = "random";
                 params["rnnamespace"] = "0";
                 params["rnlimit"] = "20";
+                break;
         }
         if (IS_DEBUG) {
             if (type == "1" || type == "4") {

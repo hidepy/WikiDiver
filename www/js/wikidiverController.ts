@@ -468,11 +468,11 @@ $scope._showImages = function(){
   console.log("el_imgs=");
   outlog(el_imgs);
 
+  var el_parent = document.getElementById("detail_content");
+
   for(var i = 0; i < el_imgs.length; i++){
     el_imgs[i].setAttribute("src", el_imgs[i].getAttribute("data-original"));
   }
-
-  return;
 }
 
       // noteを開く
@@ -553,8 +553,26 @@ $scope._showImages = function(){
           console.log("in processArticleClick(img tag)");
 
           // タッチロードなら
-          if(storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "1"){
+          //if(storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "1"){
+          if(true){
             var src = e.target.getAttribute("data-original");
+
+
+
+            popoverSharingService.sharing.id = $scope.id;
+            popoverSharingService.sharing.title = $scope.title;
+            popoverSharingService.sharing.caption = "";
+            popoverSharingService.sharing.memo = e.target.parentNode.innerHTML; //タイトルから名称を引いてくる
+
+            // sharingの値更新をsubscribeする
+            popoverSharingService.updateSharing();
+
+            if(myPopoverMemo){
+              // popover show
+              //myPopoverMemo.show("#detail_note_button");
+            }
+
+
 
             if(src){ e.target.setAttribute("src", src); }
           }
@@ -673,7 +691,14 @@ $scope._showImages = function(){
               //article = article.replace(/<img[^>]+>/g, "");
 
               //article = article.replace(/(<img.*src=")(?=\/\/)/g, "$1http:");
-              article = article.replace(/(<img.*)src="([^"]*)"([^>]*)/g, "$1 data-original='http:$2' $3"); //'$1 class="lazy" data-original="http:$2');
+              //article = article.replace(/(<img.*)src="([^"]*)"([^>]*)/g, "$1 data-original='https:$2' $3"); //'$1 class="lazy" data-original="http:$2');
+              //article = article.replace(/(<img.*)src="([^"]*)"([^>]*).*srcset="[^"]*"([^>]*>)/g, "$1 data-original='https:$2' $3 $4"); //'$1 class="lazy" data-original="http:$2');
+              //これほぼ成功。ただし、リラックマがだめarticle = article.replace(/(<img.*)src="([^"]*)"(.*)srcset="[^"]*"([^>]*>)/g, "$1 data-original='https:$2' $3 $4"); //'$1 class="lazy" data-original="http:$2');
+
+
+
+              article = article.replace(/srcset="[^"]*"/g, ""); // 一旦 srcsetを削除
+              article = article.replace(/(<img.*)src="([^"]*)"([^>]*>)/g, "$1 data-original='https:$2' $3"); // その後、srcをほかの属性に置換
 
 
 /* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
@@ -681,7 +706,6 @@ $scope._showImages = function(){
               $scope.article = $sce.trustAsHtml(article);
 
               //リンクが存在すれば、リンク要素を表示させる
-              $scope.is_links_exist = !!(res.links);
             }
 
             // link 抽出
