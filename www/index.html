@@ -69,7 +69,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
   <script type="text/ons-template" id="popover_memo.html">
     <ons-dialog ng-controller="popoverController" animation="none" cancelable style="width: 90%; max-width: 400px;">
       <div style="padding: 8px;">
-      <p>Memo for <span font-size="120%">{{sharing.title}}</span></p>
+      <p ng-hide="sharing.is_global">Memo for <span font-size="120%">{{sharing.title}}</span></p>
       <p class="caption">{{sharing.caption}}</p>
       <div>
         <ons-button ng-click="saveMemo()">save</ons-button>
@@ -173,6 +173,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
               <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
               Random Search
             </ons-button>
+          </div>
+
+          <div>
+            <ons-button id="home_globalMemoButton" ng-click="showGlobalMemo()" modifier="large--quiet">Memo(global)</ons-button>
           </div>
 
           <div>
@@ -289,27 +293,40 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       </ons-toolbar>
 
       <div class="contents_wrapper">
-        <ons-row>
-          <ons-col width="50%">
-            <h2>Language</h2>
-          </ons-col>
-          <ons-col width="50%">
-            <div class="button-bar__item">
-                <input type="radio" ng-model="radio_language" value="ja" />
-                <div class="button-bar__button">Japanese</div>
-            </div>
-            <div class="button-bar__item">
-                <input type="radio" ng-model="radio_language" value="en" />
-                <div class="button-bar__button">English</div>
-            </div>
-          </ons-col>
-        </ons-row>
+        <ons-list>
 
-        <ons-row>
-          <ons-col width="30%">
-            <h2>Image Handle</h2>
-          </ons-col>
-          <ons-col width="70%">
+          <ons-list-header>
+            <h2>{{msg_info.LANGUAGE_APPEARANCE.TITLE[radio_language_appearance]}}</h2>
+          </ons-list-header>
+          <ons-list-item>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_language_appearance" value="ja" />
+                  <div class="button-bar__button">Japanese</div>
+              </div>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_language_appearance" value="en" />
+                  <div class="button-bar__button">English</div>
+              </div>
+          </ons-list-item>
+
+          <ons-list-header>
+            <h2>{{msg_info.LANGUAGE.TITLE[radio_language_appearance]}}</h2>
+          </ons-list-header>
+          <ons-list-item>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_language" value="ja" />
+                  <div class="button-bar__button">Japanese</div>
+              </div>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_language" value="en" />
+                  <div class="button-bar__button">English</div>
+              </div>
+          </ons-list-item>
+
+          <ons-list-header>
+            <h2>{{msg_info.IMG_HANDLE.TITLE[radio_language_appearance]}}</h2>
+          </ons-list-header>
+          <ons-list-item>
             <div class="button-bar__item">
                 <input type="radio" ng-model="radio_imghandle" value="0" />
                 <div class="button-bar__button">no disp</div>
@@ -322,14 +339,12 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
                 <input type="radio" ng-model="radio_imghandle" value="2" />
                 <div class="button-bar__button">disp always</div>
             </div>
-          </ons-col>
-        </ons-row>
+          </ons-list-item>
 
-        <ons-row>
-          <ons-col width="{{w_ratio_label}}">
-            <h2>Parse or Extract</h2>
-          </ons-col>
-          <ons-col width="{{w_ratio_value}}">
+          <ons-list-header>
+            <h2>{{msg_info.ARTICLE_TYPE.TITLE[radio_language_appearance]}}</h2>
+          </ons-list-header>
+          <ons-list-item>
             <div class="button-bar__item">
                 <input type="radio" ng-model="radio_article" value="5" />
                 <div class="button-bar__button">Parse</div>
@@ -338,21 +353,21 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
                 <input type="radio" ng-model="radio_article" value="4" />
                 <div class="button-bar__button">Extract</div>
             </div>
-          </ons-col>
-        </ons-row>
+          </ons-list-item>
 
-        <ons-row>
-          <ons-col width="50%">
-            <h2>Save History Length</h2>
-          </ons-col>
-          <ons-col width="50%">
+          <ons-list-header>
+            <h2>{{msg_info.HISTORY_LENGTH.TITLE[radio_language_appearance]}}</h2>
+          </ons-list-header>
+          <ons-list-item>
             <input type="number" ng-model="history_length" />
-          </ons-col>
-        </ons-row>
+          </ons-list-item>
 
-        <ons-row>
+        </ons-list>
+
+        <div>
           <ons-button modifier="large" ng-click="saveMasterSetting()">Commit Changes</ons-button>
-        </ons-row>
+        </div>
+
       </div>
 
     </ons-page>

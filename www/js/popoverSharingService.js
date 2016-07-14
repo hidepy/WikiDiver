@@ -6,7 +6,8 @@
             id: "",
             title: "",
             caption: "",
-            memo: ""
+            memo: "",
+            is_global: false
         };
         this.updateSharing = function () {
             $rootScope.$broadcast("updateSharing", this.sharing);

@@ -56,6 +56,12 @@ TODO
     ons.ready(function () {
         // マスタ設定確認
         // 言語設定
+        var m_lang_ap = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE);
+        if (!m_lang_ap) {
+            m_lang_ap = "ja";
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, m_lang_ap);
+        }
+        // 取得先言語設定
         var m_lang = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE);
         if (!m_lang) {
             m_lang = "ja";
@@ -125,7 +131,7 @@ TODO
             myNavigator.pushPage("settings.html");
         };
     });
-    module.controller("HomeController", function ($scope) {
+    module.controller("HomeController", function ($scope, popoverSharingService) {
         $scope.search_key = "";
         $scope.favorite_length = storage_manager_favorite.getItemLength();
         $scope.history_length = storage_manager_history.getItemLength();
@@ -155,9 +161,19 @@ TODO
                 }
             });
         };
-        $scope.showMenu = function () {
-            console.log("in showMenu");
-            //menu.toggleMenu();
+        // global memo ポップアップ表示
+        $scope.showGlobalMemo = function () {
+            // global memo情報取得
+            var g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
+            // popover オープン前に必要情報をコピー
+            popoverSharingService.sharing.id = GLOBAL_MEMO_PROP.KEY;
+            popoverSharingService.sharing.title = $scope.title;
+            popoverSharingService.sharing.caption = "";
+            popoverSharingService.sharing.memo = g_memo || "";
+            popoverSharingService.sharing.is_global = true; // globalメモなので
+            // sharingの値更新をsubscribeする
+            popoverSharingService.updateSharing();
+            myPopoverMemo.show("#home_globalMemoButton");
         };
         $scope.move2setting = function () {
             console.log("in move2setting");
@@ -392,6 +408,7 @@ TODO
             popoverSharingService.sharing.title = $scope.title;
             popoverSharingService.sharing.caption = "";
             popoverSharingService.sharing.memo = memo_data.memo; //タイトルから名称を引いてくる
+            popoverSharingService.sharing.is_global = false; // globalメモではない
             // sharingの値更新をsubscribeする
             popoverSharingService.updateSharing();
             if (myPopoverMemo) {
@@ -717,17 +734,20 @@ TODO
             });
         };
     });
+    // マスタ設定コントローラ
     module.controller("SettingsController", function ($scope) {
-        $scope.w_ratio_label = "45%";
-        $scope.w_ratio_value = "55%";
+        $scope.radio_language_appearance = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE);
         $scope.radio_language = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE);
         $scope.radio_imghandle = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE);
         $scope.radio_article = storage_manager_settings.getItem(SETTING_TYPE.ARTICLE_TYPE);
         $scope.history_length = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_LENGTH);
+        // 言語関連情報
+        $scope.msg_info = SETTING_MSG;
         $scope.saveMasterSetting = function () {
             if (isNaN($scope.history_length) || ($scope.history_length < 0)) {
                 $scope.history_length = 0;
             }
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE_APPEARANCE, $scope.radio_language);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, $scope.radio_language);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.IMG_HANDLE, $scope.radio_imghandle);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, $scope.radio_article);
