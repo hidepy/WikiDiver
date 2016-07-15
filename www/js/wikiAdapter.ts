@@ -15,12 +15,17 @@ var IS_DEBUG = false;
 
    private language_type;
    private article_type;
+   public status: string = "0"; // 0=(処理なし), 1=通信中, 2=通信正常終了, 3=結果処理なし, 9=致命的なエラー
+
 
    constructor(language?: string, article_type?: string){
       this.language_type = language || "ja"; // default
       this.article_type = article_type || "5";// default(parse) "4" means extract
    }
 
+   public initStatus(): void{
+     this.status = WIKIADAPTER_CONSTANTS.STATUS.NO_ACTION;
+   }
    public setLanguage(language: string){
      this.language_type = language;
    }
@@ -56,6 +61,8 @@ var IS_DEBUG = false;
          callback(res.query.pages[id]);
        }
        else{
+         this.status = WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_NORESULT; // 取得想定対象なし
+
          console.log("cannot find target...");
          callback({has_no_contents: true});
        }
@@ -73,6 +80,8 @@ var IS_DEBUG = false;
          callback(res.query); //queryの階層にヒット件数があるので...
        }
        else{
+         this.status = WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_NORESULT; // 取得想定対象なし
+
          console.log("cannot find target...");
          callback({has_no_contents: true});
        }
@@ -105,6 +114,7 @@ var IS_DEBUG = false;
            callback(res.query.pages[key]);
          }
          else{
+           this.status = WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_NORESULT; // 取得想定対象なし
            console.log("cannnot find target article...");
            callback({has_no_contents: true});
          }
@@ -115,6 +125,7 @@ var IS_DEBUG = false;
           callback(res.parse);
         }
         else{
+          this.status = WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_NORESULT; // 取得想定対象なし
           console.log("cannot find target...");
           callback({parse: {}, has_no_contents: true});
         }
@@ -131,6 +142,7 @@ var IS_DEBUG = false;
          callback(res.query);
        }
        else{
+         this.status = WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_NORESULT; // 取得想定対象なし
          console.log("cannot find target...");
          callback({has_no_contents: true});
        }
@@ -147,6 +159,7 @@ var IS_DEBUG = false;
      // 4=> [明細]タイトル検索
      // 5=> [明細]parse
      // 6=> [ヘッダ]ランダム検索
+
 
      //var main_query = main_query_orig ? encodeURIComponent(main_query_orig) : "";
      var main_query = main_query_orig;
@@ -221,10 +234,16 @@ var IS_DEBUG = false;
        jsonpCallback: "callback",
        data: params,
        beforeSend: function(){
+
+         this.status = WIKIADAPTER_CONSTANTS.STATUS.CONNECTING;
+
          console.log("ajax beforeSend. params=");
          outlog(params);
        },
        success: function(data){
+
+         this.status = WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_DATA_PROCESSING;
+
          console.log("ajax success!!");
          outlog(data);
 
@@ -232,6 +251,9 @@ var IS_DEBUG = false;
          return;
        },
        error: function(data){
+
+         this.status = WIKIADAPTER_CONSTANTS.STATUS.FATAL_ERROR;
+
          alert("ajax error occured!!)");
          //console.log(data);
        }

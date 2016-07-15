@@ -7,6 +7,17 @@ namespace APP_CONFIGS{
   export const NAME = "APP_WIKI_DIVER";
 }
 
+namespace WIKIADAPTER_CONSTANTS{
+  export const STATUS = {
+    NO_ACTION: "0",
+    CONNECTING: "1",
+    SUCCESS_DATA_PROCESSING: "2", // データ取得はok, DOMの準備など
+    SUCCESS_PROCESSEND: "3",
+    SUCCESS_NORESULT: "4",
+    FATAL_ERROR: "9"
+  }
+}
+
 namespace STORAGE_TYPE{
   export const FAVORITE = "WIKI_DIVER_FAVORITE";
   export const NOTE_FOR_ARTICLE = "WIKI_DIVER_NOTE";

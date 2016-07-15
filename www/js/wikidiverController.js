@@ -5,6 +5,10 @@
 /*
 TODO
 
+  2016/07/15
+    statusを表示したい
+    データ操作後の処理をしっかりしたい
+
   2016/07/12
     残りタスク
       image表示, 表示用のオプション追加
@@ -59,7 +63,7 @@ TODO
         var m_lang_ap = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE);
         if (!m_lang_ap) {
             m_lang_ap = "ja";
-            storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, m_lang_ap);
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE_APPEARANCE, m_lang_ap);
         }
         // 取得先言語設定
         var m_lang = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE);
@@ -84,6 +88,11 @@ TODO
         if (!m_his_len) {
             m_his_len = 10;
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_LENGTH, m_his_len);
+        }
+        // global memoが存在しない場合、空白をセットしておく
+        var g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
+        if (!g_memo) {
+            storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, "");
         }
         // WikiAdapter をインスタンス化
         wikiAdapter = new WikiAdapter(m_lang, m_art_type);
@@ -128,13 +137,14 @@ TODO
             myNavigator.pushPage("tree_view.html");
         };
         $scope.move2setting = function () {
+            myMenu.closeMenu();
             myNavigator.pushPage("settings.html");
         };
     });
     module.controller("HomeController", function ($scope, popoverSharingService) {
         $scope.search_key = "";
         $scope.favorite_length = storage_manager_favorite.getItemLength();
-        $scope.history_length = storage_manager_history.getItemLength();
+        $scope.history_length = storage_manager_history.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
         $scope.notes_length = storage_manager_memo.getItemLength();
         $scope.dive = function () {
             var el_keyword = document.getElementById("home_searchKey");
@@ -167,9 +177,9 @@ TODO
             var g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
             // popover オープン前に必要情報をコピー
             popoverSharingService.sharing.id = GLOBAL_MEMO_PROP.KEY;
-            popoverSharingService.sharing.title = $scope.title;
+            popoverSharingService.sharing.title = GLOBAL_MEMO_PROP.KEY;
             popoverSharingService.sharing.caption = "";
-            popoverSharingService.sharing.memo = g_memo || "";
+            popoverSharingService.sharing.memo = g_memo.memo || "";
             popoverSharingService.sharing.is_global = true; // globalメモなので
             // sharingの値更新をsubscribeする
             popoverSharingService.updateSharing();
@@ -644,11 +654,19 @@ TODO
             });
             popoverSharingService.sharing = $scope.sharing; // 次ポップアップオープン時用にコピー
             showAlert("save success!! but, actually needed to check success or failure...");
+            myPopoverMemo.hide();
         };
         $scope.deleteMemo = function () {
-            storage_manager_memo.deleteItem($scope.sharing.id);
+            // global memoの場合は、本当に削除はしない
+            if ($scope.id != GLOBAL_MEMO_PROP.KEY) {
+                storage_manager_memo.deleteItem($scope.sharing.id);
+            }
+            else {
+                storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, "");
+            }
             $scope.sharing.memo = "";
             showAlert("delete success!! but, actually needed to check success or failure...");
+            myPopoverMemo.hide();
         };
         // close押下時
         $scope.closePopover = function () {
@@ -747,7 +765,7 @@ TODO
             if (isNaN($scope.history_length) || ($scope.history_length < 0)) {
                 $scope.history_length = 0;
             }
-            storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE_APPEARANCE, $scope.radio_language);
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE_APPEARANCE, $scope.radio_language_appearance);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, $scope.radio_language);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.IMG_HANDLE, $scope.radio_imghandle);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, $scope.radio_article);
