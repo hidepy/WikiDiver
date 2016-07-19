@@ -15,6 +15,25 @@ namespace WIKIADAPTER_CONSTANTS{
     SUCCESS_PROCESSEND: "3",
     SUCCESS_NORESULT: "4",
     FATAL_ERROR: "9"
+  };
+  export const FAILURE_MSG = {
+    "0": {
+      "ja": "",
+      "en": ""
+    },
+    "3": {
+      "ja": "データ取得に成功しました",
+      "en": "success!!"
+    },
+    "4": {
+      "ja": "データが見つかりませんでした...",
+      "en": "no data..."
+    },
+    "9": {
+      "ja": "データ取得中にエラーが発生しました...",
+      "en": "error occurred!!"
+    }
+
   }
 }
 

@@ -5,17 +5,18 @@
 /*
 TODO
 
-  2016/07/15
-    statusを表示したい
-    データ操作後の処理をしっかりしたい
+  2016/07/19
 
-  2016/07/12
-    残りタスク
-      image表示, 表示用のオプション追加
-      概要のみ表示、その後展開的な
-      コピーokにする
+    statu表示-> okたぶん, globalメモの件数がおかしい-> okたぶん, historyなど2回目以降の削除がおかしい
+    help, キャッシュ, コピーできない-> 実機でためす, データ操作後の挙動を完全にしたい
 
+    が解決したらリリースする
+      タイミングとしては、adsenseがokになったらadmobする
 
+  希望
+    概要のみ表示、その後展開的な
+    トップに戻る
+    ページ内検索
 
 */
 // 2016/07/01
@@ -33,15 +34,6 @@ TODO
         filter: にオブジェトを渡すと、その条件でフィルタしてくれる
 */
 //        ちなみに、filterはjs側でも使える
-// 残todo(2016/06/29)
-//   1次対応
-//   ・extractじゃなくてparseの時にimgとかどうするか
-//   ・保存できるように(ローカル対応, 名称のみ対応)
-//  　・tree対応(現在どこにいるか)
-//   ・メモ対応(wikiに対する自分のメモを残しておける)
-//      グローバルノートが欲しいな
-//   2次対応
-//   ・
 //(function(){
 {
     'use strict';
@@ -55,8 +47,8 @@ TODO
     // 履歴の保存
     var storage_manager_history = new StorageManager(STORAGE_TYPE.HISTORY);
     // wikiadapter
-    var wikiAdapter;
-    var myPopoverMemo;
+    var wikiAdapter = new WikiAdapter();
+    //var myPopoverMemo: PopoverView; // ※※※ これ必要か？？declareされているが...
     ons.ready(function () {
         // マスタ設定確認
         // 言語設定
@@ -95,7 +87,10 @@ TODO
             storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, "");
         }
         // WikiAdapter をインスタンス化
-        wikiAdapter = new WikiAdapter(m_lang, m_art_type);
+        //wikiAdapter = new WikiAdapter(m_lang, m_art_type);
+        // だと、タイミングが間に合わないようなので、(rootControllerでundefinedする)先にインスタンス化＆ここでは値をセットするだけ
+        wikiAdapter.setLanguage(m_lang); // 取得先言語設定
+        wikiAdapter.setArticleType(m_art_type); // 記事タイプ(extract, parse)
         // storage_manager_history(履歴管理) をインスタンス化
         //storage_manager_history = new StorageManager(STORAGE_TYPE.HISTORY, {length: m_his_len, sort_key: "timestamp"})
         storage_manager_history.setLimit({ length: m_his_len, sort_key: "timestamp" });
@@ -114,6 +109,40 @@ TODO
             }
         }
     });
+    /*
+        module.controller("rootController", function($scope){
+          // modalに表示するメッセージ
+          $scope.modal_msg = "";
+          $scope.wikiAdapter = wikiAdapter;
+    
+          $scope.$watch($scope.wikiAdapter.status, function(newVal, oldVal){
+            console.log("status changed!! newval, oldval=" + newVal + ", " + oldVal);
+            // newValがconnectingになった(通信開始)で表示、それ以外ではクローズのみ行う
+            switch(newVal){
+              case WIKIADAPTER_CONSTANTS.STATUS.CONNECTING:
+                $scope.modal_msg = "connecting...";
+                myModal.show(); // 通信開始なのでmodal show
+                break;
+              case WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_DATA_PROCESSING:
+                $scope.modal_msg = "data get ok. parsing...";
+                // 特にmodalの状態は変更なし
+                break;
+              case WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_PROCESSEND:
+                myModal.hide(); // 通信終了なのでmodal hide
+                break;
+              case WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_NORESULT:
+                myModal.hide(); // 通信終了なのでmodal hide
+                break;
+              case WIKIADAPTER_CONSTANTS.STATUS.FATAL_ERROR:
+                myModal.hide(); // 致命的エラーなのでmodal hide
+                break;
+              default:
+                myModal.hide();
+                break;
+            }
+          }, true);
+        });
+    */
     module.controller("MenuController", function ($scope) {
         // favoriteとhistory共通
         $scope.move2FavoriteOrHistory = function (type) {
@@ -144,8 +173,8 @@ TODO
     module.controller("HomeController", function ($scope, popoverSharingService) {
         $scope.search_key = "";
         $scope.favorite_length = storage_manager_favorite.getItemLength();
-        $scope.history_length = storage_manager_history.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
-        $scope.notes_length = storage_manager_memo.getItemLength();
+        $scope.history_length = storage_manager_history.getItemLength();
+        $scope.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
         $scope.dive = function () {
             var el_keyword = document.getElementById("home_searchKey");
             var search_key = el_keyword.value;
@@ -225,6 +254,7 @@ TODO
         $scope.delete_mode = false;
         $scope.delete_targets = { list: [] }; // 削除対象リスト
         $scope.no_result = false; // 結果0件の場合にtrue
+        $scope.GLOBAL_MEMO_NAME = GLOBAL_MEMO_PROP.KEY; // Global memoのプロパティ名
         // 削除モード切替
         $scope.toggleDeletemode = function () {
             $scope.delete_mode = !$scope.delete_mode;
@@ -295,43 +325,60 @@ TODO
             }
         };
         var getHeaderList = function (keyword) {
+            myModal.show();
             wikiAdapter.getHeaderList(keyword, function (res) {
-                console.log("callback level1");
-                for (var p in res) {
-                    if (res[p].pageid) {
-                        $scope.items.push(res[p]);
+                console.log("callback level1(getHeaderList)");
+                // wikiAdapterのステータスをチェック
+                if (isWikiStatusSuccess()) {
+                    for (var p in res) {
+                        if (res[p].pageid) {
+                            $scope.items.push(res[p]);
+                        }
                     }
+                    $scope.$apply();
                 }
-                $scope.$apply();
+                else {
+                    handleDispErrMsg();
+                }
+                myModal.hide();
             });
         };
         var searchHeadersFromKeywordCallback = function (res) {
-            console.log("callback level1(search headers)");
+            console.log("callback level1(searchHeadersFromKeywordCallback)");
             $scope.items = [];
-            if (res) {
-                if (res.has_no_contents) {
+            // ステータスsuccessなら
+            if (isWikiStatusSuccess()) {
+                if (res) {
+                    if (res.has_no_contents) {
+                        $scope.no_result = true;
+                    }
+                    else if (res.search) {
+                        for (var r in res.search) {
+                            $scope.items.push(res.search[r]);
+                        }
+                    }
+                    else if (res.random) {
+                        for (var r in res.random) {
+                            $scope.items.push(res.random[r]);
+                        }
+                    }
+                }
+                else {
                     $scope.no_result = true;
                 }
-                else if (res.search) {
-                    for (var r in res.search) {
-                        $scope.items.push(res.search[r]);
-                    }
-                }
-                else if (res.random) {
-                    for (var r in res.random) {
-                        $scope.items.push(res.random[r]);
-                    }
-                }
+                $scope.$apply();
             }
             else {
-                $scope.no_result = true;
+                handleDispErrMsg();
             }
-            $scope.$apply();
+            myModal.hide();
         };
         var searchHeadersFromKeyword = function (keyword) {
+            myModal.show();
             wikiAdapter.searchHeadersFromKeyword(keyword, searchHeadersFromKeywordCallback);
         };
         var searchRandomHeaders = function () {
+            myModal.show();
             wikiAdapter.searchRandomHeaders(searchHeadersFromKeywordCallback // コールバック
             );
         };
@@ -392,15 +439,14 @@ TODO
         $scope.links = []; //詳細ページ-> リンクlist
         $scope.no_result = false; // 結果無しの場合にtrue
         $scope.img_handle_type = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) || "0"; // 設定無しならデフォルト"0"
+        $scope.has_memo = false;
         $scope.openWithBrowser = function () {
             console.log("in open browser");
             //window.open($scope.detail.full_url, '_system');
         };
-        $scope._showImages = function () {
+        // 画像を表示する
+        $scope.showImages = function () {
             var el_imgs = document.querySelectorAll("#detail_content img[data-original]");
-            console.log("el_imgs=");
-            outlog(el_imgs);
-            var el_parent = document.getElementById("detail_content");
             for (var i = 0; i < el_imgs.length; i++) {
                 el_imgs[i].setAttribute("src", el_imgs[i].getAttribute("data-original"));
             }
@@ -470,20 +516,11 @@ TODO
                 e.preventDefault();
                 console.log("in processArticleClick(img tag)");
                 // タッチロードなら
-                //if(storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "1"){
-                if (true) {
+                if (storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "1") {
                     var src = e.target.getAttribute("data-original");
-                    popoverSharingService.sharing.id = $scope.id;
-                    popoverSharingService.sharing.title = $scope.title;
-                    popoverSharingService.sharing.caption = "";
-                    popoverSharingService.sharing.memo = e.target.parentNode.innerHTML; //タイトルから名称を引いてくる
-                    // sharingの値更新をsubscribeする
-                    popoverSharingService.updateSharing();
-                    if (myPopoverMemo) {
-                    }
                     if (src) {
                         e.target.setAttribute("src", src);
-                    }
+                    } // src属性に値をセットして画像を取得しにいく
                 }
             }
             //対象でなかったら無視
@@ -519,86 +556,95 @@ TODO
             });
         };
         var handleGetDetail = function (res) {
-            console.log("callback level1");
-            if (res.has_no_contents) {
-                $scope.no_result = true;
-            }
-            else if (!res.isTypeParse) {
-                //※※※ parseじゃなくてextractルート ※※※
-                $scope.id = res.pageid;
-                $scope.title = res.title;
-                $scope.summary = "";
-                var article = "";
-                if (res.extract) {
-                    article = res.extract;
-                    article = article.replace(/[\r\n]/g, "<br />");
-                    $scope.article = $sce.trustAsHtml(article);
+            console.log("callback level1(handleGetDetail)");
+            console.log("response cd=" + wikiAdapter.status);
+            // 成否判定
+            if (isWikiStatusSuccess()) {
+                if (res.has_no_contents) {
+                    $scope.no_result = true;
                 }
-                else if (res.revisions && res.revisions["0"] && res.revisions["0"]["*"]) {
-                    article = res.revisions["0"]["*"];
-                    article = article.replace(/[\r\n]/g, "<br />");
-                    $scope.article = $sce.trustAsHtml(article);
-                }
-                //pタグが存在すれば、一致する先頭を取得
-                if (article) {
-                    var s = article.match(/<p>.*?<\/p>/);
-                    if (s) {
+                else if (!res.isTypeParse) {
+                    //※※※ parseじゃなくてextractルート ※※※
+                    $scope.id = res.pageid;
+                    $scope.title = res.title;
+                    $scope.summary = "";
+                    var article = "";
+                    if (res.extract) {
+                        article = res.extract;
+                        article = article.replace(/[\r\n]/g, "<br />");
+                        $scope.article = $sce.trustAsHtml(article);
+                    }
+                    else if (res.revisions && res.revisions["0"] && res.revisions["0"]["*"]) {
+                        article = res.revisions["0"]["*"];
+                        article = article.replace(/[\r\n]/g, "<br />");
+                        $scope.article = $sce.trustAsHtml(article);
+                    }
+                    //pタグが存在すれば、一致する先頭を取得
+                    /*
+                    if(article){
+                      var s = article.match(/<p>.*?<\/p>/);
+                      if(s){
                         $scope.summary = $sce.trustAsHtml(s[0]);
+                      }
+                    }
+                    */
+                    $scope.summary = ""; // 概要は...もう不要なのでは？
+                    //リダイレクトが存在すれば、リダイレクトの要素を表示させる
+                    $scope.is_redirects_exist = !!(res.redirects);
+                    if (res.redirects) {
+                        for (var r in res.redirects) {
+                            $scope.redirects.push(res.redirects[r]);
+                        }
+                        console.log("redirects exist");
+                    }
+                    //リンクが存在すれば、リンク要素を表示させる
+                    $scope.is_links_exist = !!(res.links);
+                    if (res.links) {
+                        for (var l in res.links) {
+                            $scope.links.push(res.links[l]);
+                        } // linkがあればつめてく
+                        console.log("links exist");
                     }
                 }
-                //リダイレクトが存在すれば、リダイレクトの要素を表示させる
-                $scope.is_redirects_exist = !!(res.redirects);
-                if (res.redirects) {
-                    for (var r in res.redirects) {
-                        $scope.redirects.push(res.redirects[r]);
+                else {
+                    // ※※※ parseルート！！※※※
+                    $scope.id = res.pageid;
+                    $scope.title = res.title;
+                    // article 抽出
+                    {
+                        var article = res.text["*"];
+                        //hrefを削除(※必須)
+                        //article = article.replace(/href="[^"]*"/g, "");
+                        article = article.replace(/href="(?!#\.)([^"](?!\.png))*"/g, "");
+                        // img属性を調整
+                        article = article.replace(/srcset="[^"]*"/g, ""); // 一旦 srcsetを削除
+                        article = article.replace(/(<img.*)src="([^"]*)"([^>]*>)/g, "$1 data-original='https:$2' $3"); // その後、srcをほかの属性に置換
+                        $scope.article = $sce.trustAsHtml(article);
                     }
-                    console.log("redirects exist");
-                }
-                //リンクが存在すれば、リンク要素を表示させる
-                $scope.is_links_exist = !!(res.links);
-                if (res.links) {
-                    for (var l in res.links) {
-                        $scope.links.push(res.links[l]);
+                    // link 抽出
+                    if (res.links) {
+                        for (var i = 0; i < res.links.length; i++) {
+                            var title = res.links[i]["*"];
+                            var splitted_title = title.split(":");
+                            if (splitted_title.length > 1) {
+                                continue;
+                            } //template: なんとか みたいな結果は除きたい
+                            $scope.links.push({
+                                pageid: "",
+                                title: title
+                            });
+                        }
+                        console.log("links exist");
                     }
-                    console.log("links exist");
                 }
+                // parse, extractどちらでもここを通るんで
+                wikiAdapter.status = WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_PROCESSEND;
+                // メモ登録有無を確認
+                $scope.has_memo = !!(storage_manager_memo.getItem($scope[FAVORITE_KEY_PROP.KEY])); // ヒットするtitleがあれば
             }
             else {
-                // ※※※ parseルート！！※※※
-                $scope.id = res.pageid;
-                $scope.title = res.title;
-                // article 抽出
-                {
-                    var article = res.text["*"];
-                    //hrefを削除(※必須)
-                    //article = article.replace(/href="[^"]*"/g, "");
-                    article = article.replace(/href="(?!#\.)([^"](?!\.png))*"/g, "");
-                    // imgを削除
-                    //article = article.replace(/<img[^>]+>/g, "");
-                    //article = article.replace(/(<img.*src=")(?=\/\/)/g, "$1http:");
-                    //article = article.replace(/(<img.*)src="([^"]*)"([^>]*)/g, "$1 data-original='https:$2' $3"); //'$1 class="lazy" data-original="http:$2');
-                    //article = article.replace(/(<img.*)src="([^"]*)"([^>]*).*srcset="[^"]*"([^>]*>)/g, "$1 data-original='https:$2' $3 $4"); //'$1 class="lazy" data-original="http:$2');
-                    //これほぼ成功。ただし、リラックマがだめarticle = article.replace(/(<img.*)src="([^"]*)"(.*)srcset="[^"]*"([^>]*>)/g, "$1 data-original='https:$2' $3 $4"); //'$1 class="lazy" data-original="http:$2');
-                    article = article.replace(/srcset="[^"]*"/g, ""); // 一旦 srcsetを削除
-                    article = article.replace(/(<img.*)src="([^"]*)"([^>]*>)/g, "$1 data-original='https:$2' $3"); // その後、srcをほかの属性に置換
-                    /* "※※一旦！！これでいきましょう※※ 後に外部リンクとか開きたくなるかもだけど */
-                    $scope.article = $sce.trustAsHtml(article);
-                }
-                // link 抽出
-                if (res.links) {
-                    for (var i = 0; i < res.links.length; i++) {
-                        var title = res.links[i]["*"];
-                        var splitted_title = title.split(":");
-                        if (splitted_title.length > 1) {
-                            continue;
-                        } //template: なんとか みたいな結果は除きたい
-                        $scope.links.push({
-                            pageid: "",
-                            title: title
-                        });
-                    }
-                    console.log("links exist");
-                }
+                // 取得失敗...
+                handleDispErrMsg();
             }
             // 詳細取得okならhistoryにタイトルを保存
             storage_manager_history.saveItem2Storage($scope[FAVORITE_KEY_PROP.KEY], {
@@ -609,9 +655,10 @@ TODO
             $scope.$apply();
             if (storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "2") {
                 setTimeout(function () {
-                    $scope._showImages();
+                    $scope.showImages();
                 }, 1);
             }
+            myModal.hide();
         };
         //idから詳細情報を取得する
         var getDetail = function (key) {
@@ -635,6 +682,7 @@ TODO
                 //pageidがない場合、titleにて明細検索を行う
                 // 以降、メインはこっち！
                 console.log("in title root");
+                myModal.show();
                 getDetailByTitle(_args.onTransitionEnd.title);
             }
         }

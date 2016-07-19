@@ -1,5 +1,30 @@
 /// <reference path="../../tsd/cordova/cordova.d.ts"/>
 
+/* ---------- 独自共通関数定義 ここから　----------*/
+
+/* return_cdにより、成否を判定 */
+function isWikiStatusSuccess(){
+	var res = (wikiAdapter.status == WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_DATA_PROCESSING);
+
+	return res;
+}
+
+/* return値により、挙動を制御する */
+function handleDispErrMsg(){
+
+	// wikiAdapterステータスが失敗ルートなら
+	let lang = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE);
+
+	// ステータスに応じて失敗メッセージを表示
+	showAlert(WIKIADAPTER_CONSTANTS.FAILURE_MSG[wikiAdapter.status][lang]);
+	// ステータスをリセット. ゴリゴリにwikiadapterとか書いてるけど、まぁ、いいよね
+	wikiAdapter.initStatus();
+
+	myModal.hide(); // 念のためmodalは閉じる
+}
+
+/* ---------- 独自共通関数定義 ここまで ----------*/
+
 /* 安全にpoppageする. 戻り先がない場合はhomeに戻る */
 function popPageSafe(nav: NavigatorView){
 	if((<any>nav).canPopPage()){

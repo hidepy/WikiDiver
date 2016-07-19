@@ -16,6 +16,24 @@ var WIKIADAPTER_CONSTANTS;
         SUCCESS_NORESULT: "4",
         FATAL_ERROR: "9"
     };
+    WIKIADAPTER_CONSTANTS.FAILURE_MSG = {
+        "0": {
+            "ja": "",
+            "en": ""
+        },
+        "3": {
+            "ja": "データ取得に成功しました",
+            "en": "success!!"
+        },
+        "4": {
+            "ja": "データが見つかりませんでした...",
+            "en": "no data..."
+        },
+        "9": {
+            "ja": "データ取得中にエラーが発生しました...",
+            "en": "error occurred!!"
+        }
+    };
 })(WIKIADAPTER_CONSTANTS || (WIKIADAPTER_CONSTANTS = {}));
 var STORAGE_TYPE;
 (function (STORAGE_TYPE) {

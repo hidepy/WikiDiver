@@ -60,6 +60,9 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
     #header_main_list ons-col{
       white-space: nowrap;
     }
+    div,p,span{
+      -webkit-user-select: auto !important;
+    }
     </style>
 
 </head>
@@ -68,6 +71,12 @@ angular promise
 http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 -->
 <body>
+
+  <ons-modal var="myModal">
+    <ons-icon icon="ion-load-c" spin="true" style="font-size: 48px;"></ons-icon>
+    <p>please wait...</p>
+    <ons-button ng-click="myModal.hide()" modifier="quiet">close</ons-button>
+  </ons-modal>
 
   <script type="text/ons-template" id="popover_memo.html">
     <ons-dialog ng-controller="popoverController" animation="none" cancelable style="width: 90%; max-width: 400px;">
@@ -81,7 +90,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       <textarea ng-model="sharing.memo" rows="8" cols="20" style="width: 100%;"></textarea>
     </ons-dialog>
   </script>
-
 
 <ons-sliding-menu main-page="home.html" menu-page="menu.html" side="right" max-slide-distance="250px" var="myMenu">
 
@@ -149,7 +157,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </ons-toolbar>
 
         <div class="contents_wrapper">
-
           <div>
             <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
           </div>
@@ -222,7 +229,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         </ons-list-item>
 
         <ons-list-header>items</ons-list-header>
-        <ons-list-item modifier="chevron" class="item list-item-container" ng-repeat="item in items track by $index" ng-click="processItemSelect($index, $event)">
+        <ons-list-item ng-hide="item.title==GLOBAL_MEMO_NAME" modifier="chevron" class="item list-item-container" ng-repeat="item in items track by $index" ng-click="processItemSelect($index, $event)">
           <ons-row>
             <ons-col ng-show="delete_mode" width="20%"><input type="checkbox" checklist-model="delete_targets.list" checklist-value="item.title"><div class="checkbox__checkmark"></div></ons-col>
             <ons-col>{{item.title}}</ons-col>
@@ -239,16 +246,13 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
       <ons-toolbar>
         <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <!--<div class="center">Detail</div>-->
         <div class="right">
           <ons-toolbar-button ng-click="openWithBrowser()">
             <ons-icon icon="globe" style="font-size: 32px; width: 1em;"></ons-icon>
           </ons-toolbar-button>
           <ons-toolbar-button id="detail_note_button" ng-click="openNote()" style="position: relative;">
             <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
-            <div style="position: absolute; border-style: solid; border-radius: 8px; width: 14px; height: 14px; font-size: 9px; border-width: 1px; top: 2px; left: 2px;">
-              <span style="position: relative; top: -14px; left: -4px;">2</span>
-            </div>
+            <ons-icon ng-show="has_memo" icon="check-circle-o" style="position: absolute; top: 0px; left: 0px;"></ons-icon>
           </ons-toolbar-button>
           <ons-toolbar-button ng-click="saveAsFavorite()">
             <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
@@ -272,7 +276,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       </p>
 
       <p ng-show="img_handle_type=='0'">
-        <ons-button ng-click="_showImages()">get images</ons-button>
+        <ons-button ng-click="showImages()">get images</ons-button>
       </p>
 
       <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
@@ -380,7 +384,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
     <ons-page ng-controller="TreeViewController">
 
       <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
         <div class="center">Map</div>
         <div class="right">
           <ons-toolbar-button ng-click="myMenu.toggleMenu()">
