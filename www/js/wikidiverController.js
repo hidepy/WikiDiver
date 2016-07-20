@@ -5,6 +5,14 @@
 /*
 TODO
 
+  2016/07/20
+    残
+      トランdelete 2回目の挙動!!
+
+      キャッシュ... は不要か...実際、一番通信料かかるのは画像だし...
+      データ操作後の挙動を統一
+        note, favoriteに仕込みました。十分だよね。マスタはいいや
+
   2016/07/19
 
     statu表示-> okたぶん, globalメモの件数がおかしい-> okたぶん, historyなど2回目以降の削除がおかしい
@@ -442,7 +450,9 @@ TODO
         $scope.has_memo = false;
         $scope.openWithBrowser = function () {
             console.log("in open browser");
-            //window.open($scope.detail.full_url, '_system');
+            var main_url = "http://ja.wikipedia.org/wiki/";
+            var title_encoded = encodeURI($scope.title);
+            window.open(main_url + title_encoded, '_system');
         };
         // 画像を表示する
         $scope.showImages = function () {
@@ -467,8 +477,8 @@ TODO
             popoverSharingService.sharing.is_global = false; // globalメモではない
             // sharingの値更新をsubscribeする
             popoverSharingService.updateSharing();
+            // popover show
             if (myPopoverMemo) {
-                // popover show
                 myPopoverMemo.show("#detail_note_button");
             }
             else {
@@ -487,9 +497,15 @@ TODO
                 links: $scope.links,
                 update_date: formatDate(new Date())
             };
+            // 言語取得
+            var lang = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE);
             //保存 キーはtitleだが...問題なし？ wiki的には重複しない 文字化けが心配
-            storage_manager_favorite.saveItem2Storage(favorite[FAVORITE_KEY_PROP.KEY], favorite);
-            showAlert("save2favorite!! ... nocheck...");
+            if (storage_manager_favorite.saveItem2Storage(favorite[FAVORITE_KEY_PROP.KEY], favorite)) {
+                showAlert(GENERAL_MSG.SAVE_SUCCESS[lang]);
+            }
+            else {
+                showAlert(GENERAL_MSG.SAVE_FAILURE[lang]);
+            }
         };
         $scope.processArticleClick = function (e) {
             var tag = (e && e.target && e.target.tagName) ? e.target.tagName : null;
@@ -694,12 +710,20 @@ TODO
             caption: "",
             memo: ""
         };
+        var lang = storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE);
         // 保存
         $scope.saveMemo = function () {
-            storage_manager_memo.saveItem2Storage($scope.sharing[FAVORITE_KEY_PROP.KEY], {
+            if (storage_manager_memo.saveItem2Storage($scope.sharing[FAVORITE_KEY_PROP.KEY], {
                 title: $scope.sharing[FAVORITE_KEY_PROP.KEY],
                 memo: $scope.sharing.memo
-            });
+            })) {
+                // 正常終了
+                showAlert(GENERAL_MSG.SAVE_SUCCESS[lang]);
+            }
+            else {
+                // 異常終了
+                showAlert(GENERAL_MSG.SAVE_FAILURE[lang]);
+            }
             popoverSharingService.sharing = $scope.sharing; // 次ポップアップオープン時用にコピー
             showAlert("save success!! but, actually needed to check success or failure...");
             myPopoverMemo.hide();

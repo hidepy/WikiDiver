@@ -69,34 +69,53 @@ var StorageManager = function (storage_key_name, limit_info) {
     proto.getItem = function (key) {
         return this.items[key];
     };
+    // return boolean
     proto.deleteItem = function (key) {
-        delete this.items[key];
-        window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
+        try {
+            delete this.items[key];
+            window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
     };
     proto.deleteItems = function (keys) {
-        if (keys && keys.length && (keys.length > 0)) {
-            var items = this.items;
-            keys.forEach(function (v, i, arr) {
-                delete items[v];
-            });
+        try {
+            if (keys && keys.length && (keys.length > 0)) {
+                var items = this.items;
+                keys.forEach(function (v, i, arr) {
+                    delete items[v];
+                });
+            }
+            window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
+            return true;
         }
-        window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
+        catch (e) {
+            return false;
+        }
     };
     proto.saveItem2Storage = function (key, data) {
-        console.log("in saveItem2Storage. my name is=" + this.storage_key_name);
-        outlog(this.limit_info);
-        if (this.limit_info) {
-            if (this.getItemLength() >= this.limit_info.length) {
-                var sorted_arr = this.getSorted(this.limit_info.sort_key, false);
-                var target_key = sorted_arr[0]["__key"];
-                console.log("saveItem2Storage#limit_item");
-                console.log("got target_key=" + target_key);
-                outlog(this.items[target_key]);
-                this.deleteItem(target_key);
+        try {
+            console.log("in saveItem2Storage. my name is=" + this.storage_key_name);
+            outlog(this.limit_info);
+            if (this.limit_info) {
+                if (this.getItemLength() >= this.limit_info.length) {
+                    var sorted_arr = this.getSorted(this.limit_info.sort_key, false);
+                    var target_key = sorted_arr[0]["__key"];
+                    console.log("saveItem2Storage#limit_item");
+                    console.log("got target_key=" + target_key);
+                    outlog(this.items[target_key]);
+                    this.deleteItem(target_key);
+                }
             }
+            this.items[key] = data;
+            window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
+            return true;
         }
-        this.items[key] = data;
-        window.localStorage.setItem(this.storage_key_name, JSON.stringify(this.items));
+        catch (e) {
+            return false;
+        }
     };
     proto.getSorted = function (key, desc) {
         var prefix = desc ? -1 : 1;

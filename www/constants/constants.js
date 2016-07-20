@@ -6,6 +6,27 @@ var APP_CONFIGS;
 (function (APP_CONFIGS) {
     APP_CONFIGS.NAME = "APP_WIKI_DIVER";
 })(APP_CONFIGS || (APP_CONFIGS = {}));
+var FAVORITE_KEY_PROP;
+(function (FAVORITE_KEY_PROP) {
+    FAVORITE_KEY_PROP.KEY = "title";
+})(FAVORITE_KEY_PROP || (FAVORITE_KEY_PROP = {}));
+var GLOBAL_MEMO_PROP;
+(function (GLOBAL_MEMO_PROP) {
+    GLOBAL_MEMO_PROP.KEY = "__GLOBAL_MEMO__"; // 1つのstoragemanagerを作るのは大げさなんで、通常memoの1プロパティとして定義
+})(GLOBAL_MEMO_PROP || (GLOBAL_MEMO_PROP = {}));
+var PAGE_TYPE;
+(function (PAGE_TYPE) {
+    PAGE_TYPE.TYPE_MAP = {
+        "search_result_header.html": "H",
+        "search_result_detail.html": "D",
+        "tree_view.html": "T"
+    };
+    PAGE_TYPE.NAME_MAP = {
+        "search_result_header.html": "Header",
+        "search_result_detail.html": "Detail",
+        "tree_view.html": "Tree"
+    };
+})(PAGE_TYPE || (PAGE_TYPE = {}));
 var WIKIADAPTER_CONSTANTS;
 (function (WIKIADAPTER_CONSTANTS) {
     WIKIADAPTER_CONSTANTS.STATUS = {
@@ -110,24 +131,15 @@ var SETTING_MSG;
         }
     };
 })(SETTING_MSG || (SETTING_MSG = {}));
-var PAGE_TYPE;
-(function (PAGE_TYPE) {
-    PAGE_TYPE.TYPE_MAP = {
-        "search_result_header.html": "H",
-        "search_result_detail.html": "D",
-        "tree_view.html": "T"
+var GENERAL_MSG;
+(function (GENERAL_MSG) {
+    GENERAL_MSG.SAVE_SUCCESS = {
+        ja: "保存しました",
+        en: "success to save"
     };
-    PAGE_TYPE.NAME_MAP = {
-        "search_result_header.html": "Header",
-        "search_result_detail.html": "Detail",
-        "tree_view.html": "Tree"
+    GENERAL_MSG.SAVE_FAILURE = {
+        ja: "保存に失敗しました...",
+        en: "failed to save..."
     };
-})(PAGE_TYPE || (PAGE_TYPE = {}));
-var FAVORITE_KEY_PROP;
-(function (FAVORITE_KEY_PROP) {
-    FAVORITE_KEY_PROP.KEY = "title";
-})(FAVORITE_KEY_PROP || (FAVORITE_KEY_PROP = {}));
-var GLOBAL_MEMO_PROP;
-(function (GLOBAL_MEMO_PROP) {
-    GLOBAL_MEMO_PROP.KEY = "__GLOBAL_MEMO__"; // 1つのstoragemanagerを作るのは大げさなんで、通常memoの1プロパティとして定義
-})(GLOBAL_MEMO_PROP || (GLOBAL_MEMO_PROP = {}));
+})(GENERAL_MSG || (GENERAL_MSG = {}));
+;

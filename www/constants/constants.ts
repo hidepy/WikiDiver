@@ -7,6 +7,27 @@ namespace APP_CONFIGS{
   export const NAME = "APP_WIKI_DIVER";
 }
 
+namespace FAVORITE_KEY_PROP{
+  export const KEY = "title";
+}
+
+namespace GLOBAL_MEMO_PROP{
+  export const KEY = "__GLOBAL_MEMO__"; // 1つのstoragemanagerを作るのは大げさなんで、通常memoの1プロパティとして定義
+}
+
+namespace PAGE_TYPE{
+  export const TYPE_MAP = {
+    "search_result_header.html": "H",
+    "search_result_detail.html": "D",
+    "tree_view.html": "T"
+  };
+  export const NAME_MAP = {
+    "search_result_header.html": "Header",
+    "search_result_detail.html": "Detail",
+    "tree_view.html": "Tree"
+  };
+}
+
 namespace WIKIADAPTER_CONSTANTS{
   export const STATUS = {
     NO_ACTION: "0",
@@ -52,6 +73,7 @@ namespace SETTING_TYPE{
   export const ARTICLE_TYPE = "article_type";
   export const HISTORY_LENGTH = "history_length";
 }
+
 namespace SETTING_MSG{
   export const LANGUAGE_APPEARANCE = {
     TITLE: {
@@ -115,23 +137,13 @@ namespace SETTING_MSG{
   };
 }
 
-namespace PAGE_TYPE{
-  export const TYPE_MAP = {
-    "search_result_header.html": "H",
-    "search_result_detail.html": "D",
-    "tree_view.html": "T"
+namespace GENERAL_MSG {
+  export const SAVE_SUCCESS = {
+    ja: "保存しました",
+    en: "success to save"
   };
-  export const NAME_MAP = {
-    "search_result_header.html": "Header",
-    "search_result_detail.html": "Detail",
-    "tree_view.html": "Tree"
-  };
-}
-
-namespace FAVORITE_KEY_PROP{
-  export const KEY = "title";
-}
-
-namespace GLOBAL_MEMO_PROP{
-  export const KEY = "__GLOBAL_MEMO__"; // 1つのstoragemanagerを作るのは大げさなんで、通常memoの1プロパティとして定義
-}
+  export const SAVE_FAILURE = {
+    ja: "保存に失敗しました...",
+    en: "failed to save..."
+  }
+};
