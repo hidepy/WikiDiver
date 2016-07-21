@@ -192,6 +192,13 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
           </div>
 
+          <!-- swipe test -->
+          <ons-gesture-detector ng-drag="drag()" ng-swipeup="swipeup()">
+            <div style="border-style: solid; border-width: 2px;">
+              here, you can swipe
+            </div>
+          </ons-gesture-detector>
+
         </div>
 
       </ons-page>

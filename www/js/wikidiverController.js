@@ -5,6 +5,12 @@
 /*
 TODO
 
+  2016/07/21
+    残
+      トランdelete, 右下メニュー
+
+    directiveを使って、ラッピングできるところありそう。練習として取り入れたい
+
   2016/07/20
     残
       トランdelete 2回目の挙動!!
@@ -183,6 +189,12 @@ TODO
         $scope.favorite_length = storage_manager_favorite.getItemLength();
         $scope.history_length = storage_manager_history.getItemLength();
         $scope.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
+        $scope.swipeup = function () {
+            console.log("you swiped");
+        };
+        $scope.drag = function () {
+            console.log("drag");
+        };
         $scope.dive = function () {
             var el_keyword = document.getElementById("home_searchKey");
             var search_key = el_keyword.value;
