@@ -272,42 +272,53 @@ TODO
         $scope.is_notes = false;
         $scope.is_random = false;
         $scope.delete_mode = false;
-        $scope.delete_targets = { list: [] }; // 削除対象リスト
+        $scope.delete_hash = {}; // 削除対象hash
         $scope.no_result = false; // 結果0件の場合にtrue
         $scope.GLOBAL_MEMO_NAME = GLOBAL_MEMO_PROP.KEY; // Global memoのプロパティ名
         // 削除モード切替
         $scope.toggleDeletemode = function () {
             $scope.delete_mode = !$scope.delete_mode;
-            $scope.delete_targets.list = []; // 削除リストはクリア
+            //$scope.delete_targets.list = []; // 削除リストはクリア
+            $scope.delete_hash = {}; // 削除ハッシュはクリア(こっちが実質本体)
         };
         $scope.toggleAllTargets = function () {
-            if ($scope.delete_targets.list.length == $scope.items.length) {
-                $scope.delete_targets.list = [];
+            var del_length = 0;
+            for (var p in $scope.delete_hash) {
+                if ($scope.delete_hash[p]) {
+                    del_length++;
+                }
+            }
+            if (del_length == $scope.items.length) {
+                $scope.delete_hash = {};
             }
             else {
                 // 全権削除対象にpush
                 for (var i = 0; i < $scope.items.length; i++) {
-                    $scope.delete_targets.list.push($scope.items[i][FAVORITE_KEY_PROP.KEY]);
+                    $scope.delete_hash[$scope.items[i][FAVORITE_KEY_PROP.KEY]] = true;
                 }
             }
         };
         // 削除処理
         $scope.deleteFavOrHis = function () {
             console.log("in deleteFavOrHis");
-            outlog($scope.delete_targets.list);
             console.log("current fav his flag=" + $scope.is_favorite + ", " + $scope.is_history);
+            // 削除対象ハッシュを配列に変換
+            var del_arr = [];
+            for (var p in $scope.delete_hash) {
+                del_arr.push(p);
+            } // hashをarrに変換
             if ($scope.is_favorite) {
-                storage_manager_favorite.deleteItems($scope.delete_targets.list);
+                storage_manager_favorite.deleteItems(del_arr);
                 $scope.items = convHash2Arr(storage_manager_favorite.getAllItem());
                 console.log("in favorite root");
             }
             else if ($scope.is_history) {
-                storage_manager_history.deleteItems($scope.delete_targets.list);
+                storage_manager_history.deleteItems(del_arr);
                 $scope.items = convHash2Arr(storage_manager_history.getAllItem());
                 console.log("in history root");
             }
             else if ($scope.is_notes) {
-                storage_manager_memo.deleteItems($scope.delete_targets.list);
+                storage_manager_memo.deleteItems(del_arr);
                 $scope.items = convHash2Arr(storage_manager_memo.getAllItem());
                 console.log("in memo root");
             }
@@ -318,15 +329,7 @@ TODO
         //レコード選択時
         $scope.processItemSelect = function (idx, event) {
             if ($scope.delete_mode) {
-                var target_idx = $scope.delete_targets.list.indexOf($scope.items[idx][FAVORITE_KEY_PROP.KEY]);
-                //既に登録されているか
-                if (target_idx != -1) {
-                    //登録されている
-                    $scope.delete_targets.list.splice(target_idx, 1); //削除
-                }
-                else {
-                    $scope.delete_targets.list.push($scope.items[idx][FAVORITE_KEY_PROP.KEY]);
-                }
+                $scope.delete_hash[$scope.items[idx][FAVORITE_KEY_PROP.KEY]] = !$scope.delete_hash[$scope.items[idx][FAVORITE_KEY_PROP.KEY]]; //true;
             }
             else {
                 //idを求めてgetDetailByIdする

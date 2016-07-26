@@ -238,7 +238,9 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
         <ons-list-header>items</ons-list-header>
         <ons-list-item ng-hide="item.title==GLOBAL_MEMO_NAME" modifier="chevron" class="item list-item-container" ng-repeat="item in items track by $index" ng-click="processItemSelect($index, $event)">
           <ons-row>
-            <ons-col ng-show="delete_mode" width="20%"><input type="checkbox" checklist-model="delete_targets.list" checklist-value="item.title"><div class="checkbox__checkmark"></div></ons-col>
+            <!--<ons-col ng-show="delete_mode" width="20%"><input type="checkbox" checklist-model="delete_targets.list" checklist-value="item.title"><div class="checkbox__checkmark"></div></ons-col>
+            -->
+            <ons-col ng-show="delete_mode" width="20%"><ons-icon icon="ion-navicon" ng-show="delete_hash[item.title]"></ons-icon></div></ons-col>
             <ons-col>{{item.title}}</ons-col>
             <ons-col ng-hide="delete_mode" ng-show="is_notes" width="50%" style="overflow: hidden;">{{item.memo}}</ons-col>
           </ons-row>
