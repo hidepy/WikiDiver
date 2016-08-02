@@ -34,6 +34,13 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
     <script src="js/popoverSharingService.js"></script>
 
     <style>
+    #home_icons_wrapper ons-col ons-button {
+      border-width: 1px;
+      border-style: solid;
+      border-right-color: lightgray;
+      border-bottom-color: lightgray;
+      border-radius: 4px;
+    }
     .contents_wrapper {
       text-align: center;
     }
@@ -155,7 +162,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             </ons-toolbar-button>
           </div>
         </ons-toolbar>
-
+<!--
         <div class="contents_wrapper">
           <div>
             <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
@@ -190,6 +197,63 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
           <div>
             <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
+          </div>
+-->
+
+        <div class="contents_wrapper">
+          <div>
+            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
+            <ons-button ng-click="dive()" modifier="large"><ons-icon icon="search" style="font-size: 24px; width: 1em;"></ons-icon>search</ons-button>
+          </div>
+
+          <div id="home_icons_wrapper">
+            <ons-row>
+
+              <ons-col>
+                <ons-button ng-click="move2favorite()" modifier="large--quiet">
+                  <ons-icon icon="ion-android-star" style="font-size: 24px; width: 1em;"></ons-icon>
+                  <br />favorite({{favorite_length}})
+                </ons-button>
+              </ons-col>
+
+              <ons-col>
+                <ons-button ng-click="move2history()" modifier="large--quiet">
+                  <ons-icon icon="history" style="font-size: 24px; width: 1em;"></ons-icon>
+                  <br />history({{history_length}})
+                </ons-button>
+              </ons-col>
+
+              <ons-col>
+                <ons-button ng-click="move2notes()" modifier="large--quiet">
+                  <ons-icon icon="book" style="font-size: 24px; width: 1em;"></ons-icon>
+                  <br />notes({{notes_length}})
+                </ons-button>
+              </ons-col>
+
+            </ons-row>
+
+            <ons-row>
+              <ons-col>
+                <ons-button ng-click="randomDive()" modifier="large--quiet">
+                  <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
+                  <br />Random Search
+                </ons-button>
+              </ons-col>
+
+              <ons-col>
+                <ons-button id="home_globalMemoButton" ng-click="showGlobalMemo()" modifier="large--quiet">
+                  <ons-icon icon="ion-android-star" style="font-size: 24px; width: 1em;"></ons-icon>
+                  <br />Memo(global)
+                </ons-button>
+              </ons-col>
+
+              <ons-col>
+                <ons-button ng-click="move2setting()" modifier="large--quiet">
+                  <ons-icon icon="gear" style="font-size: 28px; width: 1em;"></ons-icon>
+                  <br />setting
+                </ons-button>
+              </ons-col>
+            </ons-row>
           </div>
 
           <!-- swipe test -->
