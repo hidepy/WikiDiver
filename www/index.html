@@ -34,6 +34,10 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
     <script src="js/popoverSharingService.js"></script>
 
     <style>
+    #home_icons_wrapper ons-col{
+      width: 33%;
+      overflow: hidden;
+    }
     #home_icons_wrapper ons-col ons-button {
       border-width: 1px;
       border-style: solid;
@@ -41,11 +45,16 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
       border-bottom-color: lightgray;
       border-radius: 4px;
     }
+    #home_icons_wrapper .icons_title{
+      font-size: 12px;
+    }
     .contents_wrapper {
       text-align: center;
     }
     #home_searchKey {
       margin : 4px;
+      height: 42px;
+      font-size: 32px;
     }
     a{
       font-size: 120%;
@@ -162,43 +171,6 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             </ons-toolbar-button>
           </div>
         </ons-toolbar>
-<!--
-        <div class="contents_wrapper">
-          <div>
-            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
-          </div>
-
-          <div>
-            <ons-button ng-click="dive()" modifier="large"><ons-icon icon="search" style="font-size: 24px; width: 1em;"></ons-icon>search</ons-button>
-          </div>
-
-          <div>
-            <ons-button ng-click="move2favorite()" modifier="large--quiet">view favorite({{favorite_length}} records)</ons-button>
-          </div>
-
-          <div>
-            <ons-button ng-click="move2history()" modifier="large--quiet">view history({{history_length}} records)</ons-button>
-          </div>
-
-          <div>
-            <ons-button ng-click="move2notes()" modifier="large--quiet">view notes({{notes_length}} records)</ons-button>
-          </div>
-
-          <div>
-            <ons-button ng-click="randomDive()" modifier="large--quiet">
-              <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
-              Random Search
-            </ons-button>
-          </div>
-
-          <div>
-            <ons-button id="home_globalMemoButton" ng-click="showGlobalMemo()" modifier="large--quiet">Memo(global)</ons-button>
-          </div>
-
-          <div>
-            <ons-button ng-click="move2setting()" modifier="large--quiet">setting</ons-button>
-          </div>
--->
 
         <div class="contents_wrapper">
           <div>
@@ -212,7 +184,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
               <ons-col>
                 <ons-button ng-click="move2favorite()" modifier="large--quiet">
                   <ons-icon icon="ion-android-star" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <br />favorite({{favorite_length}})
+                  <div class="icons_title">favorite({{favorite_length}})</div>
                 </ons-button>
               </ons-col>
 
@@ -349,7 +321,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       </p>
 
       <p ng-show="img_handle_type=='0'">
-        <ons-button ng-click="showImages()">get images</ons-button>
+        <ons-button modifier="large--quiet" ng-click="showImages()">Get all images</ons-button>
       </p>
 
       <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>

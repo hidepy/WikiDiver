@@ -71,6 +71,7 @@ var SETTING_TYPE;
     SETTING_TYPE.IMG_HANDLE = "img_handle"; // value 0=トップのボタン押下で全画像ロード, 1=画像タッチでロード, 2=常にロード
     SETTING_TYPE.ARTICLE_TYPE = "article_type";
     SETTING_TYPE.HISTORY_LENGTH = "history_length";
+    SETTING_TYPE.HISTORY_CACHE = "history_cache"; // 履歴をキャッシュする場合はtrue
 })(SETTING_TYPE || (SETTING_TYPE = {}));
 var SETTING_MSG;
 (function (SETTING_MSG) {

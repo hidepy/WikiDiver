@@ -123,40 +123,6 @@ TODO
             }
         }
     });
-    /*
-        module.controller("rootController", function($scope){
-          // modalに表示するメッセージ
-          $scope.modal_msg = "";
-          $scope.wikiAdapter = wikiAdapter;
-    
-          $scope.$watch($scope.wikiAdapter.status, function(newVal, oldVal){
-            console.log("status changed!! newval, oldval=" + newVal + ", " + oldVal);
-            // newValがconnectingになった(通信開始)で表示、それ以外ではクローズのみ行う
-            switch(newVal){
-              case WIKIADAPTER_CONSTANTS.STATUS.CONNECTING:
-                $scope.modal_msg = "connecting...";
-                myModal.show(); // 通信開始なのでmodal show
-                break;
-              case WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_DATA_PROCESSING:
-                $scope.modal_msg = "data get ok. parsing...";
-                // 特にmodalの状態は変更なし
-                break;
-              case WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_PROCESSEND:
-                myModal.hide(); // 通信終了なのでmodal hide
-                break;
-              case WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_NORESULT:
-                myModal.hide(); // 通信終了なのでmodal hide
-                break;
-              case WIKIADAPTER_CONSTANTS.STATUS.FATAL_ERROR:
-                myModal.hide(); // 致命的エラーなのでmodal hide
-                break;
-              default:
-                myModal.hide();
-                break;
-            }
-          }, true);
-        });
-    */
     module.controller("MenuController", function ($scope) {
         // favoriteとhistory共通
         $scope.move2FavoriteOrHistory = function (type) {
@@ -586,11 +552,11 @@ TODO
                 }
             });
         };
-        var handleGetDetail = function (res) {
+        var handleGetDetail = function (res, is_cache) {
             console.log("callback level1(handleGetDetail)");
             console.log("response cd=" + wikiAdapter.status);
-            // 成否判定
-            if (isWikiStatusSuccess()) {
+            // 成否判定 ただし、キャッシュからの場合は必ず成功なので通す
+            if (isWikiStatusSuccess() || is_cache) {
                 if (res.has_no_contents) {
                     $scope.no_result = true;
                 }
@@ -652,6 +618,8 @@ TODO
                         article = article.replace(/(<img.*)src="([^"]*)"([^>]*>)/g, "$1 data-original='https:$2' $3"); // その後、srcをほかの属性に置換
                         $scope.article = $sce.trustAsHtml(article);
                     }
+                    // リンク有無を確認
+                    $scope.is_links_exist = !!(res.links);
                     // link 抽出
                     if (res.links) {
                         for (var i = 0; i < res.links.length; i++) {
@@ -677,13 +645,22 @@ TODO
                 // 取得失敗...
                 handleDispErrMsg();
             }
-            // 詳細取得okならhistoryにタイトルを保存
-            storage_manager_history.saveItem2Storage($scope[FAVORITE_KEY_PROP.KEY], {
+            // hisotryとして格納する詳細情報を作成
+            var save_history_data = {
                 pageid: $scope.id,
                 title: $scope.title,
-                timestamp: formatDate(new Date())
-            }); // とりあえず、pageidとtitleだけ！！後にキャッシュ数とか設定できれば...
+                timestamp: formatDate(new Date()),
+                has_cache: false //キャッシュ情報保持フラグ(基本はfalseで。後にキャッシュ有りならtrueとする)
+            };
+            // historyをキャッシュとして利用する場合
+            if (storage_manager_settings[SETTING_TYPE.HISTORY_CACHE] === true) {
+                save_history_data["has_cache"] = true;
+                save_history_data["cache_data"] = res; // 取得情報をまんまキャッシュとして保存しておく
+            }
+            // 詳細取得okならhistoryにタイトルを保存
+            storage_manager_history.saveItem2Storage($scope[FAVORITE_KEY_PROP.KEY], save_history_data);
             $scope.$apply();
+            // 全画像取得設定になっている場合はロード
             if (storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "2") {
                 setTimeout(function () {
                     $scope.showImages();
@@ -713,8 +690,18 @@ TODO
                 //pageidがない場合、titleにて明細検索を行う
                 // 以降、メインはこっち！
                 console.log("in title root");
-                myModal.show();
-                getDetailByTitle(_args.onTransitionEnd.title);
+                var title = _args.onTransitionEnd.title;
+                // 履歴のキャッシュ使用有りで、履歴データのキャッシュ情報有りなら
+                if ((storage_manager_settings[SETTING_TYPE.HISTORY_CACHE] === true) && (storage_manager_history[title]) && (storage_manager_history[title]["has_cache"] === true)) {
+                    // データ取得後と同様のフローを走らせる
+                    handleGetDetail(storage_manager_history[title]["cache_data"], true);
+                }
+                else {
+                    // データ取得waiting表示
+                    myModal.show();
+                    // wiki情報取得処理開始
+                    getDetailByTitle(title);
+                }
             }
         }
     });
@@ -740,7 +727,7 @@ TODO
                 showAlert(GENERAL_MSG.SAVE_FAILURE[lang]);
             }
             popoverSharingService.sharing = $scope.sharing; // 次ポップアップオープン時用にコピー
-            showAlert("save success!! but, actually needed to check success or failure...");
+            //showAlert("save success!! but, actually needed to check success or failure...");
             myPopoverMemo.hide();
         };
         $scope.deleteMemo = function () {
