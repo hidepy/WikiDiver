@@ -192,7 +192,7 @@ console.log("wikiadapter.status=" + wikiAdapter.status);
         //これ一応OK版
         params["prop"] = "extracts|links";//redirectsは不要に！！なぜなら、redirectsは、redirects元を指すようなので
         params["titles"] = main_query;
-        params["pllimit"] = 50;
+        params["pllimit"] = 200;
         params["exsectionformat"] = "raw";
         break;
       case "5": //[明細] parseお願い

@@ -95,6 +95,12 @@ TODO
             m_his_len = 10;
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_LENGTH, m_his_len);
         }
+        // キャッシュ設定
+        var m_his_cache = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE);
+        if (!m_his_cache) {
+            m_his_cache = 1;
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_CACHE, m_his_cache);
+        }
         // global memoが存在しない場合、空白をセットしておく
         var g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
         if (!g_memo) {
@@ -155,12 +161,6 @@ TODO
         $scope.favorite_length = storage_manager_favorite.getItemLength();
         $scope.history_length = storage_manager_history.getItemLength();
         $scope.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
-        $scope.swipeup = function () {
-            console.log("you swiped");
-        };
-        $scope.drag = function () {
-            console.log("drag");
-        };
         $scope.dive = function () {
             var el_keyword = document.getElementById("home_searchKey");
             var search_key = el_keyword.value;
@@ -653,7 +653,7 @@ TODO
                 has_cache: false //キャッシュ情報保持フラグ(基本はfalseで。後にキャッシュ有りならtrueとする)
             };
             // historyをキャッシュとして利用する場合
-            if (storage_manager_settings[SETTING_TYPE.HISTORY_CACHE] === true) {
+            if (storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE) === "1") {
                 save_history_data["has_cache"] = true;
                 save_history_data["cache_data"] = res; // 取得情報をまんまキャッシュとして保存しておく
             }
@@ -690,11 +690,15 @@ TODO
                 //pageidがない場合、titleにて明細検索を行う
                 // 以降、メインはこっち！
                 console.log("in title root");
+                // 前画面から受け取った検索タイトル
                 var title = _args.onTransitionEnd.title;
+                // キャッシュデータがあれば格納
+                var cached_data = storage_manager_history.getItem(title);
                 // 履歴のキャッシュ使用有りで、履歴データのキャッシュ情報有りなら
-                if ((storage_manager_settings[SETTING_TYPE.HISTORY_CACHE] === true) && (storage_manager_history[title]) && (storage_manager_history[title]["has_cache"] === true)) {
+                if ((storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE) == "1") && (cached_data) && (cached_data.has_cache === true)) {
+                    console.log("from cache");
                     // データ取得後と同様のフローを走らせる
-                    handleGetDetail(storage_manager_history[title]["cache_data"], true);
+                    handleGetDetail(cached_data.cache_data, true);
                 }
                 else {
                     // データ取得waiting表示
@@ -833,6 +837,7 @@ TODO
         $scope.radio_imghandle = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE);
         $scope.radio_article = storage_manager_settings.getItem(SETTING_TYPE.ARTICLE_TYPE);
         $scope.history_length = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_LENGTH);
+        $scope.history_cache = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE);
         // 言語関連情報
         $scope.msg_info = SETTING_MSG;
         $scope.saveMasterSetting = function () {
@@ -844,6 +849,8 @@ TODO
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.IMG_HANDLE, $scope.radio_imghandle);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, $scope.radio_article);
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_LENGTH, $scope.history_length);
+            storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_CACHE, $scope.history_cache);
+            outlog(storage_manager_settings);
             wikiAdapter.setLanguage($scope.radio_language);
             wikiAdapter.setArticleType($scope.radio_article);
             storage_manager_history.setLimit({ length: $scope.history_length, sort_key: "timestamp" });

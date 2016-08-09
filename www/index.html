@@ -68,7 +68,7 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
       width: 100% !important;
     }
     .red-button{
-      background-color: #f85050;
+      background-color: #e04040;
     }
     img:not([src]){
       border: 2px #40ff48 solid;
@@ -99,10 +99,14 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
       <div style="padding: 8px;">
       <p ng-hide="sharing.is_global">Memo for <span font-size="120%">{{sharing.title}}</span></p>
       <p class="caption">{{sharing.caption}}</p>
-      <div>
-        <ons-button ng-click="saveMemo()">save</ons-button>
-        <ons-button ng-click="deleteMemo()" class="red-button">delete</ons-button>
-      </div>
+      <ons-row>
+        <ons-col width="70%">
+          <ons-button ng-click="saveMemo()" modifier="large--quiet" style="border-style: solid; border-color: rgba(24, 103, 194, 0.81); border-width: 2px; height: 100%;">save</ons-button>
+        </ons-col>
+        <ons-col width="30%">
+          <ons-button ng-click="deleteMemo()" modifier="large" class="red-button" style="height: 100%">delete</ons-button>
+        </ons-col>
+      </ons-row>
       <textarea ng-model="sharing.memo" rows="8" cols="20" style="width: 100%;"></textarea>
     </ons-dialog>
   </script>
@@ -172,6 +176,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
           </div>
         </ons-toolbar>
 
+
         <div class="contents_wrapper">
           <div>
             <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
@@ -191,14 +196,14 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
               <ons-col>
                 <ons-button ng-click="move2history()" modifier="large--quiet">
                   <ons-icon icon="history" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <br />history({{history_length}})
+                  <div class="icons_title">history({{history_length}})</div>
                 </ons-button>
               </ons-col>
 
               <ons-col>
                 <ons-button ng-click="move2notes()" modifier="large--quiet">
                   <ons-icon icon="book" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <br />notes({{notes_length}})
+                  <div class="icons_title">notes({{notes_length}})</div>
                 </ons-button>
               </ons-col>
 
@@ -208,33 +213,25 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
               <ons-col>
                 <ons-button ng-click="randomDive()" modifier="large--quiet">
                   <ons-icon icon="random" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <br />Random Search
+                  <div class="icons_title">Random Search</div>
                 </ons-button>
               </ons-col>
 
               <ons-col>
                 <ons-button id="home_globalMemoButton" ng-click="showGlobalMemo()" modifier="large--quiet">
                   <ons-icon icon="ion-android-star" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <br />Memo(global)
+                  <div class="icons_title">Memo(global)</div>
                 </ons-button>
               </ons-col>
 
               <ons-col>
                 <ons-button ng-click="move2setting()" modifier="large--quiet">
                   <ons-icon icon="gear" style="font-size: 28px; width: 1em;"></ons-icon>
-                  <br />setting
+                  <div class="icons_title">setting</div>
                 </ons-button>
               </ons-col>
             </ons-row>
           </div>
-
-          <!-- swipe test -->
-          <ons-gesture-detector ng-drag="drag()" ng-swipeup="swipeup()">
-            <div style="border-style: solid; border-width: 2px;">
-              here, you can swipe
-            </div>
-          </ons-gesture-detector>
-
         </div>
 
       </ons-page>
@@ -242,213 +239,234 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
   </ons-template>
 
   <ons-template id="search_result_header.html">
-    <ons-page ng-controller="HeaderListController" var="pageSearchResultHeader">
+    <ons-gesture-detector ng-swiperight="myNavigator.popPage()">
+      <ons-page ng-controller="HeaderListController" var="pageSearchResultHeader">
 
-      <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">{{screen_title}}</div>
+        <ons-toolbar>
+          <div class="left"><ons-back-button>Back</ons-back-button></div>
+          <div class="center">{{screen_title}}</div>
 
-        <div class="right">
-          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
-            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-          </ons-toolbar-button>
-        </div>
-      </ons-toolbar>
+          <div class="right">
+            <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+              <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+          </div>
+        </ons-toolbar>
 
-      <ons-list id="header_main_list">
-        <ons-list-item ng-show="is_favorite||is_history||is_notes">
-          <ons-button ng-hide="delete_mode" modifier="large" ng-disabled="items.length==0" ng-click="toggleDeletemode()">delete</ons-button>
-          <ons-row ng-show="delete_mode">
-            <ons-col>
-              <ons-button modifier="large" ng-click="toggleDeletemode()">cancel</ons-button>
-            </ons-col>
-            <ons-col>
-              <ons-button modifier="large--quiet" ng-click="toggleAllTargets()">check all</ons-button>
-            </ons-col>
-            <ons-col>
-              <ons-button modifier="large" class="red-button" ng-click="deleteFavOrHis()">delete</ons-button>
-            </ons-col>
-          </ons-row>
-        </ons-list-item>
+        <ons-list id="header_main_list">
+          <ons-list-item ng-show="is_favorite||is_history||is_notes">
+            <ons-button ng-hide="delete_mode" modifier="large" ng-disabled="items.length==0" ng-click="toggleDeletemode()">delete</ons-button>
+            <ons-row ng-show="delete_mode">
+              <ons-col>
+                <ons-button modifier="large" ng-click="toggleDeletemode()">cancel</ons-button>
+              </ons-col>
+              <ons-col>
+                <ons-button modifier="large--quiet" ng-click="toggleAllTargets()">check all</ons-button>
+              </ons-col>
+              <ons-col>
+                <ons-button modifier="large" class="red-button" ng-click="deleteFavOrHis()">delete</ons-button>
+              </ons-col>
+            </ons-row>
+          </ons-list-item>
 
-        <ons-list-header>items</ons-list-header>
-        <ons-list-item ng-hide="item.title==GLOBAL_MEMO_NAME" modifier="chevron" class="item list-item-container" ng-repeat="item in items track by $index" ng-click="processItemSelect($index, $event)">
-          <ons-row>
-            <!--<ons-col ng-show="delete_mode" width="20%"><input type="checkbox" checklist-model="delete_targets.list" checklist-value="item.title"><div class="checkbox__checkmark"></div></ons-col>
-            -->
-            <ons-col ng-show="delete_mode" width="20%"><ons-icon icon="ion-navicon" ng-show="delete_hash[item.title]"></ons-icon></div></ons-col>
-            <ons-col>{{item.title}}</ons-col>
-            <ons-col ng-hide="delete_mode" ng-show="is_notes" width="50%" style="overflow: hidden;">{{item.memo}}</ons-col>
-          </ons-row>
-        </ons-list-item>
-      </ons-list>
-
-    </ons-page>
+          <ons-list-header>items</ons-list-header>
+          <ons-list-item ng-hide="item.title==GLOBAL_MEMO_NAME" modifier="chevron" class="item list-item-container" ng-repeat="item in items track by $index" ng-click="processItemSelect($index, $event)">
+            <ons-row>
+              <!--<ons-col ng-show="delete_mode" width="20%"><input type="checkbox" checklist-model="delete_targets.list" checklist-value="item.title"><div class="checkbox__checkmark"></div></ons-col>
+              -->
+              <ons-col ng-show="delete_mode" width="20%"><ons-icon icon="ion-navicon" ng-show="delete_hash[item.title]"></ons-icon></div></ons-col>
+              <ons-col>{{item.title}}</ons-col>
+              <ons-col ng-hide="delete_mode" ng-show="is_notes" width="50%" style="overflow: hidden;">{{item.memo}}</ons-col>
+            </ons-row>
+          </ons-list-item>
+        </ons-list>
+      </ons-page>
+    </ons-gesture-detector>
   </ons-template>
 
   <ons-template id="search_result_detail.html">
-    <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
+    <ons-gesture-detector ng-swiperight="myNavigator.popPage()">
+      <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
+        <ons-toolbar>
+          <div class="left"><ons-back-button>Back</ons-back-button></div>
+          <div class="right">
+            <ons-toolbar-button ng-click="openWithBrowser()">
+              <ons-icon icon="globe" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+            <ons-toolbar-button id="detail_note_button" ng-click="openNote()" style="position: relative;">
+              <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
+              <ons-icon ng-show="has_memo" icon="check-circle-o" style="position: absolute; top: 0px; left: 0px;"></ons-icon>
+            </ons-toolbar-button>
+            <ons-toolbar-button ng-click="saveAsFavorite()">
+              <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+            <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+              <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+          </div>
+        </ons-toolbar>
 
-      <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="right">
-          <ons-toolbar-button ng-click="openWithBrowser()">
-            <ons-icon icon="globe" style="font-size: 32px; width: 1em;"></ons-icon>
-          </ons-toolbar-button>
-          <ons-toolbar-button id="detail_note_button" ng-click="openNote()" style="position: relative;">
-            <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
-            <ons-icon ng-show="has_memo" icon="check-circle-o" style="position: absolute; top: 0px; left: 0px;"></ons-icon>
-          </ons-toolbar-button>
-          <ons-toolbar-button ng-click="saveAsFavorite()">
-            <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
-          </ons-toolbar-button>
-          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
-            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-          </ons-toolbar-button>
-        </div>
-      </ons-toolbar>
+        <p>
+          <h1 id="detail_title" class="title">{{title}}</h1>
+        </p>
 
-      <p>
-        <h1 id="detail_title" class="title">{{title}}</h1>
-      </p>
+        <p>
+          <span id="detail_summary" ng-bind-html="summary"></span>
+        </p>
 
-      <p>
-        <span id="detail_summary" ng-bind-html="summary"></span>
-      </p>
+        <p ng-show="is_links_exist">
+          <ons-button modifier="large--quiet" ng-click="processLinkSearch()">Link search</ons-button>
+        </p>
 
-      <p ng-show="is_links_exist">
-        <ons-button modifier="large--quiet" ng-click="processLinkSearch()">Link search</ons-button>
-      </p>
+        <p ng-show="img_handle_type=='0'">
+          <ons-button modifier="large--quiet" ng-click="showImages()">Get all images</ons-button>
+        </p>
 
-      <p ng-show="img_handle_type=='0'">
-        <ons-button modifier="large--quiet" ng-click="showImages()">Get all images</ons-button>
-      </p>
+        <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
 
-      <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
+      </ons-page>
 
-    </ons-page>
+    </ons-gesture-detector>
   </ons-template>
 
   <ons-template id="settings.html">
-    <ons-page ng-controller="SettingsController">
+    <ons-gesture-detector ng-swiperight="myNavigator.popPage()">
+      <ons-page ng-controller="SettingsController">
 
-      <ons-toolbar>
-        <div class="left"><ons-back-button>Back</ons-back-button></div>
-        <div class="center">Settings</div>
+        <ons-toolbar>
+          <div class="left"><ons-back-button>Back</ons-back-button></div>
+          <div class="center">Settings</div>
 
-        <div class="right">
-          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
-            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-          </ons-toolbar-button>
+          <div class="right">
+            <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+              <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+          </div>
+        </ons-toolbar>
+
+        <div class="contents_wrapper">
+          <ons-list>
+
+            <ons-list-header>
+              <h2>{{msg_info.LANGUAGE_APPEARANCE.TITLE[radio_language_appearance]}}</h2>
+            </ons-list-header>
+            <ons-list-item>
+                <div class="button-bar__item">
+                    <input type="radio" ng-model="radio_language_appearance" value="ja" />
+                    <div class="button-bar__button">Japanese</div>
+                </div>
+                <div class="button-bar__item">
+                    <input type="radio" ng-model="radio_language_appearance" value="en" />
+                    <div class="button-bar__button">English</div>
+                </div>
+            </ons-list-item>
+
+            <ons-list-header>
+              <h2>{{msg_info.LANGUAGE.TITLE[radio_language_appearance]}}</h2>
+            </ons-list-header>
+            <ons-list-item>
+                <div class="button-bar__item">
+                    <input type="radio" ng-model="radio_language" value="ja" />
+                    <div class="button-bar__button">Japanese</div>
+                </div>
+                <div class="button-bar__item">
+                    <input type="radio" ng-model="radio_language" value="en" />
+                    <div class="button-bar__button">English</div>
+                </div>
+            </ons-list-item>
+
+            <ons-list-header>
+              <h2>{{msg_info.IMG_HANDLE.TITLE[radio_language_appearance]}}</h2>
+            </ons-list-header>
+            <ons-list-item>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_imghandle" value="0" />
+                  <div class="button-bar__button">no disp</div>
+              </div>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_imghandle" value="1" />
+                  <div class="button-bar__button">disp when touch</div>
+              </div>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_imghandle" value="2" />
+                  <div class="button-bar__button">disp always</div>
+              </div>
+            </ons-list-item>
+
+            <ons-list-header>
+              <h2>{{msg_info.HISTORY_CACHE.TITLE[radio_language_appearance]}}</h2>
+            </ons-list-header>
+            <ons-list-item>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="history_cache" value="1" />
+                  <div class="button-bar__button">use as cache</div>
+              </div>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="history_cache" value="0" />
+                  <div class="button-bar__button">not use</div>
+              </div>
+            </ons-list-item>
+
+            <ons-list-header>
+              <h2>{{msg_info.ARTICLE_TYPE.TITLE[radio_language_appearance]}}</h2>
+            </ons-list-header>
+            <ons-list-item>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_article" value="5" />
+                  <div class="button-bar__button">Parse</div>
+              </div>
+              <div class="button-bar__item">
+                  <input type="radio" ng-model="radio_article" value="4" />
+                  <div class="button-bar__button">Extract</div>
+              </div>
+            </ons-list-item>
+
+            <ons-list-header>
+              <h2>{{msg_info.HISTORY_LENGTH.TITLE[radio_language_appearance]}}</h2>
+            </ons-list-header>
+            <ons-list-item>
+              <input type="number" ng-model="history_length" />
+            </ons-list-item>
+
+          </ons-list>
+
+          <div>
+            <ons-button modifier="large" ng-click="saveMasterSetting()">Commit Changes</ons-button>
+          </div>
+
         </div>
-      </ons-toolbar>
 
-      <div class="contents_wrapper">
-        <ons-list>
-
-          <ons-list-header>
-            <h2>{{msg_info.LANGUAGE_APPEARANCE.TITLE[radio_language_appearance]}}</h2>
-          </ons-list-header>
-          <ons-list-item>
-              <div class="button-bar__item">
-                  <input type="radio" ng-model="radio_language_appearance" value="ja" />
-                  <div class="button-bar__button">Japanese</div>
-              </div>
-              <div class="button-bar__item">
-                  <input type="radio" ng-model="radio_language_appearance" value="en" />
-                  <div class="button-bar__button">English</div>
-              </div>
-          </ons-list-item>
-
-          <ons-list-header>
-            <h2>{{msg_info.LANGUAGE.TITLE[radio_language_appearance]}}</h2>
-          </ons-list-header>
-          <ons-list-item>
-              <div class="button-bar__item">
-                  <input type="radio" ng-model="radio_language" value="ja" />
-                  <div class="button-bar__button">Japanese</div>
-              </div>
-              <div class="button-bar__item">
-                  <input type="radio" ng-model="radio_language" value="en" />
-                  <div class="button-bar__button">English</div>
-              </div>
-          </ons-list-item>
-
-          <ons-list-header>
-            <h2>{{msg_info.IMG_HANDLE.TITLE[radio_language_appearance]}}</h2>
-          </ons-list-header>
-          <ons-list-item>
-            <div class="button-bar__item">
-                <input type="radio" ng-model="radio_imghandle" value="0" />
-                <div class="button-bar__button">no disp</div>
-            </div>
-            <div class="button-bar__item">
-                <input type="radio" ng-model="radio_imghandle" value="1" />
-                <div class="button-bar__button">disp when touch</div>
-            </div>
-            <div class="button-bar__item">
-                <input type="radio" ng-model="radio_imghandle" value="2" />
-                <div class="button-bar__button">disp always</div>
-            </div>
-          </ons-list-item>
-
-          <ons-list-header>
-            <h2>{{msg_info.ARTICLE_TYPE.TITLE[radio_language_appearance]}}</h2>
-          </ons-list-header>
-          <ons-list-item>
-            <div class="button-bar__item">
-                <input type="radio" ng-model="radio_article" value="5" />
-                <div class="button-bar__button">Parse</div>
-            </div>
-            <div class="button-bar__item">
-                <input type="radio" ng-model="radio_article" value="4" />
-                <div class="button-bar__button">Extract</div>
-            </div>
-          </ons-list-item>
-
-          <ons-list-header>
-            <h2>{{msg_info.HISTORY_LENGTH.TITLE[radio_language_appearance]}}</h2>
-          </ons-list-header>
-          <ons-list-item>
-            <input type="number" ng-model="history_length" />
-          </ons-list-item>
-
-        </ons-list>
-
-        <div>
-          <ons-button modifier="large" ng-click="saveMasterSetting()">Commit Changes</ons-button>
-        </div>
-
-      </div>
-
-    </ons-page>
+      </ons-page>
+    </ons-gesture-detector>
   </ons-template>
 
 
   <ons-template id="tree_view.html">
-    <ons-page ng-controller="TreeViewController">
+    <ons-gesture-detector ng-swiperight="myNavigator.popPage()">
+      <ons-page ng-controller="TreeViewController">
 
-      <ons-toolbar>
-        <div class="center">Map</div>
-        <div class="right">
-          <ons-toolbar-button ng-click="myMenu.toggleMenu()">
-            <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
-          </ons-toolbar-button>
+        <ons-toolbar>
+          <div class="center">Map</div>
+          <div class="right">
+            <ons-toolbar-button ng-click="myMenu.toggleMenu()">
+              <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+          </div>
+        </ons-toolbar>
+
+        <div class="contents_wrapper">
+          <ons-list>
+            <ons-list-item ng-repeat="page in page_stack" ng-click="move2SelectDepth($index)">
+              <ons-row>
+                <ons-col width="10%">{{page.depth}}</ons-col>
+                <ons-col width="10%">{{page.type}}</ons-col>
+                <ons-col width="80%">{{page.search_key}}</ons-col>
+              </ons-row>
+            </ons-list-item>
+          </ons-list>
         </div>
-      </ons-toolbar>
-
-      <div class="contents_wrapper">
-        <ons-list>
-          <ons-list-item ng-repeat="page in page_stack" ng-click="move2SelectDepth($index)">
-            <ons-row>
-              <ons-col width="10%">{{page.depth}}</ons-col>
-              <ons-col width="10%">{{page.type}}</ons-col>
-              <ons-col width="80%">{{page.search_key}}</ons-col>
-            </ons-row>
-          </ons-list-item>
-        </ons-list>
-      </div>
-    </ons-page>
+      </ons-page>
+    </ons-gesture-detector>
   </ons-template>
 
 </ons-sliding-menu>

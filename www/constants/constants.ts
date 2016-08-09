@@ -136,6 +136,15 @@ namespace SETTING_MSG{
       ja: "履歴の保持件数です。"
     }
   };
+  export const HISTORY_CACHE = {
+    TITLE: {
+      ja: "履歴キャッシュを使用",
+      en: "Use history as cache"
+    },
+    HELP: {
+      ja: "1度アクセスし、履歴にデータが残っている場合、高速にアクセスができます。余計なデータ通信も行いません"
+    }
+  };
 }
 
 namespace GENERAL_MSG {

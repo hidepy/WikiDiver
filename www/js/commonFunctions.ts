@@ -2,8 +2,6 @@
 
 /* ---------- 独自共通関数定義 ここから　----------*/
 
-
-
 /* return_cdにより、成否を判定 */
 function isWikiStatusSuccess(){
 	var res = (wikiAdapter.status == WIKIADAPTER_CONSTANTS.STATUS.SUCCESS_DATA_PROCESSING);
