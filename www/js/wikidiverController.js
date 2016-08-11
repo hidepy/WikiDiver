@@ -141,6 +141,14 @@ TODO
         $scope.cache_length.favorite_length = storage_manager_favorite.getItemLength();
         $scope.cache_length.history_length = storage_manager_history.getItemLength();
         $scope.cache_length.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
+        // GLOBAL MEMOが正常に登録されていなかった場合
+        if ($scope.cache_length.notes_length < 0) {
+            // global memoが存在しない場合、空白をセットしておく
+            var g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
+            if (!g_memo) {
+                storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, { title: GLOBAL_MEMO_PROP.KEY });
+            }
+        }
     });
     module.controller("MenuController", function ($scope) {
         // favoriteとhistory共通
