@@ -134,6 +134,7 @@ TODO
                 });
             }
         }
+        admob.createBannerView({ publisherId: "pub-2131186805773040" });
     });
     module.controller("RootController", function ($scope) {
         $scope.cache_length = {};

@@ -34,6 +34,8 @@
     <gap:plugin name="org.apache.cordova.splashscreen" />
     <!-- cordova5.1.1 needs this description and plugin install-->
     <gap:plugin name="cordova-plugin-whitelist" source="npm" />
+    <gap:plugin name="phonegap-admob" source="npm"/>
+
 
     <icon src="icon.png" />
     <icon gap:platform="android" gap:qualifier="mdpi" src="icons/android/mdpi.png" />

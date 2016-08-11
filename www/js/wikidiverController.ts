@@ -6,6 +6,7 @@ declare var myPopoverMemo: PopoverView;
 declare var myModal: ModalView;
 declare var pageSearchResultHeader: any;
 declare var pageSearchResultDetail: any;
+declare var admob: any;
 /// <reference path="./storageManager.ts" />
 /// <reference path="./commonFunctions.ts" />
 /// <reference path="../constants/constants.ts"/>
@@ -157,6 +158,9 @@ TODO
           });
         }
       }
+
+      admob.createBannerView({publisherId: "pub-2131186805773040"});
+
 
     });
 
