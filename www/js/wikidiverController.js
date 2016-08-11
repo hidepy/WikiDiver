@@ -51,7 +51,7 @@ TODO
 //(function(){
 {
     'use strict';
-    var module = ons.bootstrap(APP_CONFIGS.NAME, ['onsen', 'checklist-model']);
+    var module = ons.bootstrap(APP_CONFIGS.NAME, ['onsen']);
     // 記事のお気に入り
     var storage_manager_favorite = new StorageManager(STORAGE_TYPE.FAVORITE);
     // ノートの保存(キー=title又はid)
