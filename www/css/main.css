@@ -1,0 +1,52 @@
+#home_icons_wrapper ons-col{
+  width: 33%;
+  overflow: hidden;
+}
+#home_icons_wrapper ons-col ons-button {
+  border-width: 1px;
+  border-style: solid;
+  border-right-color: lightgray;
+  border-bottom-color: lightgray;
+  border-radius: 4px;
+}
+#home_icons_wrapper .icons_title{
+  font-size: 12px;
+}
+.contents_wrapper {
+  text-align: center;
+}
+#home_searchKey {
+  margin : 4px;
+  height: 42px;
+  font-size: 32px;
+}
+a{
+  font-size: 120%;
+  color: blue !important;
+  cursor: pointer;
+}
+.mw-editsection{
+  display: none;
+}
+.infobox{
+  width: 100% !important;
+}
+.red-button{
+  background-color: #e04040;
+}
+img:not([src]){
+  border: 2px #40ff48 solid;
+}
+#header_main_list ons-col{
+  white-space: nowrap;
+}
+#detail_contents_wrapper{
+  -webkit-user-select: text !important;
+  -khtml-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+#setting_imgLoadType > ons-row > ons-col{
+  font-size: 60%;
+}

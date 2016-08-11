@@ -80,7 +80,7 @@ TODO
         // 画像ハンドル設定
         var m_img = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE);
         if (!m_img) {
-            m_img = "0";
+            m_img = "2";
             storage_manager_settings.saveItem2Storage(SETTING_TYPE.IMG_HANDLE, m_img);
         }
         // 記事取得タイプ設定
@@ -134,7 +134,7 @@ TODO
                 });
             }
         }
-        admob.createBannerView({ publisherId: "pub-2131186805773040" });
+        admob.createBannerView({ publisherId: "ca-app-pub-2131186805773040/8634150417" });
     });
     module.controller("RootController", function ($scope) {
         $scope.cache_length = {};
@@ -171,11 +171,6 @@ TODO
     });
     module.controller("HomeController", function ($scope, popoverSharingService) {
         $scope.search_key = "";
-        /*
-        $scope.favorite_length = storage_manager_favorite.getItemLength();
-        $scope.history_length = storage_manager_history.getItemLength();
-        $scope.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
-        */
         $scope.handleSearchKeydown = function (event) {
             if (event.which == 13) {
                 $scope.dive();
@@ -247,6 +242,9 @@ TODO
                     is_notes: true
                 }
             });
+        };
+        $scope.showHelp = function () {
+            myNavigator.pushPage("help.html");
         };
     });
     module.controller("HeaderListController", function ($scope) {
