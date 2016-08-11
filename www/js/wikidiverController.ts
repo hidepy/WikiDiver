@@ -129,7 +129,7 @@ TODO
       // global memoが存在しない場合、空白をセットしておく
       let g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
       if(!g_memo){
-        storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, "");
+        storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, {title: GLOBAL_MEMO_PROP.KEY});
       }
 
       // WikiAdapter をインスタンス化
@@ -251,6 +251,9 @@ TODO
 
           // global memo情報取得
           let g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
+          if(!g_memo){
+            storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, {title: GLOBAL_MEMO_PROP.KEY});
+          }
 
           // popover オープン前に必要情報をコピー
           popoverSharingService.sharing.id = GLOBAL_MEMO_PROP.KEY;
@@ -528,6 +531,8 @@ TODO
           $scope.is_notes = true;
           $scope.screen_title = "Note";
           $scope.items = convHash2Arr(storage_manager_memo.getAllItem());
+
+          outlog($scope.items);
         }
         // link選択時
         else if(_args.onTransitionEnd && _args.onTransitionEnd.is_link){
@@ -944,11 +949,11 @@ TODO
 
       $scope.deleteMemo = function(){
         // global memoの場合は、本当に削除はしない
-        if($scope.id != GLOBAL_MEMO_PROP.KEY){
+        if($scope.title != GLOBAL_MEMO_PROP.KEY){
           storage_manager_memo.deleteItem($scope.sharing.id);
         }
         else{
-          storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, "");
+          storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, {title: GLOBAL_MEMO_PROP.KEY});
         }
         $scope.sharing.memo = "";
 
