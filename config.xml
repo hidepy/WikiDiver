@@ -25,7 +25,9 @@
     <preference name="android-minSdkVersion" value="14" />
     <preference name="android-installLocation" value="auto" />
     <gap:plugin name="org.apache.cordova.console" />
+<!--
     <gap:plugin name="org.apache.cordova.contacts" />
+-->
     <gap:plugin name="org.apache.cordova.dialogs" />
     <gap:plugin name="org.apache.cordova.inappbrowser" source="npm" />
     <gap:plugin name="org.apache.cordova.network-information" />
@@ -33,11 +35,12 @@
     <!-- cordova5.1.1 needs this description and plugin install-->
     <gap:plugin name="cordova-plugin-whitelist" source="npm" />
 
-    <icon src="icon.png" />
-    <icon gap:platform="android" gap:qualifier="ldpi" src="www/res/icon/android/icon-36-ldpi.png" />
-    <icon gap:platform="android" gap:qualifier="mdpi" src="www/res/icon/android/icon-48-mdpi.png" />
-    <icon gap:platform="android" gap:qualifier="hdpi" src="www/res/icon/android/icon-72-hdpi.png" />
-    <icon gap:platform="android" gap:qualifier="xhdpi" src="www/res/icon/android/icon-96-xhdpi.png" />
+    <icon src="icons/android/icon.png" />
+    <icon gap:platform="android" gap:qualifier="mdpi" src="icons/android/icon.png" />
+    <icon gap:platform="android" gap:qualifier="hdpi" src="icons/android/icon.png" />
+    <icon gap:platform="android" gap:qualifier="xhdpi" src="icons/android/icon.png" />
+    <icon gap:platform="android" gap:qualifier="xxhdpi" src="icons/android/icon.png" />
+    <icon gap:platform="android" gap:qualifier="xxxhdpi" src="icons/android/icon.png" />
     <icon gap:platform="blackberry" src="www/res/icon/blackberry/icon-80.png" />
     <icon gap:platform="blackberry" gap:state="hover" src="www/res/icon/blackberry/icon-80.png" />
     <icon gap:platform="ios" height="57" src="www/res/icon/ios/icon-57.png" width="57" />
