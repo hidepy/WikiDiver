@@ -118,6 +118,12 @@ TODO
         m_his_cache = 1;
         storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_CACHE, m_his_cache);
       }
+      // フォントサイズ
+      let m_font_size = storage_manager_settings.getItem(SETTING_TYPE.FONT_SIZE);
+      if(!m_font_size){
+        m_font_size = 100;
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.FONT_SIZE, m_font_size);
+      }
 
       // global memoが存在しない場合、空白をセットしておく
       let g_memo = storage_manager_memo.getItem(GLOBAL_MEMO_PROP.KEY);
@@ -151,6 +157,14 @@ TODO
           });
         }
       }
+
+    });
+
+    module.controller("RootController", function($scope){
+      $scope.cache_length = {};
+      $scope.cache_length.favorite_length = storage_manager_favorite.getItemLength();
+      $scope.cache_length.history_length = storage_manager_history.getItemLength();
+      $scope.cache_length.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
     });
 
     module.controller("MenuController", function($scope){
@@ -192,16 +206,24 @@ TODO
 
     module.controller("HomeController", function($scope, popoverSharingService){
         $scope.search_key = "";
+        /*
         $scope.favorite_length = storage_manager_favorite.getItemLength();
         $scope.history_length = storage_manager_history.getItemLength();
         $scope.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
+        */
+
+        $scope.handleSearchKeydown = function(event){
+          if (event.which == 13) {
+            $scope.dive();
+          }
+        };
 
         $scope.dive = function(){
           var el_keyword: HTMLElement = document.getElementById("home_searchKey");
           var search_key: string = (<HTMLInputElement>el_keyword).value;
 
           if(isEmpty(search_key)){ // 入力なしなら
-            showAlert("please input search key...");
+            showAlert(GENERAL_MSG.NO_SEARCH_KEY[storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE)]);
             return;
           }
 
@@ -330,7 +352,11 @@ TODO
 
           // 削除対象ハッシュを配列に変換
           let del_arr = [];
-          for(let p in $scope.delete_hash){ del_arr.push(p); }// hashをarrに変換
+          for(let p in $scope.delete_hash){
+            if(p == GLOBAL_MEMO_PROP.KEY){ continue; } // globalMemoは消去対象外
+
+            del_arr.push(p);
+          }// hashをarrに変換
 
           if($scope.is_favorite){
             storage_manager_favorite.deleteItems(del_arr);
@@ -351,7 +377,12 @@ TODO
             console.log("in memo root");
           }
 
-          showAlert("item deleted");
+          showAlert(GENERAL_MSG.DELETE_SUCCESS[storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE)]);
+
+          // ここで各種件数の値を更新
+          $scope.cache_length.favorite_length = storage_manager_favorite.getItemLength();
+          $scope.cache_length.history_length = storage_manager_history.getItemLength();
+          $scope.cache_length.notes_length = storage_manager_memo.getItemLength() - 1; // 常にglobalMemoが存在する仕様なので
 
           $scope.toggleDeletemode(); // チェック切り替え
           //$scope.$apply(); // 画面更新
@@ -519,6 +550,12 @@ TODO
       $scope.no_result = false; // 結果無しの場合にtrue
       $scope.img_handle_type = storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) || "0"; // 設定無しならデフォルト"0"
       $scope.has_memo = false;
+      $scope.has_favorite = false;
+      $scope.font_size = storage_manager_settings.getItem(SETTING_TYPE.FONT_SIZE) || "100";
+
+      $scope.move2Top = function(){
+        $('.page__content').animate({scrollTop:0},'fast');
+      };
 
       $scope.openWithBrowser = function(){
         console.log("in open browser");
@@ -581,6 +618,9 @@ TODO
         //保存 キーはtitleだが...問題なし？ wiki的には重複しない 文字化けが心配
         if(storage_manager_favorite.saveItem2Storage(favorite[FAVORITE_KEY_PROP.KEY], favorite)){
           showAlert(GENERAL_MSG.SAVE_SUCCESS[lang]);
+          $scope.has_favorite = true;
+
+          $scope.cache_length.favorite_length = storage_manager_favorite.getItemLength();
         }
         else{
           showAlert(GENERAL_MSG.SAVE_FAILURE[lang]);
@@ -768,6 +808,9 @@ TODO
 
             // メモ登録有無を確認
             $scope.has_memo = !!(storage_manager_memo.getItem($scope[FAVORITE_KEY_PROP.KEY])); // ヒットするtitleがあれば
+
+            // お気に入り登録有無を確認
+            $scope.has_favorite = !!(storage_manager_favorite.getItem($scope[FAVORITE_KEY_PROP.KEY])); // ヒットするtitleがあれば
           }
           else{
             // 取得失敗...
@@ -783,13 +826,17 @@ TODO
           }
 
           // historyをキャッシュとして利用する場合
-          if(storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE) === "1"){
+          console.log("history_cache=" + storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE));
+          if(storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE) == "1"){
             save_history_data["has_cache"] = true;
             save_history_data["cache_data"] = res; // 取得情報をまんまキャッシュとして保存しておく
           }
 
           // 詳細取得okならhistoryにタイトルを保存
           storage_manager_history.saveItem2Storage($scope[FAVORITE_KEY_PROP.KEY], save_history_data);
+
+          // 履歴の長さを更新
+          $scope.cache_length.history_length = storage_manager_history.getItemLength();
 
           $scope.$apply();
 
@@ -843,7 +890,7 @@ TODO
           let cached_data = storage_manager_history.getItem(title);
 
           // 履歴のキャッシュ使用有りで、履歴データのキャッシュ情報有りなら
-          if((storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE) == "1") && (cached_data) && (cached_data.has_cache === true)){
+          if((storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE) == "1") && (cached_data) && (cached_data.has_cache == true)){
             console.log("from cache");
             // データ取得後と同様のフローを走らせる
             handleGetDetail(cached_data.cache_data, true);
@@ -883,6 +930,8 @@ TODO
           showAlert(GENERAL_MSG.SAVE_FAILURE[lang])
         }
 
+        $scope.cache_length.notes_length = storage_manager_memo.getItemLength() - 1;
+
         popoverSharingService.sharing = $scope.sharing; // 次ポップアップオープン時用にコピー
 
         //showAlert("save success!! but, actually needed to check success or failure...");
@@ -899,7 +948,8 @@ TODO
           storage_manager_memo.saveItem2Storage(GLOBAL_MEMO_PROP.KEY, "");
         }
         $scope.sharing.memo = "";
-        showAlert("delete success!! but, actually needed to check success or failure...");
+
+        showAlert(GENERAL_MSG.SAVE_SUCCESS[lang]);
 
         myPopoverMemo.hide();
       };
@@ -947,12 +997,12 @@ TODO
           search_key: (type == "H") ? (function(){
             if(isEmpty(options.search_key)){
               // 検索キーがない=> お気に入りか履歴から来た場合
-              if(is_favorite){ return "FAVORITE"; }
-              else if(is_history){ return "HISTORY"; }
-              else if(is_notes){ return "NOTES"; }
-              else if(is_random){ return "RANDOM Search"; }
-              else if(is_link){ return "LINK Search"; }
-              else{ return "UNKNOWN..."; }
+              if(is_favorite){ return "[FAVORITE]"; }
+              else if(is_history){ return "[HISTORY]"; }
+              else if(is_notes){ return "[NOTES]"; }
+              else if(is_random){ return "[RANDOM Search]"; }
+              else if(is_link){ return "[LINK Search]"; }
+              else{ return "[UNKNOWN...]"; }
             }
             else{
               return options.search_key;
@@ -1009,6 +1059,7 @@ TODO
       $scope.radio_article = storage_manager_settings.getItem(SETTING_TYPE.ARTICLE_TYPE);
       $scope.history_length = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_LENGTH);
       $scope.history_cache = storage_manager_settings.getItem(SETTING_TYPE.HISTORY_CACHE);
+      $scope.font_size = storage_manager_settings.getItem(SETTING_TYPE.FONT_SIZE);
 
       // 言語関連情報
       $scope.msg_info = SETTING_MSG;
@@ -1018,21 +1069,24 @@ TODO
           $scope.history_length = 0;
         }
 
+        if(isNaN($scope.font_size) || ($scope.font_size < 20) || ($scope.font_size > 200)){
+          $scope.history_length = 100;
+        }
+
         storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE_APPEARANCE, $scope.radio_language_appearance);
         storage_manager_settings.saveItem2Storage(SETTING_TYPE.LANGUAGE, $scope.radio_language);
         storage_manager_settings.saveItem2Storage(SETTING_TYPE.IMG_HANDLE, $scope.radio_imghandle);
         storage_manager_settings.saveItem2Storage(SETTING_TYPE.ARTICLE_TYPE, $scope.radio_article);
         storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_LENGTH, $scope.history_length);
         storage_manager_settings.saveItem2Storage(SETTING_TYPE.HISTORY_CACHE, $scope.history_cache);
-
-outlog(storage_manager_settings);
+        storage_manager_settings.saveItem2Storage(SETTING_TYPE.FONT_SIZE, $scope.font_size);
 
         wikiAdapter.setLanguage($scope.radio_language);
         wikiAdapter.setArticleType($scope.radio_article);
 
         storage_manager_history.setLimit({length: $scope.history_length, sort_key: "timestamp"});
 
-        showAlert("Commit Setting Change!!");
+        showAlert(GENERAL_MSG.SAVE_SUCCESS[storage_manager_settings.getItem(SETTING_TYPE.LANGUAGE_APPEARANCE)]);
 
         // 安全に前画面に戻る
         popPageSafe(myNavigator);

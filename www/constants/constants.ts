@@ -73,6 +73,7 @@ namespace SETTING_TYPE{
   export const ARTICLE_TYPE = "article_type";
   export const HISTORY_LENGTH = "history_length";
   export const HISTORY_CACHE = "history_cache"; // 履歴をキャッシュする場合はtrue
+  export const FONT_SIZE = "font_size";
 }
 
 namespace SETTING_MSG{
@@ -145,6 +146,15 @@ namespace SETTING_MSG{
       ja: "1度アクセスし、履歴にデータが残っている場合、高速にアクセスができます。余計なデータ通信も行いません"
     }
   };
+  export const FONT_SIZE = {
+    TITLE:{
+      ja: "文字サイズ",
+      en: "font size"
+    },
+    HELP: {
+      ja: "文字のサイズを%で指定します"
+    }
+  };
 }
 
 namespace GENERAL_MSG {
@@ -155,5 +165,13 @@ namespace GENERAL_MSG {
   export const SAVE_FAILURE = {
     ja: "保存に失敗しました...",
     en: "failed to save..."
-  }
+  };
+  export const NO_SEARCH_KEY = {
+    ja: "検索キーを入力してください",
+    en: "please input search key..."
+  };
+  export const DELETE_SUCCESS = {
+    ja: "削除しました",
+    en: "success to delete"
+  };
 };

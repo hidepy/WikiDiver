@@ -76,8 +76,12 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
     #header_main_list ons-col{
       white-space: nowrap;
     }
-    div,p,span{
-      -webkit-user-select: auto !important;
+    #detail_contents_wrapper{
+      -webkit-user-select: text !important;
+      -khtml-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
     }
     </style>
 
@@ -86,7 +90,7 @@ historyからtreeしてーとかやってると、treeでindex求める時にバ
 angular promise
 http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 -->
-<body>
+<body ng-controller="RootController">
 
   <ons-modal var="myModal">
     <ons-icon icon="ion-load-c" spin="true" style="font-size: 48px;"></ons-icon>
@@ -95,7 +99,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
   </ons-modal>
 
   <script type="text/ons-template" id="popover_memo.html">
-    <ons-dialog ng-controller="popoverController" animation="none" cancelable style="width: 90%; max-width: 400px;">
+    <ons-dialog ng-controller="popoverController" animation="none" direction="up" cancelable style="width: 90%; max-width: 400px;">
       <div style="padding: 8px;">
       <p ng-hide="sharing.is_global">Memo for <span font-size="120%">{{sharing.title}}</span></p>
       <p class="caption">{{sharing.caption}}</p>
@@ -179,31 +183,32 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
         <div class="contents_wrapper">
           <div>
-            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" />
+            <input type="text" id="home_searchKey" class="search-input" placeholder="input keyword..." value="" ng-keydown="handleSearchKeydown($event)" />
             <ons-button ng-click="dive()" modifier="large"><ons-icon icon="search" style="font-size: 24px; width: 1em;"></ons-icon>search</ons-button>
           </div>
 
           <div id="home_icons_wrapper">
+
             <ons-row>
 
               <ons-col>
                 <ons-button ng-click="move2favorite()" modifier="large--quiet">
                   <ons-icon icon="ion-android-star" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <div class="icons_title">favorite({{favorite_length}})</div>
+                  <div class="icons_title">favorite({{cache_length.favorite_length}})</div>
                 </ons-button>
               </ons-col>
 
               <ons-col>
                 <ons-button ng-click="move2history()" modifier="large--quiet">
                   <ons-icon icon="history" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <div class="icons_title">history({{history_length}})</div>
+                  <div class="icons_title">history({{cache_length.history_length}})</div>
                 </ons-button>
               </ons-col>
 
               <ons-col>
                 <ons-button ng-click="move2notes()" modifier="large--quiet">
                   <ons-icon icon="book" style="font-size: 24px; width: 1em;"></ons-icon>
-                  <div class="icons_title">notes({{notes_length}})</div>
+                  <div class="icons_title">notes({{cache_length.notes_length}})</div>
                 </ons-button>
               </ons-col>
 
@@ -258,7 +263,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             <ons-button ng-hide="delete_mode" modifier="large" ng-disabled="items.length==0" ng-click="toggleDeletemode()">delete</ons-button>
             <ons-row ng-show="delete_mode">
               <ons-col>
-                <ons-button modifier="large" ng-click="toggleDeletemode()">cancel</ons-button>
+                <ons-button modifier="large--quiet" ng-click="toggleDeletemode()">cancel</ons-button>
               </ons-col>
               <ons-col>
                 <ons-button modifier="large--quiet" ng-click="toggleAllTargets()">check all</ons-button>
@@ -274,7 +279,7 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
             <ons-row>
               <!--<ons-col ng-show="delete_mode" width="20%"><input type="checkbox" checklist-model="delete_targets.list" checklist-value="item.title"><div class="checkbox__checkmark"></div></ons-col>
               -->
-              <ons-col ng-show="delete_mode" width="20%"><ons-icon icon="ion-navicon" ng-show="delete_hash[item.title]"></ons-icon></div></ons-col>
+              <ons-col ng-show="delete_mode" width="20%"><ons-icon icon="ion-checkmark" ng-show="delete_hash[item.title]"></ons-icon></div></ons-col>
               <ons-col>{{item.title}}</ons-col>
               <ons-col ng-hide="delete_mode" ng-show="is_notes" width="50%" style="overflow: hidden;">{{item.memo}}</ons-col>
             </ons-row>
@@ -286,10 +291,10 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
 
   <ons-template id="search_result_detail.html">
     <ons-gesture-detector ng-swiperight="myNavigator.popPage()">
-      <ons-page ng-controller="DetailController" var="pageSearchResultDetail">
+      <ons-page id="page_search_result_detail" ng-controller="DetailController" var="pageSearchResultDetail">
         <ons-toolbar>
           <div class="left"><ons-back-button>Back</ons-back-button></div>
-          <div class="right">
+          <div class="center">
             <ons-toolbar-button ng-click="openWithBrowser()">
               <ons-icon icon="globe" style="font-size: 32px; width: 1em;"></ons-icon>
             </ons-toolbar-button>
@@ -297,32 +302,40 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
               <ons-icon icon="book" style="font-size: 32px; width: 1em;"></ons-icon>
               <ons-icon ng-show="has_memo" icon="check-circle-o" style="position: absolute; top: 0px; left: 0px;"></ons-icon>
             </ons-toolbar-button>
-            <ons-toolbar-button ng-click="saveAsFavorite()">
+            <ons-toolbar-button ng-click="saveAsFavorite()" style="position: relative;">
               <ons-icon icon="ion-android-star" style="font-size: 32px; width: 1em;"></ons-icon>
+              <ons-icon ng-show="has_favorite" icon="check-circle-o" style="position: absolute; top: 0px; left: 0px;"></ons-icon>
             </ons-toolbar-button>
+            <ons-toolbar-button ng-click="move2Top()">
+              <ons-icon icon="ion-arrow-up-a" style="font-size: 32px; width: 1em;"></ons-icon>
+            </ons-toolbar-button>
+          </div>
+          <div class="right">
             <ons-toolbar-button ng-click="myMenu.toggleMenu()">
               <ons-icon icon="ion-navicon" style="font-size: 32px; width: 1em;"></ons-icon>
             </ons-toolbar-button>
           </div>
         </ons-toolbar>
 
-        <p>
-          <h1 id="detail_title" class="title">{{title}}</h1>
-        </p>
+        <div id="detail_contents_wrapper">
+          <p>
+            <h1 id="detail_title" class="title">{{title}}</h1>
+          </p>
 
-        <p>
-          <span id="detail_summary" ng-bind-html="summary"></span>
-        </p>
+          <p>
+            <span id="detail_summary" ng-bind-html="summary"></span>
+          </p>
 
-        <p ng-show="is_links_exist">
-          <ons-button modifier="large--quiet" ng-click="processLinkSearch()">Link search</ons-button>
-        </p>
+          <p ng-show="is_links_exist">
+            <ons-button modifier="large--quiet" style="border-style: solid; border-color: lightgray; border-width: 1px;" ng-click="processLinkSearch()">Link search</ons-button>
+          </p>
 
-        <p ng-show="img_handle_type=='0'">
-          <ons-button modifier="large--quiet" ng-click="showImages()">Get all images</ons-button>
-        </p>
+          <p ng-show="img_handle_type=='0'">
+            <ons-button modifier="large--quiet" style="border-style: solid; border-color: lightgray; border-width: 1px;" ng-click="showImages()">Get all images</ons-button>
+          </p>
 
-        <p id="detail_content" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
+          <p id="detail_content" style="font-size: {{font_size}}%" ng-click="processArticleClick($event)" ng-bind-html="article" class="article"></p>
+        </div>
 
       </ons-page>
 
@@ -373,6 +386,13 @@ http://whiskers.nukos.kitchen/2015/04/27/angularjs-promise.html
                     <input type="radio" ng-model="radio_language" value="en" />
                     <div class="button-bar__button">English</div>
                 </div>
+            </ons-list-item>
+
+            <ons-list-header>
+              <h2>{{msg_info.FONT_SIZE.TITLE[radio_language_appearance]}}</h2>
+            </ons-list-header>
+            <ons-list-item>
+              <input type="number" ng-model="font_size" min="20" max="200" /> %
             </ons-list-item>
 
             <ons-list-header>

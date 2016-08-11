@@ -170,7 +170,7 @@ var WikiAdapter = (function () {
                 params["action"] = "parse";
                 params["page"] = main_query;
                 //params["prop"] = "text|sections|links";
-                params["prop"] = "text|sections|links|images";
+                params["prop"] = "text|sections|links";
                 break;
             case "6":
                 params["list"] = "random";
