@@ -586,7 +586,9 @@ TODO
         var el_imgs = document.querySelectorAll("#detail_content img[data-original]");
 
         for(var i = 0; i < el_imgs.length; i++){
-          el_imgs[i].setAttribute("src", el_imgs[i].getAttribute("data-original"));
+          let src = el_imgs[i].getAttribute("data-original");
+          src = src.replace("https:https:", "https:");
+          el_imgs[i].setAttribute("src", src);
         }
       }
 
@@ -678,6 +680,7 @@ TODO
           // タッチロードなら
           if(storage_manager_settings.getItem(SETTING_TYPE.IMG_HANDLE) == "1"){
             var src = e.target.getAttribute("data-original");
+            src = src.replace("https:https:", "https:");
             if(src){ e.target.setAttribute("src", src); } // src属性に値をセットして画像を取得しにいく
           }
         }

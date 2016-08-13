@@ -8,11 +8,11 @@
 	hideyuki kawamura
     </author>
     <content src="index.html" />
-    <preference name="phonegap-version" value="cli-5.1.1" />
+    <preference name="phonegap-version" value="cli-6.3.0" />
     <preference name="permissions" value="none" />
     <preference name="orientation" value="default" />
     <preference name="target-device" value="universal" />
-    <preference name="fullscreen" value="true" />
+    <preference name="fullscreen" value="false" />
     <preference name="webviewbounce" value="true" />
     <preference name="prerendered-icon" value="true" />
     <preference name="stay-in-webview" value="false" />
@@ -25,17 +25,12 @@
     <preference name="android-minSdkVersion" value="14" />
     <preference name="android-installLocation" value="auto" />
     <gap:plugin name="org.apache.cordova.console" />
-<!--
-    <gap:plugin name="org.apache.cordova.contacts" />
--->
     <gap:plugin name="org.apache.cordova.dialogs" />
     <gap:plugin name="org.apache.cordova.inappbrowser" source="npm" />
     <gap:plugin name="org.apache.cordova.network-information" />
     <gap:plugin name="org.apache.cordova.splashscreen" />
-    <!-- cordova5.1.1 needs this description and plugin install-->
     <gap:plugin name="cordova-plugin-whitelist" source="npm" />
     <gap:plugin name="phonegap-admob" source="npm"/>
-
 
     <icon src="icon.png" />
     <icon gap:platform="android" gap:qualifier="mdpi" src="icons/android/mdpi.png" />
