@@ -32,7 +32,7 @@
     <gap:plugin name="cordova-plugin-whitelist" source="npm" />
     <gap:plugin name="phonegap-admob" source="npm"/>
 
-    <icon src="icon.png" />
+    <icon src="icons/android/icon.png" />
     <icon gap:platform="android" gap:qualifier="mdpi" src="icons/android/mdpi.png" />
     <icon gap:platform="android" gap:qualifier="hdpi" src="icons/android/hdpi.png" />
     <icon gap:platform="android" gap:qualifier="xhdpi" src="icons/android/xhdpi.png" />
@@ -47,10 +47,11 @@
     <icon gap:platform="webos" src="www/res/icon/webos/icon-64.png" />
     <icon gap:platform="winphone" src="www/res/icon/windows-phone/icon-48.png" />
     <icon gap:platform="winphone" gap:role="background" src="www/res/icon/windows-phone/icon-173-tile.png" />
-    <gap:splash gap:platform="android" gap:qualifier="port-ldpi" src="www/res/screen/android/screen-ldpi-portrait.png" />
-    <gap:splash gap:platform="android" gap:qualifier="port-mdpi" src="www/res/screen/android/screen-mdpi-portrait.png" />
-    <gap:splash gap:platform="android" gap:qualifier="port-hdpi" src="www/res/screen/android/screen-hdpi-portrait.png" />
-    <gap:splash gap:platform="android" gap:qualifier="port-xhdpi" src="www/res/screen/android/screen-xhdpi-portrait.png" />
+    <gap:splash gap:platform="android" gap:qualifier="mdpi" src="splash/android/mdpi.png" />
+    <gap:splash gap:platform="android" gap:qualifier="hdpi" src="splash/android/hdpi.png" />
+    <gap:splash gap:platform="android" gap:qualifier="xhdpi" src="splash/android/xhdpi.png" />
+    <gap:splash gap:platform="android" gap:qualifier="xxhdpi" src="splash/android/xxhdpi.png" />
+    <gap:splash gap:platform="android" gap:qualifier="xxxhdpi" src="splash/android/xxxhdpi.png" />
     <gap:splash gap:platform="blackberry" src="www/res/screen/blackberry/screen-225.png" />
     <gap:splash gap:platform="ios" height="480" src="www/res/screen/ios/screen-iphone-portrait.png" width="320" />
     <gap:splash gap:platform="ios" height="960" src="www/res/screen/ios/screen-iphone-portrait-2x.png" width="640" />
